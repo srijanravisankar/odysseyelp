@@ -1,13 +1,7 @@
 import { AppSidebar } from "@/components/app-sidebar"
 import { InputWithButton } from "@/components/input-with-button"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Itinerary } from "@/components/itinerary"
+import { ItineraryScrollArea } from "@/components/itinerary-scroll-area"
 import { Separator } from "@/components/ui/separator"
 import {
   SidebarInset,
@@ -28,7 +22,7 @@ export default function Page() {
       <div className="flex flex-1 flex-col gap-4 p-4">
         <SidebarInset className="rounded-xl border border-border bg-card/50">
           <header className="flex h-16 shrink-0 items-center gap-2">
-            <div className="flex items-center gap-2 px-4">
+            <div className="flex flex-1 items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
               <Separator
                 orientation="vertical"
@@ -37,13 +31,14 @@ export default function Page() {
               <InputWithButton />
             </div>
           </header>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-            <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-              <div className="bg-muted/50 aspect-video rounded-xl" />
-              <div className="bg-muted/50 aspect-video rounded-xl" />
-              <div className="bg-muted/50 aspect-video rounded-xl" />
+          <div className="flex flex-1 flex-col gap-6 p-4 pt-0">
+            <div className="grid auto-rows-min gap-6 md:grid-cols-3 mx-auto">
+              <Itinerary />
+              <Itinerary />
+              <Itinerary />
+              {/* <div className="bg-muted/50 aspect-video rounded-xl" /> */}
             </div>
-            <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
+            {/* <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" /> */}
           </div>
         </SidebarInset>
       </div>
