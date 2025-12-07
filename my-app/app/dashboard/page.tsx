@@ -1,7 +1,6 @@
 import { AppSidebar } from "@/components/app-sidebar"
 import { InputWithButton } from "@/components/input-with-button"
 import { Itinerary } from "@/components/itinerary"
-import { ItineraryScrollArea } from "@/components/itinerary-scroll-area"
 import { Separator } from "@/components/ui/separator"
 import {
   SidebarInset,
@@ -19,7 +18,7 @@ export default function Page() {
       }
     >
       <AppSidebar />
-      <div className="flex flex-1 flex-col gap-4 p-4">
+      <div className="flex flex-1 flex-col gap-0 p-3">
         <SidebarInset className="rounded-xl border border-border bg-card/50">
           <header className="flex h-16 shrink-0 items-center gap-2">
             <div className="flex flex-1 items-center gap-2 px-4">
@@ -36,9 +35,7 @@ export default function Page() {
               <Itinerary />
               <Itinerary />
               <Itinerary />
-              {/* <div className="bg-muted/50 aspect-video rounded-xl" /> */}
             </div>
-            {/* <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" /> */}
           </div>
         </SidebarInset>
       </div>

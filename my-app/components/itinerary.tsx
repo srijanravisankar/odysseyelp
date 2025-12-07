@@ -11,7 +11,7 @@ import Image from "next/image";
 
 export function Itinerary() {
   return (
-  <Card className="-space-y-6 p-0 bg-muted/50">
+  <Card className="-space-y-5 p-0 bg-muted/50">
     <CardHeader className="pt-3">
 			<CardTitle className="text-sm">Plan A</CardTitle>
     </CardHeader>
