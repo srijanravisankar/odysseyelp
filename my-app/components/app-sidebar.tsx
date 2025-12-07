@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ArchiveX, Command, File, Inbox, Send, Trash2 } from "lucide-react"
+import { ArchiveX, Binoculars, Command, File, Globe, Heart, Inbox, MapPinCheckInside, Moon, Send, Sun, Trash2, Waypoints } from "lucide-react"
 
 import { NavUser } from "@/components/nav-user"
 import { Label } from "@/components/ui/label"
@@ -19,6 +19,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { Switch } from "@/components/ui/switch"
+import { useTheme } from "next-themes"
 
 // This is sample data
 const data = {
@@ -29,33 +30,39 @@ const data = {
   },
   navMain: [
     {
-      title: "Inbox",
+      title: "Touring",
       url: "#",
-      icon: Inbox,
+      icon: Binoculars,
       isActive: true,
     },
     {
-      title: "Drafts",
+      title: "Favorites",
       url: "#",
-      icon: File,
+      icon: Heart,
       isActive: false,
     },
     {
-      title: "Sent",
+      title: "Shared",
       url: "#",
-      icon: Send,
+      icon: Waypoints,
       isActive: false,
     },
     {
-      title: "Junk",
+      title: "Visited",
       url: "#",
-      icon: ArchiveX,
+      icon: MapPinCheckInside,
       isActive: false,
     },
     {
-      title: "Trash",
+      title: "Explore",
       url: "#",
-      icon: Trash2,
+      icon: Globe,
+      isActive: false,
+    },
+    {
+      title: "Theme",
+      url: "#",
+      icon: Moon,
       isActive: false,
     },
   ],
@@ -149,6 +156,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [activeItem, setActiveItem] = React.useState(data.navMain[0])
   const [mails, setMails] = React.useState(data.mails)
   const { setOpen } = useSidebar()
+  const { theme, setTheme } = useTheme()
 
   return (
     <Sidebar
@@ -184,7 +192,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroup>
             <SidebarGroupContent className="px-1.5 md:px-0">
               <SidebarMenu>
-                {data.navMain.map((item) => (
+                {data.navMain.map((item) => {
+                  const isThemeItem = item.title === "Theme"
+                  const Icon = isThemeItem && theme === "dark" ? Sun : item.icon
+                  return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       tooltip={{
@@ -192,6 +203,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         hidden: false,
                       }}
                       onClick={() => {
+                        if (isThemeItem) {
+                          setTheme(theme === "dark" ? "light" : "dark")
+                          return
+                        }
+
                         setActiveItem(item)
                         const mail = data.mails.sort(() => Math.random() - 0.5)
                         setMails(
@@ -209,7 +225,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <span>{item.title}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                ))}
+                )})}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
