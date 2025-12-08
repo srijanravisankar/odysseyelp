@@ -9,4 +9,4 @@
 ![Chat Layout](ranger-yelp-layout-planning.jpg)
 
 ## Touring Page:
-![touring_page](Yelp Hackathon-2.jpg)
+![touring_page](yelp-hackathon-touring-page.jpg)
