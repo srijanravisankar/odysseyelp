@@ -6,6 +6,7 @@ import {
     Calendar as CalendarIcon,
     Trash2,
     ChevronDownIcon,
+    ExternalLink,        // 👈 NEW
 } from "lucide-react"
 
 import {
@@ -81,6 +82,20 @@ function JourneyStopAccordionItem({ stop }: { stop: JourneyStop }) {
             {/* Content (expanded) */}
             <AccordionContent>
                 <div className="space-y-4 text-xs text-muted-foreground">
+
+                    {/* 0. Yelp link */}
+                    <div>
+                        <a
+                            href="https://www.yelp.com/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs font-medium text-emerald-500 hover:text-emerald-600 hover:underline"
+                        >
+                            Visit Yelp for more info
+                            <ExternalLink className="h-3 w-3" />
+                        </a>
+                    </div>
+
                     {/* 1. Address */}
                     <div>
                         <span className="font-medium text-foreground">Address: </span>
