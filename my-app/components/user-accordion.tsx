@@ -1,7 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { Star, Calendar as CalendarIcon, Trash2 } from "lucide-react"
+import {
+    Star,
+    Calendar as CalendarIcon,
+    Trash2,
+    ChevronDownIcon,
+} from "lucide-react"
 
 import {
     Accordion,
@@ -10,8 +15,14 @@ import {
     AccordionContent,
 } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
+import {
+    Popover,
+    PopoverTrigger,
+    PopoverContent,
+} from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 
 // TEMP: mock journey stops.
@@ -43,8 +54,13 @@ type JourneyStop = (typeof journeyStops)[number]
 
 function JourneyStopAccordionItem({ stop }: { stop: JourneyStop }) {
     const [date, setDate] = React.useState<Date | undefined>()
+    const [time, setTime] = React.useState<string>("10:30:00")
+    const [open, setOpen] = React.useState(false)
 
     const filledStars = Math.max(0, Math.min(5, Math.round(stop.rating)))
+
+    const dateId = `date-picker-${stop.id}`
+    const timeId = `time-picker-${stop.id}`
 
     return (
         <AccordionItem value={stop.id}>
@@ -64,7 +80,7 @@ function JourneyStopAccordionItem({ stop }: { stop: JourneyStop }) {
 
             {/* Content (expanded) */}
             <AccordionContent>
-                <div className="space-y-3 text-xs text-muted-foreground">
+                <div className="space-y-4 text-xs text-muted-foreground">
                     {/* 1. Address */}
                     <div>
                         <span className="font-medium text-foreground">Address: </span>
@@ -106,36 +122,59 @@ function JourneyStopAccordionItem({ stop }: { stop: JourneyStop }) {
                         <span>{stop.openStatus}</span>
                     </div>
 
-                    {/* 5. Date picker */}
-                    <div className="flex flex-col gap-1">
-                        <span className="font-medium text-foreground">Planned date</span>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className={cn(
-                                        "w-full justify-start text-left font-normal",
-                                        !date && "text-muted-foreground"
-                                    )}
-                                >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {date ? date.toLocaleDateString() : <span>Pick a date</span>}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar
-                                    mode="single"
-                                    selected={date}
-                                    onSelect={setDate}
-                                    initialFocus
+                    {/* 5. Date + Time picker (Calendar24 style) */}
+                    <div className="flex flex-col gap-2">
+                        <span className="font-medium text-foreground">Schedule</span>
+                        <div className="flex gap-4">
+                            {/* Date */}
+                            <div className="flex flex-col gap-3">
+                                <Label htmlFor={dateId} className="px-1">
+                                    Date
+                                </Label>
+                                <Popover open={open} onOpenChange={setOpen}>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            id={dateId}
+                                            className="w-32 justify-between font-normal"
+                                        >
+                                            {date ? date.toLocaleDateString() : "Select date"}
+                                            <ChevronDownIcon className="h-3 w-3" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+                                        <Calendar
+                                            mode="single"
+                                            selected={date}
+                                            captionLayout="dropdown"
+                                            onSelect={(d) => {
+                                                setDate(d)
+                                                setOpen(false)
+                                            }}
+                                        />
+                                    </PopoverContent>
+                                </Popover>
+                            </div>
+
+                            {/* Time */}
+                            <div className="flex flex-col gap-3">
+                                <Label htmlFor={timeId} className="px-1">
+                                    Time
+                                </Label>
+                                <Input
+                                    type="time"
+                                    id={timeId}
+                                    step="60"
+                                    value={time}
+                                    onChange={(e) => setTime(e.target.value)}
+                                    className="bg-background h-9 w-28 appearance-none text-xs [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
                                 />
-                            </PopoverContent>
-                        </Popover>
+                            </div>
+                        </div>
                     </div>
 
                     {/* 6. Delete button */}
-                    <div className="pt-2 flex justify-end">
+                    <div className="pt-1 flex justify-end">
                         <Button
                             type="button"
                             variant="outline"
@@ -143,7 +182,7 @@ function JourneyStopAccordionItem({ stop }: { stop: JourneyStop }) {
                             className="border-destructive text-destructive hover:bg-destructive/10"
                             onClick={() => {
                                 // later: wire this to actually remove the stop from your state
-                                console.log("Delete stop", stop.id)
+                                console.log("Delete stop", stop.id, { date, time })
                             }}
                         >
                             <Trash2 className="mr-1 h-3.5 w-3.5" />
