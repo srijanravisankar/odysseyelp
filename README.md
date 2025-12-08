@@ -7,3 +7,6 @@
 
 ### Chat Layout:
 ![Chat Layout](ranger-yelp-layout-planning.jpg)
+
+## Touring Page:
+![touring_page](Yelp Hackathon-2.jpg)
