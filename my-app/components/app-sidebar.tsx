@@ -6,6 +6,7 @@ import {
 	Command,
 	Globe,
 	Heart,
+	Home,
 	MapPinCheckInside,
 	Moon,
 	Sun,
@@ -32,6 +33,12 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { SidebarUserAccordion } from "@/components/user-accordion"
 import { NavUser } from "./nav-user"
+import { ExploreSidebarContent } from "./sidebar/explore-sidebar-content"
+import { HomeSidebarContent } from "./sidebar/home-sidebar-content"
+import { FavoritesSidebarContent } from "./sidebar/favorites-sidebar-content"
+import { TouringSidebarContent } from "./sidebar/touring-sidebar-content"
+import { VisitedSidebarContent } from "./sidebar/visited-sidebar-content"
+import { SharedSidebarContent } from "./sidebar/shared-sidebar-content"
 
 // ----------------------
 // Sample data
@@ -43,6 +50,11 @@ const data = {
 		avatar: "/avatars/shadcn.jpg",
 	},
 	navMain: [
+		{
+			title: "Home",
+			url: "/",
+			icon: Home,
+		},
 		{
 			title: "Touring",
 			url: "/touring",
@@ -75,45 +87,7 @@ const data = {
 		},
 	],
 }
-//
-// // ----------------------
-// // Your user accordion
-// // ----------------------
-// function SidebarUserAccordion() {
-//     return (
-//         <Accordion type="single" collapsible className="w-full">
-//             <AccordionItem value="user-info">
-//                 <AccordionTrigger>Account &amp; context</AccordionTrigger>
-//                 <AccordionContent>
-//                     <div className="space-y-1 text-xs text-muted-foreground">
-//                         <div>
-//                             <span className="font-medium text-foreground">shadcn</span>
-//                             <div>m@example.com</div>
-//                         </div>
-//                         <div className="pt-2 border-t">
-//                             <div>Last updated: just now</div>
-//                             <div>More account stuff can go here.</div>
-//                         </div>
-//                     </div>
-//                 </AccordionContent>
-//             </AccordionItem>
-//
-//             <AccordionItem value="help">
-//                 <AccordionTrigger>Help &amp; tips</AccordionTrigger>
-//                 <AccordionContent>
-//                     <div className="text-xs text-muted-foreground space-y-1">
-//                         <p>• Use the left icons to switch pages.</p>
-//                         <p>• Use the theme item to toggle dark/light mode.</p>
-//                     </div>
-//                 </AccordionContent>
-//             </AccordionItem>
-//         </Accordion>
-//     )
-// }
 
-// ----------------------
-// Sidebar component
-// ----------------------
 export function AppSidebar(
 	props: React.ComponentProps<typeof Sidebar>
 ) {
@@ -128,16 +102,26 @@ export function AppSidebar(
   }, [])
 
 	// Active item is derived from current route
-	const activeItem = React.useMemo(() => {
-		return (
-			data.navMain.find(
-				(item) =>
-					item.title !== "Theme" &&
-					item.url !== "#" &&
-					pathname.startsWith(item.url)
-			) ?? data.navMain[0]
-		)
-	}, [pathname])
+  const activeItem = React.useMemo(() => {
+    return (
+      data.navMain.find((item) => {
+        if (item.title === "Theme" || item.url === "#") return false
+        if (item.url === "/") return pathname === "/"
+        return pathname.startsWith(item.url)
+      }) ?? data.navMain[0]
+    )
+  }, [pathname])
+
+	const sidebarContentMap: Record<string, React.ReactNode> = {
+		"Home": <HomeSidebarContent />,
+    "Touring": <TouringSidebarContent />,
+		"Favorites": <FavoritesSidebarContent />,
+		"Shared": <SharedSidebarContent />,
+    "Visited": <VisitedSidebarContent />,
+		"Explore": <ExploreSidebarContent />,
+  }
+
+	const currentSidebarContent = sidebarContentMap[activeItem?.title] || <SidebarUserAccordion />;
 
 	return (
 		<Sidebar
@@ -226,30 +210,13 @@ export function AppSidebar(
 
 			{/* Right sidebar – your "inside navbar" area */}
 			<Sidebar collapsible="none" className="hidden flex-1 md:flex">
-				<SidebarHeader className="gap-3.5 border-b p-4">
-					<div className="flex w-full items-center justify-between">
-						<div className="text-foreground text-base font-medium">
-							{activeItem?.title}
-						</div>
-						<Label className="flex items-center gap-2 text-sm">
-							<span>Unreads</span>
-							<Switch className="shadow-none" />
-						</Label>
-					</div>
-
-					<div className="text-xs text-muted-foreground">
-						Currently in {activeItem?.title} page
-					</div>
-
-					<SidebarInput placeholder="Type to search..." />
+				<SidebarHeader className="gap-3 border-b p-3">
+					{activeItem?.title}
 				</SidebarHeader>
 
 				<SidebarContent className="scrollbar-hide px-0">
 					<SidebarGroup className="px-0">
-						<SidebarGroupContent className="px-4 py-2">
-							{/* This is where accordion shows up */}
-							<SidebarUserAccordion />
-						</SidebarGroupContent>
+						{currentSidebarContent}
 					</SidebarGroup>
 				</SidebarContent>
 			</Sidebar>
