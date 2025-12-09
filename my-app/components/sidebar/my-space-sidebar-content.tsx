@@ -3,7 +3,7 @@
 import React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Heart, Waypoints, MapPinCheckInside } from "lucide-react"
+import {Heart, Waypoints, MapPinCheckInside, Earth} from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const items = [
@@ -15,7 +15,7 @@ const items = [
     },
     {
         href: "/my-space/published",
-        icon: Waypoints,
+        icon: Earth,
         label: "Published",
         description: "Places you published for others to see.",
     },
