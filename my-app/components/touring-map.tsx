@@ -13,7 +13,7 @@ type TouringMapProps = {
 }
 
 export function TouringMap({
-                               initialLng = -79.3832,  // Toronto-ish
+                               initialLng = -79.3832, // Toronto-ish
                                initialLat = 43.6532,
                                initialZoom = 12,
                            }: TouringMapProps) {
@@ -29,13 +29,13 @@ export function TouringMap({
 
         const map = new mapboxgl.Map({
             container: containerRef.current,
-            style: "mapbox://styles/mapbox/streets-v12", // has roads + POIs, globe by default :contentReference[oaicite:0]{index=0}
+            style: "mapbox://styles/mapbox/streets-v12", // roads + POIs
             center: [initialLng, initialLat],
             zoom: initialZoom,
-            pitch: 60,   // start in 3D
+            pitch: 60, // start in 3D
             bearing: -20,
             antialias: true,
-            projection: "globe", // explicit, matches v12 default :contentReference[oaicite:1]{index=1}
+            projection: "globe", // default for v12
         })
 
         mapRef.current = map
@@ -43,7 +43,7 @@ export function TouringMap({
         setProjection("globe")
 
         map.on("load", () => {
-            // 3D buildings layer (from Mapbox example) :contentReference[oaicite:2]{index=2}
+            // 3D buildings
             const layers = map.getStyle().layers
             if (!layers) return
 
@@ -123,17 +123,17 @@ export function TouringMap({
     const setProj = (proj: "globe" | "mercator") => {
         if (!mapRef.current) return
         setProjection(proj)
-        // Mapbox GL lets you change projection at runtime with setProjection :contentReference[oaicite:3]{index=3}
         mapRef.current.setProjection(proj)
     }
 
     return (
-        <div ref={outerRef} className="absolute inset-0 w-full h-full">
+        <div ref={outerRef} className="absolute inset-0 h-full w-full">
             {/* Map canvas */}
-            <div ref={containerRef} className="w-full h-full" />
+            <div ref={containerRef} className="h-full w-full" />
 
-            {/* Controls overlay */}
-            <div className="pointer-events-auto absolute right-3 top-3 flex flex-col gap-2 rounded-md bg-background/80 p-2 text-xs shadow">
+            {/* Controls overlay - now horizontal */}
+            <div className="pointer-events-auto absolute right-3 top-3 flex items-center gap-2 rounded-md bg-background/80 p-2 text-xs shadow">
+                {/* 2D / 3D */}
                 <div className="flex gap-1">
                     <button
                         onClick={switchTo2D}
@@ -157,6 +157,7 @@ export function TouringMap({
                     </button>
                 </div>
 
+                {/* Globe / Flat */}
                 <div className="flex gap-1">
                     <button
                         onClick={() => setProj("globe")}
