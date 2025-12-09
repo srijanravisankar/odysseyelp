@@ -132,12 +132,12 @@ export function TouringMap({
             <div ref={containerRef} className="h-full w-full" />
 
             {/* Controls overlay - now horizontal */}
-            <div className="pointer-events-auto absolute right-3 top-3 flex items-center gap-2 rounded-md bg-background/80 p-2 text-xs shadow">
+            <div className="pointer-events-auto absolute right-3 top-3 flex items-center gap-2 rounded-md bg-background/50 p-1 text-xs shadow">
                 {/* 2D / 3D */}
                 <div className="flex gap-1">
                     <button
                         onClick={switchTo2D}
-                        className={`rounded px-2 py-1 ${
+                        className={`rounded cursor-pointer px-2 py-1 ${
                             viewMode === "2d"
                                 ? "bg-primary text-primary-foreground"
                                 : "bg-muted"
@@ -147,7 +147,7 @@ export function TouringMap({
                     </button>
                     <button
                         onClick={switchTo3D}
-                        className={`rounded px-2 py-1 ${
+                        className={`rounded cursor-pointer px-2 py-1 ${
                             viewMode === "3d"
                                 ? "bg-primary text-primary-foreground"
                                 : "bg-muted"
@@ -161,7 +161,7 @@ export function TouringMap({
                 <div className="flex gap-1">
                     <button
                         onClick={() => setProj("globe")}
-                        className={`rounded px-2 py-1 ${
+                        className={`rounded cursor-pointer px-2 py-1 ${
                             projection === "globe"
                                 ? "bg-primary text-primary-foreground"
                                 : "bg-muted"
@@ -171,7 +171,7 @@ export function TouringMap({
                     </button>
                     <button
                         onClick={() => setProj("mercator")}
-                        className={`rounded px-2 py-1 ${
+                        className={`rounded cursor-pointer px-2 py-1 ${
                             projection === "mercator"
                                 ? "bg-primary text-primary-foreground"
                                 : "bg-muted"

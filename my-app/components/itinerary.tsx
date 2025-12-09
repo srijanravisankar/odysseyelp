@@ -9,23 +9,20 @@ import {
   ButtonGroup,
 } from "@/components/ui/button-group"
 import { Button } from "./ui/button";
-import { Check, Pen, X } from "lucide-react";
+import { Check, CircleCheckBig, Pen, SquarePen, X } from "lucide-react";
 
 export function Itinerary() {
   return (
     <Card className="flex flex-row p-0 bg-muted/50 h-full overflow-hidden">
       <CardContent className="flex flex-col flex-1 min-h-0 pr-3 pl-3 pt-3 pb-3 overflow-y-auto w-50">
         <ItineraryScrollArea />
-        <div className="w-full flex justify-end flex-shrink-0 pt-2">
-          <ButtonGroup className="pt-2 h-fit">
-            <Button variant="outline" size="icon">
-              <Check />
+        <div className="w-full flex justify-end flex-shrink-0 pt-1">
+          <ButtonGroup>
+            <Button variant="ghost" size="icon">
+              <CircleCheckBig className="text-green-600" />
             </Button>
-            <Button variant="outline" size="icon">
-              <X />
-            </Button> 
-            <Button variant="outline" size="icon">
-              <Pen />
+            <Button variant="ghost" size="icon">
+              <SquarePen className="text-yellow-600" />
             </Button>
           </ButtonGroup>
         </div>
