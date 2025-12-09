@@ -7,7 +7,8 @@ import {
   TimelineSeparator,
 } from "@/components/ui/timeline"
 
-import { Beer, Coffee, Utensils, Footprints, Music, MapPin, Ticket, ShoppingBag, Palette, Briefcase } from "lucide-react"
+import { Beer, Coffee, Utensils, Footprints, Music, MapPin, Ticket, ShoppingBag, Palette, Briefcase, SquarePen, Trash2 } from "lucide-react"
+import { Button } from "./ui/button"
 
 const journeyTimeline = [
   {
@@ -16,7 +17,7 @@ const journeyTimeline = [
     subtitle: "Downtown · 3 stops",
     createdAt: "2 hours ago",
     isActive: false,
-    icon: <Beer className="h-3 w-3" />, 
+    icon: <Beer className="h-3 w-3" />,
   },
   {
     id: "2",
@@ -94,20 +95,68 @@ const journeyTimeline = [
 
 export function JourneyTimeline() {
   return (
+    // <Timeline>
+    //   {journeyTimeline.map((item) => (
+    //     <TimelineItem key={item.id}>
+    //       <TimelineHeader>
+    //         <TimelineSeparator />
+    //         <TimelineIcon className="bg-primary text-primary-foreground">
+    //           {item.icon}
+    //         </TimelineIcon>
+    //       </TimelineHeader>
+    //       <TimelineBody>
+    //         <div className="flex flex-col gap-1">
+    //           <h3 className="font-medium text-sm leading-none">{item.title}</h3>
+    //           <p className="text-xs text-muted-foreground">{item.subtitle}</p>
+    //           <p className="text-[10px] text-muted-foreground/60">{item.createdAt}</p>
+    //         </div>
+    //       </TimelineBody>
+    //     </TimelineItem>
+    //   ))}
+    // </Timeline>
+    // Inside JourneyTimeline()
+    // ...
+
     <Timeline>
       {journeyTimeline.map((item) => (
         <TimelineItem key={item.id}>
           <TimelineHeader>
-            <TimelineSeparator />
-            <TimelineIcon className="bg-primary text-primary-foreground">
+            <TimelineSeparator className="bg-gray-300 w-[1px]" />
+            <TimelineIcon className={`
+              h-10 w-10 [&_svg]:h-5 [&_svg]:w-5 border-1 border-primary
+              ${item.isActive ? "bg-primary text-primary-foreground" : "bg-muted"}
+            `}>
               {item.icon}
             </TimelineIcon>
           </TimelineHeader>
-          <TimelineBody>
-            <div className="flex flex-col gap-1">
-              <h3 className="font-medium text-sm leading-none">{item.title}</h3>
-              <p className="text-xs text-muted-foreground">{item.subtitle}</p>
-              <p className="text-[10px] text-muted-foreground/60">{item.createdAt}</p>
+          <TimelineBody className="group pl-3"> {/* 1. ADD 'group' for hover effects */}
+            {/* 2. Add Flex container to align content and buttons horizontally */}
+            <div className="flex w-full items-start justify-between">
+
+              {/* LEFT SIDE: Text Content (needs to be wrapped) */}
+              <div className="flex flex-col gap-1 pr-4">
+                <h3 className="font-light text-md leading-none">{item.title}</h3>
+                <p className="text-xs text-muted-foreground">{item.subtitle}</p>
+                <p className="text-[10px] text-muted-foreground/60">{item.createdAt}</p>
+              </div>
+
+              {/* RIGHT SIDE: Button Group */}
+              <div className="flex shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 p-0"
+                >
+                  <SquarePen className="text-yellow-600" /> {/* Example Edit Icon */}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 p-0 text-destructive/80 hover:text-destructive"
+                >
+                  <Trash2 className="text-red-400" /> {/* Example Delete Icon */}
+                </Button>
+              </div>
             </div>
           </TimelineBody>
         </TimelineItem>
