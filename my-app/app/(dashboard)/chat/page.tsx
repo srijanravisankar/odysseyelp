@@ -4,7 +4,7 @@ import { Itinerary } from "@/components/itinerary"
 export default function Page() {
     return (
         <div className="grid h-full w-full gap-6 md:grid-rows-1">
-            Home Page
+            <Itinerary />
         </div>
     )
 }

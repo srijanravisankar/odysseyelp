@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import {
-    Binoculars, Brain,
+    Binoculars, BotMessageSquare, Brain,
     Command,
     Globe,
     Heart,
@@ -34,12 +34,13 @@ import { usePathname } from "next/navigation"
 import { SidebarUserAccordion } from "@/components/user-accordion"
 import { NavUser } from "./nav-user"
 import { ExploreSidebarContent } from "./sidebar/explore-sidebar-content"
-import { HomeSidebarContent } from "./sidebar/home-sidebar-content"
+import { ChatSidebarContent } from "./sidebar/chat-sidebar-content"
 import { FavoritesSidebarContent } from "./sidebar/favorites-sidebar-content"
 import { TouringSidebarContent } from "./sidebar/touring-sidebar-content"
 import { VisitedSidebarContent } from "./sidebar/visited-sidebar-content"
 import { SharedSidebarContent } from "./sidebar/shared-sidebar-content"
 import {MySpaceSidebarContent} from "@/components/sidebar/my-space-sidebar-content";
+import { HomeSidebarContent } from "./sidebar/home-sidebar-content"
 
 // ----------------------
 // Sample data
@@ -55,6 +56,11 @@ const data = {
 			title: "Home",
 			url: "/",
 			icon: Home,
+		},
+		{
+			title: "Chat",
+			url: "/chat",
+			icon: BotMessageSquare,
 		},
 		{
 			title: "Touring",
@@ -105,6 +111,7 @@ export function AppSidebar(
 
     const sidebarContentMap: Record<string, React.ReactNode> = {
         "Home": <HomeSidebarContent />,
+        "Chat": <ChatSidebarContent />,
         "Touring": <TouringSidebarContent />,
         "My Space": <MySpaceSidebarContent />,
         "Explore": <ExploreSidebarContent />,
