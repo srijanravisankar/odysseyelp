@@ -189,10 +189,10 @@ function JourneyStopAccordionItem({ stop }: { stop: JourneyStop }) {
       <AccordionTrigger>
         <div className="flex w-full items-center justify-between gap-2">
           <div className="flex flex-col text-left">
-            <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
+            <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
               {stop.pointLabel}
             </span>
-            <span className="text-sm font-medium text-foreground">
+            <span className="text-base font-light text-foreground">
               {stop.name}
             </span>
           </div>
