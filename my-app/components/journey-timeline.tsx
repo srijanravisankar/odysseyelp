@@ -123,7 +123,7 @@ export function JourneyTimeline() {
           <TimelineHeader>
             <TimelineSeparator className="bg-gray-300 w-[1px]" />
             <TimelineIcon className={`
-              h-10 w-10 [&_svg]:h-5 [&_svg]:w-5 border-1 border-primary
+              h-9 w-9 [&_svg]:h-5 [&_svg]:w-5 border-1 border-primary
               ${item.isActive ? "bg-primary text-primary-foreground" : "bg-muted"}
             `}>
               {item.icon}
@@ -135,7 +135,7 @@ export function JourneyTimeline() {
 
               {/* LEFT SIDE: Text Content (needs to be wrapped) */}
               <div className="flex flex-col gap-1 pr-4">
-                <h3 className="font-light text-md leading-none">{item.title}</h3>
+                <h3 className="font-dark text-lg leading-none">{item.title}</h3>
                 <p className="text-xs text-muted-foreground">{item.subtitle}</p>
                 <p className="text-[10px] text-muted-foreground/60">{item.createdAt}</p>
               </div>

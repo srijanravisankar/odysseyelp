@@ -1,4 +1,4 @@
-import { Itinerary } from "@/components/itinerary"
+import { Itinerary } from "@/components/chat-page/itinerary"
 
 // pr check
 export default function Page() {
