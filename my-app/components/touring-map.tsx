@@ -128,7 +128,7 @@ export function TouringMap({
     }
 
     return (
-        <div ref={outerRef} className="relative w-full h-full">
+        <div ref={outerRef} className="absolute inset-0 w-full h-full">
             {/* Map canvas */}
             <div ref={containerRef} className="w-full h-full" />
 

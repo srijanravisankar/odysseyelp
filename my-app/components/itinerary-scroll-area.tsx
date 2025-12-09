@@ -3,7 +3,7 @@ import { SidebarUserAccordion } from "./user-accordion"
 
 export function ItineraryScrollArea() {
   return (
-    <ScrollArea className="h-100 overflow-y-auto w-full rounded-md border bg-muted/50">
+    <ScrollArea className="h-75 overflow-y-auto w-full rounded-md border bg-muted/50">
       <div className="p-4">
         <SidebarUserAccordion />
       </div>
