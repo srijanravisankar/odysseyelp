@@ -2,15 +2,15 @@
 
 import * as React from "react"
 import {
-	Binoculars,
-	Command,
-	Globe,
-	Heart,
-	Home,
-	MapPinCheckInside,
-	Moon,
-	Sun,
-	Waypoints,
+    Binoculars, Brain,
+    Command,
+    Globe,
+    Heart,
+    Home,
+    MapPinCheckInside,
+    Moon,
+    Sun,
+    Waypoints,
 } from "lucide-react"
 
 import { Label } from "@/components/ui/label"
@@ -39,6 +39,7 @@ import { FavoritesSidebarContent } from "./sidebar/favorites-sidebar-content"
 import { TouringSidebarContent } from "./sidebar/touring-sidebar-content"
 import { VisitedSidebarContent } from "./sidebar/visited-sidebar-content"
 import { SharedSidebarContent } from "./sidebar/shared-sidebar-content"
+import {MySpaceSidebarContent} from "@/components/sidebar/my-space-sidebar-content";
 
 // ----------------------
 // Sample data
@@ -60,21 +61,11 @@ const data = {
 			url: "/touring",
 			icon: Binoculars,
 		},
-		{
-			title: "Favorites",
-			url: "/favorites",
-			icon: Heart,
-		},
-		{
-			title: "Shared",
-			url: "/shared",
-			icon: Waypoints,
-		},
-		{
-			title: "Visited",
-			url: "/visited",
-			icon: MapPinCheckInside,
-		},
+        {
+            title: "My Space",
+            url: "/my-space",
+            icon: Brain,   // new icon
+        },
 		{
 			title: "Explore",
 			url: "/explore",
@@ -112,16 +103,15 @@ export function AppSidebar(
     )
   }, [pathname])
 
-	const sidebarContentMap: Record<string, React.ReactNode> = {
-		"Home": <HomeSidebarContent />,
-    "Touring": <TouringSidebarContent />,
-		"Favorites": <FavoritesSidebarContent />,
-		"Shared": <SharedSidebarContent />,
-    "Visited": <VisitedSidebarContent />,
-		"Explore": <ExploreSidebarContent />,
-  }
+    const sidebarContentMap: Record<string, React.ReactNode> = {
+        "Home": <HomeSidebarContent />,
+        "Touring": <TouringSidebarContent />,
+        "My Space": <MySpaceSidebarContent />,
+        "Explore": <ExploreSidebarContent />,
+    }
 
-	const currentSidebarContent = sidebarContentMap[activeItem?.title] || <SidebarUserAccordion />;
+
+    const currentSidebarContent = sidebarContentMap[activeItem?.title] || <SidebarUserAccordion />;
 
 	return (
 		<Sidebar
