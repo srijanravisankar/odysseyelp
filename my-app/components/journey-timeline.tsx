@@ -15,8 +15,8 @@ const journeyTimeline = [
     title: "Birthday bar-hopping",
     subtitle: "Downtown · 3 stops",
     createdAt: "2 hours ago",
-    isActive: true,
-    icon: <Beer className="h-3 w-3 text-primary-foreground" />, 
+    isActive: false,
+    icon: <Beer className="h-3 w-3" />, 
   },
   {
     id: "2",
@@ -99,7 +99,7 @@ export function JourneyTimeline() {
         <TimelineItem key={item.id}>
           <TimelineHeader>
             <TimelineSeparator />
-            <TimelineIcon className={item.isActive ? "bg-primary" : "bg-muted"}>
+            <TimelineIcon className="bg-primary text-primary-foreground">
               {item.icon}
             </TimelineIcon>
           </TimelineHeader>
