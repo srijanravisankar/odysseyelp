@@ -2,7 +2,7 @@
 
 import { SidebarContent } from "../ui/sidebar"
 import { Button } from "../ui/button"
-import { MoreHorizontal, MessageSquare, Clock, Bot, MessageCircle } from "lucide-react"
+import { MoreHorizontal, MessageSquare, Clock, Bot, MessageCircle, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // TEMP: mock history data (replace with real data later)
@@ -55,7 +55,8 @@ export function ChatSidebarContent() {
 						variant="outline"
 						onClick={() => console.log("New plan")}
 					>
-						+ New plan
+						<Plus />
+						New plan
 					</Button>
 				</div>
 
@@ -85,7 +86,7 @@ export function ChatSidebarContent() {
 							{/* Title + subtitle */}
 							<div className="flex min-w-0 flex-1 flex-col">
 								{/* Title: wrap to max 2 lines */}
-								<span className="text-md font-light leading-tight line-clamp-2 break-words">
+								<span className="text-md leading-tight line-clamp-2 break-words">
 									{item.title}
 								</span>
 
