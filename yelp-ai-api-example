@@ -1,0 +1,534 @@
+POST https://api.yelp.com/ai/chat/v2
+Authorization: Bearer <Your API Key>
+Content-Type: application/json
+
+{
+  "query": "What's a good vegan pizza place near me?",
+  "user_context": {
+    "locale": "en_US",
+    "latitude": 40.7128,
+    "longitude": -74.0060
+  }
+}
+
+Response:
+{
+    "chat_id": "3NyLlUlACyXbNYGYISpHLw",
+    "response": {
+        "text": "I found a few great options for vegan pizza near you. Double Zero is a vegan pizzeria known for cashew cheese pizzas and creative truffle toppings. Norm's Pizza offers classic NY-style slices and has vegan options, while Rubirosa is popular for its cracker-thin crust and lively atmosphere. Double Zero is fully plant-based, making it a top pick for vegan pizza lovers.",
+        "tags": [
+            {
+                "tag_type": "business",
+                "start": 54,
+                "end": 65,
+                "meta": {
+                    "business_id": "EBK0OkVMBg_n_KxAU_4DZg"
+                }
+            },
+            {
+                "tag_type": "highlight",
+                "start": 96,
+                "end": 116
+            },
+            {
+                "tag_type": "highlight",
+                "start": 121,
+                "end": 146
+            },
+            {
+                "tag_type": "business",
+                "start": 148,
+                "end": 160,
+                "meta": {
+                    "business_id": "Qr9FJkZAzav9px3xsEf1yQ"
+                }
+            },
+            {
+                "tag_type": "highlight",
+                "start": 168,
+                "end": 191
+            },
+            {
+                "tag_type": "business",
+                "start": 221,
+                "end": 229,
+                "meta": {
+                    "business_id": "WG639VkTjmK5dzydd1BBJA"
+                }
+            },
+            {
+                "tag_type": "highlight",
+                "start": 249,
+                "end": 267
+            }
+        ]
+    },
+    "types": [
+        "business_search"
+    ],
+    "entities": [
+        {
+            "businesses": [
+                {
+                    "id": "EBK0OkVMBg_n_KxAU_4DZg",
+                    "alias": "double-zero-new-york-5",
+                    "name": "Double Zero",
+                    "url": "https://www.yelp.com/biz/double-zero-new-york-5?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+                    "location": {
+                        "address1": "65 2nd Ave",
+                        "address2": "",
+                        "address3": "",
+                        "city": "New York",
+                        "zip_code": null,
+                        "state": "NY",
+                        "country": "US",
+                        "formatted_address": "65 2nd Ave\nNew York, NY 10003"
+                    },
+                    "coordinates": {
+                        "latitude": 40.7260895,
+                        "longitude": -73.9897998
+                    },
+                    "review_count": 663,
+                    "price": "$$",
+                    "rating": 4.3,
+                    "categories": [
+                        {
+                            "alias": "pizza",
+                            "title": "Pizza"
+                        },
+                        {
+                            "alias": "italian",
+                            "title": "Italian"
+                        }
+                    ],
+                    "attributes": {
+                        "BusinessAcceptsApplePay": false,
+                        "GenderNeutralRestrooms": true,
+                        "PokestopNearby": true,
+                        "BusinessUrl": "https://www.matthewkenneycuisine.com/double-zero",
+                        "AboutThisBizBioPhotoDict": null,
+                        "AboutThisBizBusinessRecommendation": [],
+                        "BusinessAddressAlternate": null,
+                        "BusinessCategorySic": null,
+                        "BusinessMovedFrom": null,
+                        "BusinessNameAlternate": null,
+                        "BusinessOpeningDate": null,
+                        "BusinessTempClosed": null,
+                        "GroupName": null,
+                        "StoreCode": null,
+                        "AboutThisBizBio": null,
+                        "AboutThisBizBioFirstName": null,
+                        "AboutThisBizBioLastName": null,
+                        "AboutThisBizHistory": null,
+                        "AboutThisBizRole": null,
+                        "AboutThisBizSpecialties": null,
+                        "AboutThisBizYearEstablished": null,
+                        "Alcohol": "full_bar",
+                        "Ambience": {
+                            "divey": false,
+                            "hipster": null,
+                            "casual": null,
+                            "touristy": false,
+                            "trendy": true,
+                            "intimate": null,
+                            "romantic": null,
+                            "classy": null,
+                            "upscale": null
+                        },
+                        "BikeParking": true,
+                        "BusinessAcceptsAndroidPay": null,
+                        "BusinessAcceptsBitcoin": false,
+                        "BusinessAcceptsCreditCards": true,
+                        "BusinessDisplayUrl": "",
+                        "BusinessMovedTo": null,
+                        "BusinessParking": {
+                            "garage": false,
+                            "street": true,
+                            "validated": false,
+                            "lot": false,
+                            "valet": false
+                        },
+                        "BYOB": false,
+                        "BYOBCorkage": null,
+                        "Caters": true,
+                        "Corkage": false,
+                        "DogsAllowed": true,
+                        "DriveThru": null,
+                        "FlowerDelivery": null,
+                        "GoodForKids": false,
+                        "GoodForMeal": {
+                            "dessert": null,
+                            "latenight": false,
+                            "lunch": null,
+                            "dinner": true,
+                            "brunch": false,
+                            "breakfast": false
+                        },
+                        "HappyHour": false,
+                        "HasTV": false,
+                        "MenuUrl": "",
+                        "NationalProviderIdentifier": null,
+                        "NoiseLevel": "average",
+                        "OffersMilitaryDiscount": null,
+                        "OngoingVigilanteEvent": null,
+                        "OnlineReservations": null,
+                        "Open24Hours": null,
+                        "BusinessOpenToAll": null,
+                        "PlatformDelivery": null,
+                        "RestaurantsAttire": "casual",
+                        "RestaurantsCounterService": null,
+                        "RestaurantsDelivery": true,
+                        "RestaurantsGoodForGroups": true,
+                        "RestaurantsPriceRange": null,
+                        "RestaurantsPriceRange2": 2,
+                        "RestaurantsReservations": true,
+                        "RestaurantsTableService": true,
+                        "RestaurantsTakeOut": true,
+                        "WaitlistReservation": null,
+                        "WheelchairAccessible": true,
+                        "WiFi": "free",
+                        "biz_summary_long": {
+                            "summary": "Vegan Italian restaurant with indoor seating offering a casual ambiance and outdoor seating with a street view. The menu includes a diverse selection of pizzas, pastas, and small plates, all crafted with plant-based ingredients. The establishment features a thin, crispy crust and creative toppings like truffle mushrooms and cashew cheese. The restaurant caters to both vegans and non-vegans, with gluten-free options and accommodating service.",
+                            "is_inactive": false,
+                            "allows_auto_summary_generation": true,
+                            "eligible_reviews_considered": 49
+                        },
+                        "biz_summary": {
+                            "summary": "Vegan pizzeria offers cashew cheese pizzas and standout truffle flavors.",
+                            "is_inactive": false,
+                            "allows_auto_summary_generation": true,
+                            "eligible_reviews_considered": 30
+                        }
+                    },
+                    "phone": "+12127771608",
+                    "summaries": {
+                        "short": "Vegan pizzeria offers cashew cheese pizzas and standout truffle flavors.",
+                        "medium": "Vegan Italian restaurant with indoor seating offering a casual ambiance and outdoor seating with a street view. The menu includes a diverse selection of pizzas, pastas, and small plates, all crafted with plant-based ingredients. The establishment features a thin, crispy crust and creative toppings like truffle mushrooms and cashew cheese.",
+                        "long": "Vegan Italian restaurant with indoor seating offering a casual ambiance and outdoor seating with a street view. The menu includes a diverse selection of pizzas, pastas, and small plates, all crafted with plant-based ingredients. The establishment features a thin, crispy crust and creative toppings like truffle mushrooms and cashew cheese. The restaurant caters to both vegans and non-vegans, with gluten-free options and accommodating service."
+                    },
+                    "contextual_info": {
+                        "summary": null,
+                        "review_snippets": [],
+                        "business_hours": [],
+                        "photos": [
+                            {
+                                "original_url": "https://s3-media0.fl.yelpcdn.com/bphoto/Aea3haoOsIyHF__Lksp7hQ/o.jpg"
+                            },
+                            {
+                                "original_url": "https://s3-media0.fl.yelpcdn.com/bphoto/7L5UHRZUUA0tMDuFglEWqA/o.jpg"
+                            },
+                            {
+                                "original_url": "https://s3-media0.fl.yelpcdn.com/bphoto/VZ8E_RSMCy3GYgBZmW65Fw/o.jpg"
+                            }
+                        ],
+                        "review_snippet": "Speaking of [[HIGHLIGHT]]vegan pizzas[[ENDHIGHLIGHT]] - Double Zero has hands down the best vegan pizza I have had in my 5 years...",
+                        "accepts_reservations_through_yelp": false,
+                        "reservation_availability": null
+                    }
+                },
+                {
+                    "id": "Qr9FJkZAzav9px3xsEf1yQ",
+                    "alias": "norms-pizza-new-york",
+                    "name": "Norm's Pizza",
+                    "url": "https://www.yelp.com/biz/norms-pizza-new-york?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+                    "location": {
+                        "address1": "8 Cortlandt St",
+                        "address2": null,
+                        "address3": "",
+                        "city": "New York",
+                        "zip_code": null,
+                        "state": "NY",
+                        "country": "US",
+                        "formatted_address": "8 Cortlandt St\nNew York, NY 10007"
+                    },
+                    "coordinates": {
+                        "latitude": 40.71008448698627,
+                        "longitude": -74.0103149
+                    },
+                    "review_count": 55,
+                    "price": null,
+                    "rating": 4.6,
+                    "categories": [
+                        {
+                            "alias": "pizza",
+                            "title": "Pizza"
+                        }
+                    ],
+                    "attributes": {
+                        "BusinessUrl": "http://www.normspizza.com",
+                        "AboutThisBizBioPhotoDict": null,
+                        "AboutThisBizBusinessRecommendation": [],
+                        "BusinessAddressAlternate": null,
+                        "BusinessCategorySic": null,
+                        "BusinessMovedFrom": null,
+                        "BusinessNameAlternate": null,
+                        "BusinessOpeningDate": null,
+                        "BusinessTempClosed": null,
+                        "GroupName": null,
+                        "StoreCode": null,
+                        "AboutThisBizBio": null,
+                        "AboutThisBizBioFirstName": null,
+                        "AboutThisBizBioLastName": null,
+                        "AboutThisBizHistory": null,
+                        "AboutThisBizRole": null,
+                        "AboutThisBizSpecialties": "Norm’s is a straight-up, no-frills pizza parlor. Heavy on the nostalgia and low on the BS, this is classic Brooklyn pizza for the people. We use only the highest quality ingredients, and we utilize the centuries-old technique of natural leavening to make our dough. At Norm’s, there’s a slice for you.",
+                        "AboutThisBizYearEstablished": null,
+                        "Alcohol": "none",
+                        "Ambience": {
+                            "divey": null,
+                            "hipster": null,
+                            "casual": null,
+                            "touristy": null,
+                            "trendy": null,
+                            "intimate": false,
+                            "romantic": null,
+                            "classy": null,
+                            "upscale": null
+                        },
+                        "BikeParking": null,
+                        "BusinessAcceptsAndroidPay": null,
+                        "BusinessAcceptsApplePay": null,
+                        "BusinessAcceptsBitcoin": null,
+                        "BusinessAcceptsCreditCards": true,
+                        "BusinessDisplayUrl": null,
+                        "BusinessMovedTo": null,
+                        "BusinessParking": {
+                            "valet": false,
+                            "garage": false,
+                            "street": false,
+                            "lot": false,
+                            "validated": true
+                        },
+                        "BYOB": false,
+                        "BYOBCorkage": null,
+                        "Caters": true,
+                        "Corkage": null,
+                        "DogsAllowed": true,
+                        "DriveThru": null,
+                        "FlowerDelivery": null,
+                        "GenderNeutralRestrooms": null,
+                        "GoodForKids": null,
+                        "GoodForMeal": null,
+                        "HappyHour": null,
+                        "HasTV": false,
+                        "MenuUrl": "https://normspizza.com/welcome#menu-home",
+                        "NationalProviderIdentifier": null,
+                        "NoiseLevel": null,
+                        "OffersMilitaryDiscount": null,
+                        "OngoingVigilanteEvent": null,
+                        "OnlineReservations": null,
+                        "Open24Hours": null,
+                        "BusinessOpenToAll": null,
+                        "PlatformDelivery": null,
+                        "PokestopNearby": null,
+                        "RestaurantsCounterService": null,
+                        "RestaurantsDelivery": true,
+                        "RestaurantsGoodForGroups": null,
+                        "RestaurantsPriceRange": null,
+                        "RestaurantsPriceRange2": null,
+                        "RestaurantsReservations": null,
+                        "RestaurantsTableService": false,
+                        "RestaurantsTakeOut": true,
+                        "WaitlistReservation": null,
+                        "WheelchairAccessible": true,
+                        "WiFi": null,
+                        "biz_summary_long": {
+                            "summary": "Classic pizza parlor with a 1960s-inspired design offering prepared slices in Downtown Brooklyn. Norm's Pizza uses naturally leavened dough and high-quality ingredients, baked in high-temperature electric ovens. The menu features a variety of pies, including the distinctive vodka sauce pizza and avant garlic slice, with limited standing tables available for dining.",
+                            "is_inactive": false,
+                            "allows_auto_summary_generation": true,
+                            "eligible_reviews_considered": 17
+                        },
+                        "biz_summary": {
+                            "summary": "Hidden gem near WTC offering classic NY-style pizza with crispy pepperoni.",
+                            "is_inactive": false,
+                            "allows_auto_summary_generation": true,
+                            "eligible_reviews_considered": 30
+                        }
+                    },
+                    "phone": "+16466492692",
+                    "summaries": {
+                        "short": "Hidden gem near WTC offering classic NY-style pizza with crispy pepperoni.",
+                        "medium": "Classic pizza parlor with a 1960s-inspired design offering prepared slices in Downtown Brooklyn. Norm's Pizza uses naturally leavened dough and high-quality ingredients, baked in high-temperature electric ovens.",
+                        "long": "Classic pizza parlor with a 1960s-inspired design offering prepared slices in Downtown Brooklyn. Norm's Pizza uses naturally leavened dough and high-quality ingredients, baked in high-temperature electric ovens. The menu features a variety of pies, including the distinctive vodka sauce pizza and avant garlic slice, with limited standing tables available for dining."
+                    },
+                    "contextual_info": {
+                        "summary": null,
+                        "review_snippets": [],
+                        "business_hours": [],
+                        "photos": [
+                            {
+                                "original_url": "https://s3-media0.fl.yelpcdn.com/bphoto/fQmKa1TxZlIudVp_CS84hw/o.jpg"
+                            },
+                            {
+                                "original_url": "https://s3-media0.fl.yelpcdn.com/bphoto/iQjT28D2ZjUj3XY79WXzgg/o.jpg"
+                            },
+                            {
+                                "original_url": "https://s3-media0.fl.yelpcdn.com/bphoto/rJoupHXh7UuM2r4t2jxAIw/o.jpg"
+                            }
+                        ],
+                        "review_snippet": "The best [[HIGHLIGHT]]pizza[[ENDHIGHLIGHT]] right now for me. The pizza pie was delicious, freshly made, came hot, and the...",
+                        "accepts_reservations_through_yelp": false,
+                        "reservation_availability": null
+                    }
+                },
+                {
+                    "id": "WG639VkTjmK5dzydd1BBJA",
+                    "alias": "rubirosa-new-york-2",
+                    "name": "Rubirosa",
+                    "url": "https://www.yelp.com/biz/rubirosa-new-york-2?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+                    "location": {
+                        "address1": "235 Mulberry St",
+                        "address2": "",
+                        "address3": "",
+                        "city": "New York",
+                        "zip_code": null,
+                        "state": "NY",
+                        "country": "US",
+                        "formatted_address": "235 Mulberry St\nNew York, NY 10012"
+                    },
+                    "coordinates": {
+                        "latitude": 40.722766,
+                        "longitude": -73.996233
+                    },
+                    "review_count": 3686,
+                    "price": "$$",
+                    "rating": 4.3,
+                    "categories": [
+                        {
+                            "alias": "italian",
+                            "title": "Italian"
+                        },
+                        {
+                            "alias": "pizza",
+                            "title": "Pizza"
+                        }
+                    ],
+                    "attributes": {
+                        "BusinessAcceptsAndroidPay": false,
+                        "BusinessAcceptsApplePay": true,
+                        "GenderNeutralRestrooms": true,
+                        "PokestopNearby": true,
+                        "BusinessUrl": "https://www.rubirosanyc.com",
+                        "AboutThisBizBioPhotoDict": null,
+                        "AboutThisBizBusinessRecommendation": [],
+                        "BusinessAddressAlternate": null,
+                        "BusinessCategorySic": null,
+                        "BusinessMovedFrom": null,
+                        "BusinessNameAlternate": null,
+                        "BusinessOpeningDate": null,
+                        "BusinessTempClosed": null,
+                        "GroupName": null,
+                        "StoreCode": null,
+                        "AboutThisBizBio": null,
+                        "AboutThisBizBioFirstName": null,
+                        "AboutThisBizBioLastName": null,
+                        "AboutThisBizHistory": "Rubirosa was established in 2010 with a vision to bridge the gap between the old and new neighborhood regulars. As to date, Rubirosa's homey and comfortable atmosphere has accomplished to welcome every occasion, from family-style group dining to drinks and antipasti at our cozy bar. \nInspiration for the creation of Rubirosa remounts to visits to Florence, Italy from Owner, Angelo Pappalardo to a restaurant of equal name. So, what is the origin of the name Rubirosa? Well, history associates none other than Porfirio Rubirosa (1909-1965), World-Wide diplomat, socialite and skillful playboy; Rubirosa lived a life that many would envy.",
+                        "AboutThisBizRole": null,
+                        "AboutThisBizSpecialties": "Rubirosa specializes in old school American-Italian Cuisine.  Most noticeable is the Pappalardo family recipe for Rubirosa's thin crust pizza but also hosting an array of dishes. Starting off with traditional appetizers like Sicilian-style mini rice balls, roasted octopi or the famously acclaimed Beef Braciole; moving on to entrees that indulge the palate : Italian-American pasta dishes like Lasagna Napoletana, Chicken Parmesan or for the more adventurous the black and white Tagliatelle , all our pastas are house made. Don't forget to try our classic desserts that include the family recipe Cheesecake, our light and savory Tiramisu or the crispy Zeppole.",
+                        "AboutThisBizYearEstablished": "2010",
+                        "Alcohol": "full_bar",
+                        "Ambience": {
+                            "divey": false,
+                            "hipster": null,
+                            "casual": true,
+                            "touristy": false,
+                            "trendy": null,
+                            "intimate": null,
+                            "romantic": null,
+                            "classy": false,
+                            "upscale": false
+                        },
+                        "BikeParking": true,
+                        "BusinessAcceptsBitcoin": null,
+                        "BusinessAcceptsCreditCards": true,
+                        "BusinessDisplayUrl": null,
+                        "BusinessMovedTo": null,
+                        "BusinessParking": {
+                            "garage": false,
+                            "street": true,
+                            "validated": false,
+                            "lot": false,
+                            "valet": false
+                        },
+                        "BYOB": null,
+                        "BYOBCorkage": null,
+                        "Caters": true,
+                        "Corkage": true,
+                        "DogsAllowed": false,
+                        "DriveThru": false,
+                        "FlowerDelivery": null,
+                        "GoodForKids": true,
+                        "GoodForMeal": {
+                            "breakfast": false,
+                            "brunch": null,
+                            "lunch": true,
+                            "dinner": true,
+                            "latenight": false,
+                            "dessert": null
+                        },
+                        "HappyHour": false,
+                        "HasTV": false,
+                        "MenuUrl": "https://www.rubirosanyc.com/menus/",
+                        "NationalProviderIdentifier": null,
+                        "NoiseLevel": "average",
+                        "OffersMilitaryDiscount": null,
+                        "OngoingVigilanteEvent": null,
+                        "OnlineReservations": null,
+                        "Open24Hours": null,
+                        "BusinessOpenToAll": null,
+                        "PlatformDelivery": true,
+                        "RestaurantsAttire": "casual",
+                        "RestaurantsCounterService": null,
+                        "RestaurantsDelivery": true,
+                        "RestaurantsGoodForGroups": true,
+                        "RestaurantsPriceRange": null,
+                        "RestaurantsPriceRange2": 2,
+                        "RestaurantsReservations": true,
+                        "RestaurantsTableService": true,
+                        "RestaurantsTakeOut": true,
+                        "WaitlistReservation": null,
+                        "WheelchairAccessible": true,
+                        "WiFi": "no",
+                        "biz_summary": {
+                            "summary": "Cozy Italian eatery with cracker-thin pizzas and a lively nostalgic atmosphere.",
+                            "is_inactive": false,
+                            "allows_auto_summary_generation": true,
+                            "eligible_reviews_considered": 30
+                        },
+                        "biz_summary_long": {
+                            "summary": "Italian-American eatery featuring thin crust pizza and a variety of handmade pastas, including Lasagna Napoletana and Chicken Parmesan. The menu also includes unique items like black and white Tagliatelle and Sicilian-style mini rice balls. Established in 2010, the restaurant provides a cozy atmosphere suitable for family-style dining and casual gatherings.",
+                            "is_inactive": false,
+                            "allows_auto_summary_generation": true,
+                            "eligible_reviews_considered": 650
+                        }
+                    },
+                    "phone": "+12129650500",
+                    "summaries": {
+                        "short": "Cozy Italian eatery with cracker-thin pizzas and a lively nostalgic atmosphere.",
+                        "medium": "Italian-American eatery featuring thin crust pizza and a variety of handmade pastas, including Lasagna Napoletana and Chicken Parmesan. The menu also includes unique items like black and white Tagliatelle and Sicilian-style mini rice balls.",
+                        "long": "Italian-American eatery featuring thin crust pizza and a variety of handmade pastas, including Lasagna Napoletana and Chicken Parmesan. The menu also includes unique items like black and white Tagliatelle and Sicilian-style mini rice balls. Established in 2010, the restaurant provides a cozy atmosphere suitable for family-style dining and casual gatherings."
+                    },
+                    "contextual_info": {
+                        "summary": null,
+                        "review_snippets": [],
+                        "business_hours": [],
+                        "photos": [
+                            {
+                                "original_url": "https://s3-media0.fl.yelpcdn.com/bphoto/cLUasyhzLIQzoauxyiIjcg/o.jpg"
+                            },
+                            {
+                                "original_url": "https://s3-media0.fl.yelpcdn.com/bphoto/_79fAHKOKG-6yzoSd3f-Dw/o.jpg"
+                            },
+                            {
+                                "original_url": "https://s3-media0.fl.yelpcdn.com/bphoto/l0Phrnhhj78RFiDhLIOUyQ/o.jpg"
+                            }
+                        ],
+                        "review_snippet": "The staff was super accommodating and very nice, and made sure to double check with the [[HIGHLIGHT]]vegan pizza[[ENDHIGHLIGHT]]...",
+                        "accepts_reservations_through_yelp": false,
+                        "reservation_availability": null
+                    }
+                }
+            ]
+        }
+    ]
+}
