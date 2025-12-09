@@ -8,8 +8,9 @@ import { TouringMap } from "@/components/touring-map";
 import {
   ButtonGroup,
 } from "@/components/ui/button-group"
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { Check, CircleCheckBig, Pen, SquarePen, X } from "lucide-react";
+import { ChatPagePagination } from "./chat-page-pagination";
 
 export function Itinerary() {
   return (
@@ -18,11 +19,13 @@ export function Itinerary() {
         <ItineraryScrollArea />
         <div className="w-full flex justify-end flex-shrink-0 pt-1">
           <ButtonGroup>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" className="cursor-pointer">
               <CircleCheckBig className="text-green-600" />
+              Approve
             </Button>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" className="cursor-pointer">
               <SquarePen className="text-yellow-600" />
+              Modify
             </Button>
           </ButtonGroup>
         </div>

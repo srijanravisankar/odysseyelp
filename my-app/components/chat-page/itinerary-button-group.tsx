@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 
 export function ItineraryButtonGroup() {
-
   return (
     <ButtonGroup className="ml-auto bg-muted/80">
       <Button className="rounded cursor-pointer"><Share /></Button>
