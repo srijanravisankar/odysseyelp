@@ -11,79 +11,6 @@ import { Beer, Coffee, Utensils, Footprints, Music, MapPin, Ticket, ShoppingBag,
 import { Button } from "./ui/button"
 import Image from "next/image"
 
-// const journeyTimeline = [
-//   {
-//     id: "1",
-//     title: "Birthday bar-hopping",
-//     address: "Downtown",
-//     isActive: false,
-//     icon: <Beer className="h-3 w-3" />,
-//   },
-//   {
-//     id: "2",
-//     title: "Cozy cafe date + walk",
-//     address: "Queen St W",
-//     isActive: false,
-//     icon: <Coffee className="h-3 w-3" />,
-//   },
-//   {
-//     id: "3",
-//     title: "Kensington Market food crawl",
-//     address: "Kensington",
-//     isActive: false,
-//     icon: <Utensils className="h-3 w-3" />,
-//   },
-//   {
-//     id: "4",
-//     title: "High Park cherry blossoms",
-//     address: "High Park",
-//     isActive: false,
-//     icon: <Footprints className="h-3 w-3" />,
-//   },
-//   {
-//     id: "5",
-//     title: "Late night jazz & drinks",
-//     address: "Reservoir Lounge",
-//     isActive: false,
-//     icon: <Music className="h-3 w-3" />,
-//   },
-//   {
-//     id: "6",
-//     title: "Weekend getaway planning",
-//     address: "Niagara Falls",
-//     isActive: false,
-//     icon: <MapPin className="h-3 w-3" />,
-//   },
-//   {
-//     id: "7",
-//     title: "Last-minute concert tickets",
-//     address: "Massey Hall",
-//     isActive: false,
-//     icon: <Ticket className="h-3 w-3" />,
-//   },
-//   {
-//     id: "8",
-//     title: "Holiday gift shopping route",
-//     address: "Eaton Centre",
-//     isActive: false,
-//     icon: <ShoppingBag className="h-3 w-3" />,
-//   },
-//   {
-//     id: "9",
-//     title: "Gallery hop and street art",
-//     address: "West Queen West",
-//     isActive: false,
-//     icon: <Palette className="h-3 w-3" />,
-//   },
-//   {
-//     id: "10",
-//     title: "Client dinner presentation",
-//     address: "Financial District",
-//     isActive: false,
-//     icon: <Briefcase className="h-3 w-3" />,
-//   },
-// ]
-``
 const journeyTimeline = [
   {
     id: "1",
@@ -172,7 +99,7 @@ const journeyTimeline = [
     isActive: false,
     icon: <Palette className="h-3 w-3" />,
     ratings: 4.7, // New
-    hours: "11 a.m.–6 p.m.", // New
+    hours: "11 a.m.–6 p.m.", // New
     phone: "416-555-1209", // New
   },
   {
@@ -182,7 +109,7 @@ const journeyTimeline = [
     isActive: false,
     icon: <Briefcase className="h-3 w-3" />,
     ratings: 4.3, // New
-    hours: "11 a.m.–12 a.m.", // New
+    hours: "11 a.m.–12 a.m.", // New
     phone: "416-555-1210", // New
   },
 ]
