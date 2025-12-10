@@ -1,3 +1,254 @@
+// "use client";
+
+// import { useEffect, useRef, useState } from "react";
+// import { useItinerary } from "@/components/chat-page/itinerary-context";
+// import mapboxgl from "mapbox-gl";
+// import "mapbox-gl/dist/mapbox-gl.css";
+
+// mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || "";
+
+// type TouringMapProps = {
+//   initialLng?: number;
+//   initialLat?: number;
+//   initialZoom?: number;
+// };
+
+// export function TouringMap({
+//   initialLng = -79.3832, // Toronto-ish
+//   initialLat = 43.6532,
+//   initialZoom = 12,
+// }: TouringMapProps) {
+//   const outerRef = useRef<HTMLDivElement | null>(null);
+//   const containerRef = useRef<HTMLDivElement | null>(null);
+//   const mapRef = useRef<mapboxgl.Map | null>(null);
+
+//   // NEW: keep track of markers we’ve added so we can clear them
+//   const markersRef = useRef<mapboxgl.Marker[]>([]);
+
+//   // NEW: access itinerary + selected stops from context
+//   const { itineraryData, selectedStopIds } = useItinerary();
+
+//   const [viewMode, setViewMode] = useState<"2d" | "3d">("3d");
+//   const [projection, setProjection] = useState<"globe" | "mercator">("globe");
+
+//   useEffect(() => {
+//     if (!containerRef.current || mapRef.current) return;
+
+//     const map = new mapboxgl.Map({
+//       container: containerRef.current,
+//       style: "mapbox://styles/mapbox/streets-v12", // roads + POIs
+//       center: [initialLng, initialLat],
+//       zoom: initialZoom,
+//       pitch: 60, // start in 3D
+//       bearing: -20,
+//       antialias: true,
+//       projection: "globe", // default for v12
+//     });
+
+//     mapRef.current = map;
+//     setViewMode("3d");
+//     setProjection("globe");
+
+//     map.on("load", () => {
+//       // 3D buildings
+//       const layers = map.getStyle().layers;
+//       if (!layers) return;
+
+//       const labelLayerId = layers.find(
+//         (layer) =>
+//           layer.type === "symbol" && (layer.layout as any)?.["text-field"]
+//       )?.id;
+
+//       if (labelLayerId) {
+//         map.addLayer(
+//           {
+//             id: "3d-buildings",
+//             source: "composite",
+//             "source-layer": "building",
+//             filter: ["==", "extrude", "true"],
+//             type: "fill-extrusion",
+//             minzoom: 15,
+//             paint: {
+//               "fill-extrusion-color": "#aaa",
+//               "fill-extrusion-height": [
+//                 "interpolate",
+//                 ["linear"],
+//                 ["zoom"],
+//                 15,
+//                 0,
+//                 15.05,
+//                 ["get", "height"],
+//               ],
+//               "fill-extrusion-base": [
+//                 "interpolate",
+//                 ["linear"],
+//                 ["zoom"],
+//                 15,
+//                 0,
+//                 15.05,
+//                 ["get", "min_height"],
+//               ],
+//               "fill-extrusion-opacity": 0.6,
+//             },
+//           },
+//           labelLayerId
+//         );
+//       }
+//     });
+
+//     return () => {
+//       // remove any markers we created
+//       markersRef.current.forEach((marker) => marker.remove());
+//       markersRef.current = [];
+
+//       map.remove();
+//       mapRef.current = null;
+//     };
+//   }, [initialLng, initialLat, initialZoom]);
+
+//   useEffect(() => {
+//     if (!mapRef.current || !itineraryData?.center) return;
+
+//     const { lat, lng } = itineraryData.center;
+//     if (typeof lat !== "number" || typeof lng !== "number") return;
+
+//     mapRef.current.setCenter([lng, lat]);
+//   }, [itineraryData?.center?.lat, itineraryData?.center?.lng]);
+
+//   useEffect(() => {
+//     if (!mapRef.current) return;
+//     if (!itineraryData?.stops) return;
+
+//     const map = mapRef.current;
+
+//     // Clear existing markers
+//     markersRef.current.forEach((marker) => marker.remove());
+//     markersRef.current = [];
+
+//     // Only show markers for selected stops
+//     if (selectedStopIds.length === 0) {
+//       return;
+//     }
+
+//     const bounds = new mapboxgl.LngLatBounds();
+
+//     itineraryData.stops.forEach((stop: any, index: number) => {
+//       const stopId = stop.id ?? String(index);
+//       if (!selectedStopIds.includes(stopId)) return;
+
+//       // 🔑 This matches the shape in your example (coordinates.lat / coordinates.lng)
+//       const lat = stop.coordinates?.lat;
+//       const lng = stop.coordinates?.lng;
+
+//       if (typeof lat !== "number" || typeof lng !== "number") return;
+
+//       const marker = new mapboxgl.Marker({ color: "#22c55e" })
+//         .setLngLat([lng, lat])
+//         .addTo(map);
+
+//       markersRef.current.push(marker);
+//       bounds.extend([lng, lat]);
+//     });
+
+//     // Zoom/fit to the selected markers
+//     if (!bounds.isEmpty()) {
+//       map.fitBounds(bounds, {
+//         padding: 80,
+//         duration: 800,
+//         maxZoom: 14,
+//       });
+//     }
+//   }, [itineraryData, selectedStopIds]);
+
+//   // --- handlers ---
+
+//   const switchTo2D = () => {
+//     if (!mapRef.current) return;
+//     setViewMode("2d");
+//     mapRef.current.easeTo({
+//       pitch: 0,
+//       bearing: 0,
+//       duration: 800,
+//     });
+//   };
+
+//   const switchTo3D = () => {
+//     if (!mapRef.current) return;
+//     setViewMode("3d");
+//     mapRef.current.easeTo({
+//       pitch: 60,
+//       bearing: -20,
+//       duration: 800,
+//       // small upward offset so the scene feels more visually centered
+//       offset: [0, -100],
+//     });
+//   };
+
+//   const setProj = (proj: "globe" | "mercator") => {
+//     if (!mapRef.current) return;
+//     setProjection(proj);
+//     mapRef.current.setProjection(proj);
+//   };
+
+//   return (
+//     <div ref={outerRef} className="absolute inset-0 h-full w-full">
+//       {/* Map canvas */}
+//       <div ref={containerRef} className="h-full w-full" />
+
+//       {/* Controls overlay - now horizontal */}
+//       <div className="pointer-events-auto absolute right-3 top-3 flex items-center gap-2 rounded-md bg-background/50 p-1 text-xs shadow">
+//         {/* 2D / 3D */}
+//         <div className="flex gap-1">
+//           <button
+//             onClick={switchTo2D}
+//             className={`rounded cursor-pointer px-2 py-1 ${
+//               viewMode === "2d"
+//                 ? "bg-primary text-primary-foreground"
+//                 : "bg-muted"
+//             }`}
+//           >
+//             2D
+//           </button>
+//           <button
+//             onClick={switchTo3D}
+//             className={`rounded cursor-pointer px-2 py-1 ${
+//               viewMode === "3d"
+//                 ? "bg-primary text-primary-foreground"
+//                 : "bg-muted"
+//             }`}
+//           >
+//             3D
+//           </button>
+//         </div>
+
+//         {/* Globe / Flat */}
+//         <div className="flex gap-1">
+//           <button
+//             onClick={() => setProj("globe")}
+//             className={`rounded cursor-pointer px-2 py-1 ${
+//               projection === "globe"
+//                 ? "bg-primary text-primary-foreground"
+//                 : "bg-muted"
+//             }`}
+//           >
+//             Globe
+//           </button>
+//           <button
+//             onClick={() => setProj("mercator")}
+//             className={`rounded cursor-pointer px-2 py-1 ${
+//               projection === "mercator"
+//                 ? "bg-primary text-primary-foreground"
+//                 : "bg-muted"
+//             }`}
+//           >
+//             Flat
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -31,6 +282,7 @@ export function TouringMap({
   const [viewMode, setViewMode] = useState<"2d" | "3d">("3d");
   const [projection, setProjection] = useState<"globe" | "mercator">("globe");
 
+  // 1. Initialize Map
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
@@ -106,6 +358,22 @@ export function TouringMap({
     };
   }, [initialLng, initialLat, initialZoom]);
 
+  // 2. Handle Resizing (The FIX)
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (mapRef.current) {
+        mapRef.current.resize();
+      }
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  // 3. Update Center
   useEffect(() => {
     if (!mapRef.current || !itineraryData?.center) return;
 
@@ -115,6 +383,7 @@ export function TouringMap({
     mapRef.current.setCenter([lng, lat]);
   }, [itineraryData?.center?.lat, itineraryData?.center?.lng]);
 
+  // 4. Update Markers
   useEffect(() => {
     if (!mapRef.current) return;
     if (!itineraryData?.stops) return;
