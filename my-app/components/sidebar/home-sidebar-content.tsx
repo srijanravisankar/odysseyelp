@@ -1,7 +1,9 @@
+import {JourneyTimeline} from "@/components/journey-timeline";
+
 export function HomeSidebarContent() {
   return (
-    <div>
-      Home Sidebar Content
+    <div className="p-3">
+      <JourneyTimeline />
     </div>
   )
 }

@@ -8,6 +8,7 @@ import {
   SidebarInset,
 } from "@/components/ui/sidebar"
 import { ShellHeader } from "@/components/shell-header"
+import { ItineraryProvider } from "@/components/chat-page/itinerary-context"
 
 export default function ShellLayout({
   children,
@@ -15,26 +16,28 @@ export default function ShellLayout({
   children: React.ReactNode
 }) {
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "350px",
-        } as React.CSSProperties
-      }
-    >
-      <AppSidebar />
+    <ItineraryProvider>
+      <SidebarProvider
+        style={
+          {
+            "--sidebar-width": "350px",
+          } as React.CSSProperties
+        }
+      >
+        <AppSidebar />
 
-      <div className="flex flex-1 flex-col gap-0 p-3">
-        <SidebarInset className="rounded-xl border border-border bg-card/50">
-          {/* Header */}
-          <ShellHeader />
+        <div className="flex flex-1 flex-col gap-0 p-3">
+          <SidebarInset className="rounded-xl border border-border bg-card/50">
+            {/* Header */}
+            <ShellHeader />
 
-          {/* Content */}
-          <div className="flex flex-1 flex-col gap-6 p-4 pt-0">
-            {children}
-          </div>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+            {/* Content */}
+            <div className="flex flex-1 flex-col gap-6 p-4 pt-0">
+              {children}
+            </div>
+          </SidebarInset>
+        </div>
+      </SidebarProvider>
+    </ItineraryProvider>
   )
 }
