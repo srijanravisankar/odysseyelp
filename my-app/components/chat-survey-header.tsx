@@ -1,10 +1,14 @@
 "use client"
 
-import React, {useState} from "react"
-import type {DateRange} from "react-day-picker"
+import React, { useState } from "react"
+import type { DateRange } from "react-day-picker"
 
-// 👇 alias FormInput to Form so you can use <Form />
-import {FormInput as Form, Send, Calendar as CalendarIcon, FormInput, NotebookPen} from "lucide-react"
+import {
+    FormInput as Form,
+    Send,
+    Calendar as CalendarIcon,
+    NotebookPen,
+} from "lucide-react"
 
 import {
     Dialog,
@@ -15,13 +19,13 @@ import {
     DialogFooter,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import {Button} from "@/components/ui/button"
-import {Input} from "@/components/ui/input"
-import {Label} from "@/components/ui/label"
-import {Switch} from "@/components/ui/switch"
-import {Calendar} from "@/components/ui/calendar"
-import {Popover, PopoverTrigger, PopoverContent} from "@/components/ui/popover"
-import {cn} from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
 
 // ---------------- Date-range picker (uses shadcn Calendar) -------------------
 
@@ -38,7 +42,7 @@ function SurveyDateRangePicker(props: {
     value: DateRange | undefined
     onChange: (value: DateRange | undefined) => void
 }) {
-    const {value, onChange} = props
+    const { value, onChange } = props
 
     return (
         <Popover>
@@ -47,10 +51,10 @@ function SurveyDateRangePicker(props: {
                     variant="outline"
                     className={cn(
                         "w-full justify-start text-left font-normal",
-                        !value?.from && "text-muted-foreground"
+                        !value?.from && "text-muted-foreground",
                     )}
                 >
-                    <CalendarIcon className="mr-2 h-4 w-4"/>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
                     {value?.from ? (
                         value.to ? (
                             <>
@@ -85,7 +89,7 @@ type CrowdLevel = "less_crowded" | "average" | "busy"
 type IndoorOutdoor = "indoor" | "outdoor" | "mix"
 type AlcoholPref = "no_alcohol" | "okay_with_alcohol" | "must_have_alcohol"
 
-type SurveyContext = {
+export type SurveyContext = {
     trip: {
         type: TripType
         vibe: string[]
@@ -126,7 +130,11 @@ type SurveyContext = {
 }
 
 // toggle helper for chips
-function toggleInArray(value: string, arr: string[], setArr: (v: string[]) => void) {
+function toggleInArray(
+    value: string,
+    arr: string[],
+    setArr: (v: string[]) => void,
+) {
     if (arr.includes(value)) {
         setArr(arr.filter((v) => v !== value))
     } else {
@@ -157,7 +165,8 @@ export function ChatSurveyHeader() {
     const [timesOfDay, setTimesOfDay] = useState<string[]>(["evening"])
 
     // Budget
-    const [priceLevel, setPriceLevel] = useState<"$" | "$$" | "$$$" | "$$$$">("$$")
+    const [priceLevel, setPriceLevel] =
+        useState<"$" | "$$" | "$$$" | "$$$$">("$$")
     const [perPersonRange, setPerPersonRange] = useState("50-100")
     const [transport, setTransport] = useState("walking")
     const [maxMinutes, setMaxMinutes] = useState(15)
@@ -171,22 +180,27 @@ export function ChatSurveyHeader() {
     // Preferences
     const [noise, setNoise] = useState<NoiseLevel>("chill")
     const [crowd, setCrowd] = useState<CrowdLevel>("less_crowded")
-    const [indoorOutdoor, setIndoorOutdoor] = useState<IndoorOutdoor>("mix")
+    const [indoorOutdoor, setIndoorOutdoor] =
+        useState<IndoorOutdoor>("mix")
     const [kidFriendly, setKidFriendly] = useState(false)
 
     // Quality filters
     const [minRating, setMinRating] = useState(4.0)
     const [minReviews, setMinReviews] = useState(50)
-    const [mustTakeReservations, setMustTakeReservations] = useState(true)
+    const [mustTakeReservations, setMustTakeReservations] =
+        useState(true)
 
     // Avoid
-    const [avoidTags, setAvoidTags] = useState("nightclubs, tourist_traps")
-    const [avoidNotes, setAvoidNotes] = useState("no rooftop bars")
+    const [avoidTags, setAvoidTags] =
+        useState("nightclubs, tourist_traps")
+    const [avoidNotes, setAvoidNotes] =
+        useState("no rooftop bars")
 
     // ---- helper: build survey context from current state -----------------------
 
     const buildSurveyContext = (): SurveyContext => {
-        const toISODate = (d?: Date) => (d ? d.toISOString().slice(0, 10) : undefined)
+        const toISODate = (d?: Date) =>
+            d ? d.toISOString().slice(0, 10) : undefined
 
         return {
             trip: {
@@ -238,13 +252,16 @@ export function ChatSurveyHeader() {
         }
     }
 
-// ---- Save survey inside the dialog --------------------------------------
+    // ---- Save survey inside the dialog --------------------------------------
 
     const handleSaveSurvey = () => {
         const surveyContext = buildSurveyContext()
 
         try {
-            localStorage.setItem("ranger-yelp-survey", JSON.stringify(surveyContext))
+            localStorage.setItem(
+                "ranger-yelp-survey",
+                JSON.stringify(surveyContext),
+            )
             setSavedSurvey(surveyContext)
             console.log("Saved surveyContext", surveyContext)
         } catch (e) {
@@ -254,9 +271,6 @@ export function ChatSurveyHeader() {
         setDialogOpen(false)
     }
 
-
-    // ---- When user presses send on the search bar ---------------------------
-
     // ---- When user presses send on the search bar ---------------------------
 
     async function handleSend(e: React.FormEvent<HTMLFormElement>) {
@@ -265,17 +279,20 @@ export function ChatSurveyHeader() {
         if (!query.trim()) return
 
         try {
-            // Use savedSurvey if user clicked "Save survey", otherwise build from current state
-            const survey = savedSurvey ?? buildSurveyContext()
-
-            const payload = {
-                query,   // from useState above
-                survey,  // full SurveyContext object
-            }
+            // ❗ Only include survey if user explicitly saved it
+            const payload =
+                savedSurvey != null
+                    ? {
+                        query: query.trim(),
+                        survey: savedSurvey,
+                    }
+                    : {
+                        query: query.trim(),
+                    }
 
             const res = await fetch("/api/chat", {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             })
 
@@ -289,15 +306,11 @@ export function ChatSurveyHeader() {
 
             console.log("Composed prompt:", data.composedPrompt)
             console.log("Yelp AI response:", data.yelp)
-
-            // TODO (next slice):
-            // - map data.yelp into JourneyTimeline / SidebarUserAccordion
-            // - store in state instead of using mock journeyStops
+            console.log("Itinerary:", data.itinerary)
         } catch (err) {
             console.error("Network error", err)
         }
     }
-
 
     // --------------------------- RENDER --------------------------------------
 
@@ -310,23 +323,21 @@ export function ChatSurveyHeader() {
                         variant="ghost"
                         className="flex items-center gap-0 rounded-full -mr-2"
                     >
-                        <NotebookPen className="text-xl"/>
+                        <NotebookPen className="text-xl" />
                         <span className="inline sm:hidden">Trip survey</span>
                     </Button>
                 </DialogTrigger>
 
                 <DialogContent
                     className={cn(
-                        // square-ish glassy dialog
-                        "max-w-3xl w-[min(100%-2rem,900px)] max-h-[80vh] overflow-y-auto scrollbar-hide",
+                        "max-w-3xl w-[min(100%-2rem,900px)] max-h-[80vh] overflow-y-auto",
                         "rounded-2xl border border-border/60 bg-background/80",
-                        "backdrop-blur-xl shadow-2xl"
+                        "backdrop-blur-xl shadow-2xl space-y-6",
                     )}
                 >
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
-                            {/* and here */}
-                            <Form className="h-4 w-4"/>
+                            <Form className="h-4 w-4" />
                             Trip survey (optional)
                         </DialogTitle>
                         <DialogDescription>
@@ -335,459 +346,418 @@ export function ChatSurveyHeader() {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="mt-1 space-y-6 text-sm">
-                        {/* Trip basics */}
-                        <section className="space-y-3">
-                            <h3 className="text-xs font-semibold uppercase text-muted-foreground">
-                                Trip basics
-                            </h3>
-
-                            {/* Trip type */}
-                            <div className="space-y-1">
+                    {/* Trip basics */}
+                    <section className="space-y-3">
+                        <h3 className="text-sm font-semibold">Trip basics</h3>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <div className="space-y-2">
                                 <Label className="text-xs">Trip type</Label>
                                 <div className="flex flex-wrap gap-2">
-                                    {[
-                                        {value: "solo", label: "Solo"},
-                                        {value: "friends", label: "Friends"},
-                                        {value: "family", label: "Family"},
-                                        {value: "date", label: "Date"},
-                                        {value: "work", label: "Work"},
-                                    ].map((opt) => (
-                                        <button
-                                            key={opt.value}
+                                    {["solo", "friends", "family", "date", "work"].map((t) => (
+                                        <Button
+                                            key={t}
                                             type="button"
-                                            onClick={() => setTripType(opt.value as TripType)}
-                                            className={cn(
-                                                "rounded-full border px-3 py-1 text-xs",
-                                                tripType === opt.value
-                                                    ? "bg-primary text-primary-foreground border-primary"
-                                                    : "bg-background hover:bg-muted"
-                                            )}
+                                            size="sm"
+                                            variant={tripType === t ? "default" : "outline"}
+                                            className="rounded-full text-xs"
+                                            onClick={() => setTripType(t as TripType)}
                                         >
-                                            {opt.label}
-                                        </button>
+                                            {t}
+                                        </Button>
                                     ))}
                                 </div>
                             </div>
 
-                            {/* Trip vibe */}
-                            <div className="space-y-1">
-                                <Label className="text-xs">Trip vibe (pick a few)</Label>
+                            <div className="space-y-2">
+                                <Label className="text-xs">Vibe</Label>
                                 <div className="flex flex-wrap gap-2">
-                                    {[
-                                        "cozy",
-                                        "food-focused",
-                                        "nightlife",
-                                        "touristy",
-                                        "nature",
-                                        "romantic",
-                                    ].map((tag) => (
-                                        <button
-                                            key={tag}
-                                            type="button"
-                                            onClick={() => toggleInArray(tag, tripVibe, setTripVibe)}
-                                            className={cn(
-                                                "rounded-full border px-3 py-1 text-xs capitalize",
-                                                tripVibe.includes(tag)
-                                                    ? "bg-primary/10 border-primary text-primary"
-                                                    : "bg-background hover:bg-muted"
-                                            )}
-                                        >
-                                            {tag.replace("-", " ")}
-                                        </button>
-                                    ))}
+                                    {["cozy", "food-focused", "adventurous", "romantic", "chill"].map(
+                                        (v) => (
+                                            <Button
+                                                key={v}
+                                                type="button"
+                                                size="sm"
+                                                variant={tripVibe.includes(v) ? "default" : "outline"}
+                                                className="rounded-full text-xs"
+                                                onClick={() => toggleInArray(v, tripVibe, setTripVibe)}
+                                            >
+                                                {v}
+                                            </Button>
+                                        ),
+                                    )}
                                 </div>
                             </div>
+                        </div>
 
-                            {/* Occasion + people */}
-                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                <div className="space-y-1">
-                                    <Label className="text-xs">Occasion</Label>
-                                    <Input
-                                        placeholder="anniversary, birthday, just for fun..."
-                                        value={tripOccasion}
-                                        onChange={(e) => setTripOccasion(e.target.value)}
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <Label className="text-xs">Number of people</Label>
-                                    <Input
-                                        type="number"
-                                        min={1}
-                                        value={tripPeople}
-                                        onChange={(e) =>
-                                            setTripPeople(Number(e.target.value) || 1)
-                                        }
-                                    />
-                                </div>
-                            </div>
-                        </section>
-
-                        {/* Location & dates */}
-                        <section className="space-y-3">
-                            <h3 className="text-xs font-semibold uppercase text-muted-foreground">
-                                Location & dates
-                            </h3>
-
-                            <div className="space-y-1">
-                                <Label className="text-xs">Area</Label>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label className="text-xs">Occasion</Label>
                                 <Input
-                                    placeholder="Downtown Toronto, Kensington, etc."
-                                    value={area}
-                                    onChange={(e) => setArea(e.target.value)}
+                                    value={tripOccasion}
+                                    onChange={(e) => setTripOccasion(e.target.value)}
+                                    placeholder="anniversary, birthday, first date..."
                                 />
                             </div>
+                            <div className="space-y-2">
+                                <Label className="text-xs">Number of people</Label>
+                                <Input
+                                    type="number"
+                                    min={1}
+                                    value={tripPeople}
+                                    onChange={(e) =>
+                                        setTripPeople(
+                                            Number.isNaN(parseInt(e.target.value))
+                                                ? 1
+                                                : parseInt(e.target.value),
+                                        )
+                                    }
+                                />
+                            </div>
+                        </div>
+                    </section>
 
-                            <div className="space-y-1">
+                    {/* Location & dates */}
+                    <section className="space-y-3">
+                        <h3 className="text-sm font-semibold">Location &amp; dates</h3>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label className="text-xs">Area / neighborhood</Label>
+                                <Input
+                                    value={area}
+                                    onChange={(e) => setArea(e.target.value)}
+                                    placeholder="Downtown Toronto, Central Park, etc."
+                                />
+                            </div>
+                            <div className="space-y-2">
                                 <Label className="text-xs">Date range</Label>
                                 <SurveyDateRangePicker
                                     value={dateRange}
                                     onChange={setDateRange}
                                 />
                             </div>
+                        </div>
 
-                            <div className="space-y-1">
-                                <Label className="text-xs">Preferred time of day</Label>
+                        <div className="space-y-2">
+                            <Label className="text-xs">Times of day</Label>
+                            <div className="flex flex-wrap gap-2">
+                                {["morning", "afternoon", "evening", "late night"].map((t) => (
+                                    <Button
+                                        key={t}
+                                        type="button"
+                                        size="sm"
+                                        variant={timesOfDay.includes(t) ? "default" : "outline"}
+                                        className="rounded-full text-xs"
+                                        onClick={() => toggleInArray(t, timesOfDay, setTimesOfDay)}
+                                    >
+                                        {t}
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Budget & travel */}
+                    <section className="space-y-3">
+                        <h3 className="text-sm font-semibold">Budget &amp; travel</h3>
+                        <div className="grid gap-3 sm:grid-cols-3">
+                            <div className="space-y-2">
+                                <Label className="text-xs">Price level</Label>
                                 <div className="flex flex-wrap gap-2">
-                                    {["morning", "afternoon", "evening", "late night"].map(
-                                        (t) => (
-                                            <button
-                                                key={t}
-                                                type="button"
-                                                onClick={() =>
-                                                    toggleInArray(t, timesOfDay, setTimesOfDay)
-                                                }
-                                                className={cn(
-                                                    "rounded-full border px-3 py-1 text-xs capitalize",
-                                                    timesOfDay.includes(t)
-                                                        ? "bg-primary/10 border-primary text-primary"
-                                                        : "bg-background hover:bg-muted"
-                                                )}
-                                            >
-                                                {t}
-                                            </button>
-                                        )
-                                    )}
-                                </div>
-                            </div>
-                        </section>
-
-                        {/* Budget & travel */}
-                        <section className="space-y-3">
-                            <h3 className="text-xs font-semibold uppercase text-muted-foreground">
-                                Budget & travel
-                            </h3>
-
-                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                <div className="space-y-1">
-                                    <Label className="text-xs">Price level</Label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {["$", "$$", "$$$", "$$$$"].map((p) => (
-                                            <button
-                                                key={p}
-                                                type="button"
-                                                onClick={() =>
-                                                    setPriceLevel(p as "$" | "$$" | "$$$" | "$$$$")
-                                                }
-                                                className={cn(
-                                                    "rounded-full border px-3 py-1 text-xs",
-                                                    priceLevel === p
-                                                        ? "bg-primary text-primary-foreground border-primary"
-                                                        : "bg-background hover:bg-muted"
-                                                )}
-                                            >
-                                                {p}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="space-y-1">
-                                    <Label className="text-xs">
-                                        Budget per person per day (CAD)
-                                    </Label>
-                                    <Input
-                                        placeholder="e.g. 50-100"
-                                        value={perPersonRange}
-                                        onChange={(e) => setPerPersonRange(e.target.value)}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                <div className="space-y-1">
-                                    <Label className="text-xs">Transport</Label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {["walking", "transit", "driving", "rideshare"].map(
-                                            (mode) => (
-                                                <button
-                                                    key={mode}
-                                                    type="button"
-                                                    onClick={() => setTransport(mode)}
-                                                    className={cn(
-                                                        "rounded-full border px-3 py-1 text-xs capitalize",
-                                                        transport === mode
-                                                            ? "bg-primary/10 border-primary text-primary"
-                                                            : "bg-background hover:bg-muted"
-                                                    )}
-                                                >
-                                                    {mode}
-                                                </button>
-                                            )
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="space-y-1">
-                                    <Label className="text-xs">
-                                        Max travel time between stops (mins)
-                                    </Label>
-                                    <Input
-                                        type="number"
-                                        min={0}
-                                        value={maxMinutes}
-                                        onChange={(e) =>
-                                            setMaxMinutes(Number(e.target.value) || 0)
-                                        }
-                                    />
-                                </div>
-                            </div>
-                        </section>
-
-                        {/* Food & dietary */}
-                        <section className="space-y-3">
-                            <h3 className="text-xs font-semibold uppercase text-muted-foreground">
-                                Food & dietary
-                            </h3>
-
-                            <div className="space-y-1">
-                                <Label className="text-xs">Dietary restrictions</Label>
-                                <div className="flex flex-wrap gap-2">
-                                    {["halal", "gluten-free", "vegetarian", "vegan"].map(
-                                        (tag) => (
-                                            <button
-                                                key={tag}
-                                                type="button"
-                                                onClick={() => toggleInArray(tag, dietary, setDietary)}
-                                                className={cn(
-                                                    "rounded-full border px-3 py-1 text-xs capitalize",
-                                                    dietary.includes(tag)
-                                                        ? "bg-primary/10 border-primary text-primary"
-                                                        : "bg-background hover:bg-muted"
-                                                )}
-                                            >
-                                                {tag}
-                                            </button>
-                                        )
-                                    )}
-                                </div>
-                            </div>
-
-                            <div className="space-y-1">
-                                <Label className="text-xs">Preferred cuisines</Label>
-                                <Input
-                                    placeholder="e.g. Middle Eastern, Asian"
-                                    value={cuisines}
-                                    onChange={(e) => setCuisines(e.target.value)}
-                                />
-                            </div>
-
-                            <div className="space-y-1">
-                                <Label className="text-xs">Alcohol preference</Label>
-                                <div className="flex flex-wrap gap-2">
-                                    {[
-                                        {value: "no_alcohol", label: "No alcohol"},
-                                        {value: "okay_with_alcohol", label: "Okay with alcohol"},
-                                        {value: "must_have_alcohol", label: "Must have alcohol"},
-                                    ].map((opt) => (
-                                        <button
-                                            key={opt.value}
+                                    {["$", "$$", "$$$", "$$$$"].map((p) => (
+                                        <Button
+                                            key={p}
                                             type="button"
+                                            size="sm"
+                                            variant={priceLevel === p ? "default" : "outline"}
+                                            className="rounded-full text-xs"
                                             onClick={() =>
-                                                setAlcoholPreference(opt.value as AlcoholPref)
+                                                setPriceLevel(p as "$" | "$$" | "$$$" | "$$$$")
                                             }
-                                            className={cn(
-                                                "rounded-full border px-3 py-1 text-xs",
-                                                alcoholPreference === opt.value
-                                                    ? "bg-primary/10 border-primary text-primary"
-                                                    : "bg-background hover:bg-muted"
-                                            )}
                                         >
-                                            {opt.label}
-                                        </button>
+                                            {p}
+                                        </Button>
                                     ))}
                                 </div>
                             </div>
-                        </section>
-
-                        {/* Vibe preferences */}
-                        <section className="space-y-3">
-                            <h3 className="text-xs font-semibold uppercase text-muted-foreground">
-                                Vibe preferences
-                            </h3>
-
-                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                <div className="space-y-1">
-                                    <Label className="text-xs">Noise level</Label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {[
-                                            {value: "chill", label: "Chill"},
-                                            {value: "balanced", label: "Balanced"},
-                                            {value: "energetic", label: "Energetic"},
-                                        ].map((opt) => (
-                                            <button
-                                                key={opt.value}
-                                                type="button"
-                                                onClick={() => setNoise(opt.value as NoiseLevel)}
-                                                className={cn(
-                                                    "rounded-full border px-3 py-1 text-xs",
-                                                    noise === opt.value
-                                                        ? "bg-primary/10 border-primary text-primary"
-                                                        : "bg-background hover:bg-muted"
-                                                )}
-                                            >
-                                                {opt.label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="space-y-1">
-                                    <Label className="text-xs">Crowd level</Label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {[
-                                            {value: "less_crowded", label: "Less crowded"},
-                                            {value: "average", label: "Average"},
-                                            {value: "busy", label: "Busy"},
-                                        ].map((opt) => (
-                                            <button
-                                                key={opt.value}
-                                                type="button"
-                                                onClick={() => setCrowd(opt.value as CrowdLevel)}
-                                                className={cn(
-                                                    "rounded-full border px-3 py-1 text-xs",
-                                                    crowd === opt.value
-                                                        ? "bg-primary/10 border-primary text-primary"
-                                                        : "bg-background hover:bg-muted"
-                                                )}
-                                            >
-                                                {opt.label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
+                            <div className="space-y-2">
+                                <Label className="text-xs">Per person per day</Label>
+                                <Input
+                                    value={perPersonRange}
+                                    onChange={(e) => setPerPersonRange(e.target.value)}
+                                    placeholder="e.g. 50-100"
+                                />
                             </div>
+                            <div className="space-y-2">
+                                <Label className="text-xs">Max travel time (mins)</Label>
+                                <Input
+                                    type="number"
+                                    min={0}
+                                    value={maxMinutes}
+                                    onChange={(e) =>
+                                        setMaxMinutes(
+                                            Number.isNaN(parseInt(e.target.value))
+                                                ? 0
+                                                : parseInt(e.target.value),
+                                        )
+                                    }
+                                />
+                            </div>
+                        </div>
 
-                            <div className="space-y-1">
-                                <Label className="text-xs">Indoor vs outdoor</Label>
+                        <div className="space-y-2">
+                            <Label className="text-xs">Transport</Label>
+                            <div className="flex flex-wrap gap-2">
+                                {["walking", "public transit", "car", "bike"].map((t) => (
+                                    <Button
+                                        key={t}
+                                        type="button"
+                                        size="sm"
+                                        variant={transport === t ? "default" : "outline"}
+                                        className="rounded-full text-xs"
+                                        onClick={() => setTransport(t)}
+                                    >
+                                        {t}
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Food & dietary */}
+                    <section className="space-y-3">
+                        <h3 className="text-sm font-semibold">Food &amp; dietary</h3>
+                        <div className="space-y-2">
+                            <Label className="text-xs">Dietary needs</Label>
+                            <div className="flex flex-wrap gap-2">
+                                {["halal", "kosher", "vegan", "vegetarian", "gluten-free"].map(
+                                    (d) => (
+                                        <Button
+                                            key={d}
+                                            type="button"
+                                            size="sm"
+                                            variant={dietary.includes(d) ? "default" : "outline"}
+                                            className="rounded-full text-xs"
+                                            onClick={() => toggleInArray(d, dietary, setDietary)}
+                                        >
+                                            {d}
+                                        </Button>
+                                    ),
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="text-xs">Preferred cuisines</Label>
+                            <Input
+                                value={cuisines}
+                                onChange={(e) => setCuisines(e.target.value)}
+                                placeholder="e.g. Middle Eastern, Asian"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label className="text-xs">Alcohol preference</Label>
+                            <div className="flex flex-wrap gap-2">
+                                {[
+                                    { value: "no_alcohol", label: "No alcohol" },
+                                    {
+                                        value: "okay_with_alcohol",
+                                        label: "Okay with alcohol",
+                                    },
+                                    {
+                                        value: "must_have_alcohol",
+                                        label: "Must have alcohol",
+                                    },
+                                ].map((opt) => (
+                                    <Button
+                                        key={opt.value}
+                                        type="button"
+                                        size="sm"
+                                        variant={
+                                            alcoholPreference === opt.value
+                                                ? "default"
+                                                : "outline"
+                                        }
+                                        className="rounded-full text-xs"
+                                        onClick={() =>
+                                            setAlcoholPreference(opt.value as AlcoholPref)
+                                        }
+                                    >
+                                        {opt.label}
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Vibe preferences */}
+                    <section className="space-y-3">
+                        <h3 className="text-sm font-semibold">Vibe preferences</h3>
+                        <div className="grid gap-3 sm:grid-cols-3">
+                            <div className="space-y-2">
+                                <Label className="text-xs">Noise</Label>
                                 <div className="flex flex-wrap gap-2">
                                     {[
-                                        {value: "indoor", label: "Mostly indoor"},
-                                        {value: "outdoor", label: "Mostly outdoor"},
-                                        {value: "mix", label: "Mix"},
+                                        { value: "chill", label: "Chill" },
+                                        { value: "balanced", label: "Balanced" },
+                                        { value: "energetic", label: "Energetic" },
                                     ].map((opt) => (
-                                        <button
+                                        <Button
                                             key={opt.value}
                                             type="button"
+                                            size="sm"
+                                            variant={
+                                                noise === opt.value ? "default" : "outline"
+                                            }
+                                            className="rounded-full text-xs"
+                                            onClick={() =>
+                                                setNoise(opt.value as NoiseLevel)
+                                            }
+                                        >
+                                            {opt.label}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-xs">Crowd</Label>
+                                <div className="flex flex-wrap gap-2">
+                                    {[
+                                        { value: "less_crowded", label: "Less crowded" },
+                                        { value: "average", label: "Average" },
+                                        { value: "busy", label: "Busy" },
+                                    ].map((opt) => (
+                                        <Button
+                                            key={opt.value}
+                                            type="button"
+                                            size="sm"
+                                            variant={
+                                                crowd === opt.value ? "default" : "outline"
+                                            }
+                                            className="rounded-full text-xs"
+                                            onClick={() =>
+                                                setCrowd(opt.value as CrowdLevel)
+                                            }
+                                        >
+                                            {opt.label}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-xs">Indoor / outdoor</Label>
+                                <div className="flex flex-wrap gap-2">
+                                    {[
+                                        { value: "indoor", label: "Indoor" },
+                                        { value: "outdoor", label: "Outdoor" },
+                                        { value: "mix", label: "Mix" },
+                                    ].map((opt) => (
+                                        <Button
+                                            key={opt.value}
+                                            type="button"
+                                            size="sm"
+                                            variant={
+                                                indoorOutdoor === opt.value
+                                                    ? "default"
+                                                    : "outline"
+                                            }
+                                            className="rounded-full text-xs"
                                             onClick={() =>
                                                 setIndoorOutdoor(opt.value as IndoorOutdoor)
                                             }
-                                            className={cn(
-                                                "rounded-full border px-3 py-1 text-xs",
-                                                indoorOutdoor === opt.value
-                                                    ? "bg-primary/10 border-primary text-primary"
-                                                    : "bg-background hover:bg-muted"
-                                            )}
                                         >
                                             {opt.label}
-                                        </button>
+                                        </Button>
                                     ))}
                                 </div>
                             </div>
+                        </div>
 
-                            <div className="flex items-center justify-between">
-                                <Label className="text-xs">
-                                    Show only kid-friendly options
-                                </Label>
-                                <Switch
-                                    checked={kidFriendly}
-                                    onCheckedChange={(checked) => setKidFriendly(checked)}
-                                />
+                        <div className="flex items-center justify-between">
+                            <div className="space-y-0.5">
+                                <Label className="text-xs">Kid friendly</Label>
+                                <p className="text-[10px] text-muted-foreground">
+                                    Include places that work well with kids.
+                                </p>
                             </div>
-                        </section>
+                            <Switch
+                                checked={kidFriendly}
+                                onCheckedChange={setKidFriendly}
+                            />
+                        </div>
+                    </section>
 
-                        {/* Quality filters */}
-                        <section className="space-y-3">
-                            <h3 className="text-xs font-semibold uppercase text-muted-foreground">
-                                Quality filters
-                            </h3>
-
-                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                                <div className="space-y-1">
-                                    <Label className="text-xs">Min rating</Label>
-                                    <Input
-                                        type="number"
-                                        step="0.1"
-                                        min={0}
-                                        max={5}
-                                        value={minRating}
-                                        onChange={(e) =>
-                                            setMinRating(Number(e.target.value) || 0)
-                                        }
-                                    />
-                                </div>
-
-                                <div className="space-y-1">
-                                    <Label className="text-xs">Min review count</Label>
-                                    <Input
-                                        type="number"
-                                        min={0}
-                                        value={minReviews}
-                                        onChange={(e) =>
-                                            setMinReviews(Number(e.target.value) || 0)
-                                        }
-                                    />
-                                </div>
-
-                                <div className="flex items-center justify-between space-y-0">
-                                    <Label className="text-xs">Must take reservations</Label>
-                                    <Switch
-                                        checked={mustTakeReservations}
-                                        onCheckedChange={(checked) =>
-                                            setMustTakeReservations(checked)
-                                        }
-                                    />
-                                </div>
-                            </div>
-                        </section>
-
-                        {/* Avoid */}
-                        <section className="space-y-3">
-                            <h3 className="text-xs font-semibold uppercase text-muted-foreground">
-                                Avoid
-                            </h3>
-
-                            <div className="space-y-1">
-                                <Label className="text-xs">Avoid tags</Label>
+                    {/* Quality filters */}
+                    <section className="space-y-3">
+                        <h3 className="text-sm font-semibold">Quality filters</h3>
+                        <div className="grid gap-3 sm:grid-cols-3">
+                            <div className="space-y-2">
+                                <Label className="text-xs">Min rating</Label>
                                 <Input
-                                    placeholder="nightclubs, tourist_traps, ..."
-                                    value={avoidTags}
-                                    onChange={(e) => setAvoidTags(e.target.value)}
+                                    type="number"
+                                    min={1}
+                                    max={5}
+                                    step={0.5}
+                                    value={minRating}
+                                    onChange={(e) =>
+                                        setMinRating(
+                                            Number.isNaN(parseFloat(e.target.value))
+                                                ? 0
+                                                : parseFloat(e.target.value),
+                                        )
+                                    }
                                 />
                             </div>
+                            <div className="space-y-2">
+                                <Label className="text-xs">Min review count</Label>
+                                <Input
+                                    type="number"
+                                    min={0}
+                                    value={minReviews}
+                                    onChange={(e) =>
+                                        setMinReviews(
+                                            Number.isNaN(parseInt(e.target.value))
+                                                ? 0
+                                                : parseInt(e.target.value),
+                                        )
+                                    }
+                                />
+                            </div>
+                            <div className="flex items-center justify-between space-y-0">
+                                <div className="space-y-0.5">
+                                    <Label className="text-xs">Must take reservations</Label>
+                                    <p className="text-[10px] text-muted-foreground">
+                                        Only suggest places that accept reservations.
+                                    </p>
+                                </div>
+                                <Switch
+                                    checked={mustTakeReservations}
+                                    onCheckedChange={setMustTakeReservations}
+                                />
+                            </div>
+                        </div>
+                    </section>
 
-                            <div className="space-y-1">
-                                <Label className="text-xs">Notes</Label>
-                                <textarea
-                                    rows={2}
-                                    className="w-full rounded-md border bg-background/80 px-3 py-2 text-sm"
-                                    placeholder="no rooftop bars, no long lineups..."
-                                    value={avoidNotes}
-                                    onChange={(e) => setAvoidNotes(e.target.value)}
-                                />
-                            </div>
-                        </section>
-                    </div>
+                    {/* Avoid */}
+                    <section className="space-y-3">
+                        <h3 className="text-sm font-semibold">Avoid</h3>
+                        <div className="space-y-2">
+                            <Label className="text-xs">Avoid tags</Label>
+                            <Input
+                                value={avoidTags}
+                                onChange={(e) => setAvoidTags(e.target.value)}
+                                placeholder="nightclubs, tourist_traps, etc."
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-xs">Anything to avoid?</Label>
+                            <Input
+                                value={avoidNotes}
+                                onChange={(e) => setAvoidNotes(e.target.value)}
+                                placeholder="e.g. no rooftop bars"
+                            />
+                        </div>
+                    </section>
 
                     <DialogFooter className="mt-4">
                         <Button
@@ -823,7 +793,7 @@ export function ChatSurveyHeader() {
                     size="icon-sm"
                     className="rounded-full cursor-pointer"
                 >
-                    <Send className="h-4 w-4"/>
+                    <Send className="h-4 w-4" />
                 </Button>
             </form>
         </div>
