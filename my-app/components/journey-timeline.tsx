@@ -145,12 +145,13 @@ const journeyTimeline = [
 ];
 
 export function JourneyTimeline() {
-  const { itineraryData } = useItinerary();
+  // const { itineraryData } = useItinerary();
 
-  // which stops are completed (for the green state)
-  const [completedStops, setCompletedStops] = useState<Record<string, boolean>>(
-    {}
-  );
+  // // which stops are completed (for the green state)
+  // const [completedStops, setCompletedStops] = useState<Record<string, boolean>>(
+  //   {}
+  // );
+  const { itineraryData, selectedStopIds, setSelectedStopIds } = useItinerary();
 
   return (
     <Timeline>
@@ -159,7 +160,7 @@ export function JourneyTimeline() {
           stop.address?.split("\n").join(", ") || "Address unavailable";
 
         const stopId = stop.id ?? String(index);
-        const isCompleted = !!completedStops[stopId];
+        const isCompleted = selectedStopIds.includes(stopId);
 
         // shared colors for card + icon + status bar
         const borderColorClass = isCompleted
@@ -173,6 +174,8 @@ export function JourneyTimeline() {
         const iconColorClass = isCompleted
           ? "text-emerald-600"
           : "text-rose-500";
+
+        // SAMPLE CONFIGURATIONS BELOW
 
         // Pending (Amber) -> Done (Teal)
         // const borderColorClass = isCompleted
@@ -272,10 +275,11 @@ export function JourneyTimeline() {
                           className="h-7 w-7"
                           aria-label="Mark stop as done"
                           onClick={() =>
-                            setCompletedStops((prev) => ({
-                              ...prev,
-                              [stopId]: !prev[stopId],
-                            }))
+                            setSelectedStopIds((prev) =>
+                              prev.includes(stopId)
+                                ? prev.filter((id) => id !== stopId)
+                                : [...prev, stopId]
+                            )
                           }
                         >
                           <CheckCheck
