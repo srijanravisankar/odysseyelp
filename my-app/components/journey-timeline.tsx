@@ -161,26 +161,82 @@ export function JourneyTimeline() {
         const stopId = stop.id ?? String(index);
         const isCompleted = !!completedStops[stopId];
 
+        // shared colors for card + icon + status bar
+        const borderColorClass = isCompleted
+          ? "border-emerald-500/70"
+          : "border-rose-400/70";
+
+        const statusBarColorClass = isCompleted
+          ? "bg-emerald-500"
+          : "bg-rose-400";
+
+        const iconColorClass = isCompleted
+          ? "text-emerald-600"
+          : "text-rose-500";
+
+        // Pending (Amber) -> Done (Teal)
+        // const borderColorClass = isCompleted
+        //   ? "border-teal-500/70"
+        //   : "border-amber-500/80";
+
+        // const statusBarColorClass = isCompleted
+        //   ? "bg-teal-500"
+        //   : "bg-amber-500";
+
+        // const iconColorClass = isCompleted ? "text-teal-600" : "text-amber-600";
+
+        // Pending (Gray) -> Done (Emerald)
+        // const borderColorClass = isCompleted
+        //   ? "border-emerald-500/70"
+        //   : "border-zinc-400/60";
+
+        // const statusBarColorClass = isCompleted
+        //   ? "bg-emerald-500"
+        //   : "bg-zinc-400";
+
+        // const iconColorClass = isCompleted
+        //   ? "text-emerald-600"
+        //   : "text-zinc-500";
+
+        // Pending (Violet) -> Done (Rose)
+        // const borderColorClass = isCompleted
+        //   ? "border-rose-400/70"
+        //   : "border-violet-500/70";
+
+        // const statusBarColorClass = isCompleted
+        //   ? "bg-rose-400"
+        //   : "bg-violet-500";
+
+        // const iconColorClass = isCompleted
+        //   ? "text-rose-500"
+        //   : "text-violet-600";
+
         return (
-          <TimelineItem key={stopId}>
-            {/* LEFT: icon + connecting line */}
-            <TimelineHeader>
+          <TimelineItem key={stopId} className="items-stretch">
+            {/* LEFT: icon + connecting line, aligned with card */}
+            <TimelineHeader className="flex flex-col items-center pt-1">
               {index !== itineraryData.stops.length - 1 && (
-                <TimelineSeparator className="bg-gray-200 w-px" />
+                <TimelineSeparator className="bg-gray-200 w-px flex-1 mt-12" />
               )}
-              <TimelineIcon className="h-8 w-8 [&_svg]:h-4 [&_svg]:w-4 border border-primary bg-muted">
+              <TimelineIcon
+                className={cn(
+                  "mt-12 h-8 w-8 [&_svg]:h-4 [&_svg]:w-4 bg-muted flex items-center justify-center",
+                  borderColorClass,
+                  iconColorClass
+                )}
+              >
                 <Store />
               </TimelineIcon>
             </TimelineHeader>
 
-            {/* RIGHT: stop info inside a calmer MagicCard */}
+            {/* RIGHT: stop info */}
             <TimelineBody className="group pl-3 w-full">
               <div
                 className={cn(
                   "relative w-full overflow-hidden rounded-lg border p-3",
-                  "bg-card/70 hover:bg-accent/40", // soft background change
+                  "bg-card/70 hover:bg-accent/40",
                   "transition-all duration-200",
-                  isCompleted ? "border-emerald-500/70" : "border-border"
+                  borderColorClass // card border matches icon border
                 )}
               >
                 <div className="flex gap-3">
@@ -188,7 +244,7 @@ export function JourneyTimeline() {
                   <div
                     className={cn(
                       "w-1 rounded-full mt-1 mb-1 transition-colors",
-                      isCompleted ? "bg-emerald-500" : "bg-red-400/80"
+                      statusBarColorClass
                     )}
                   />
 
