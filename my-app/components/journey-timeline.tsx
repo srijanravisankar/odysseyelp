@@ -132,7 +132,7 @@ export function JourneyTimeline() {
         return (
           <TimelineItem key={stop.id || index}>
             <TimelineHeader>
-              <TimelineSeparator className="bg-gray-200 w-px" />
+              {index !== itineraryData.stops.length - 1 && <TimelineSeparator className="bg-gray-200 w-px" />}
               <TimelineIcon 
               // className="bg-primary text-primary-foreground border-primary h-8 w-8 [&_svg]:h-4 [&_svg]:w-4"
               className="h-8 w-8 [&_svg]:h-4 [&_svg]:w-4 border border-primary bg-muted"
@@ -151,7 +151,7 @@ export function JourneyTimeline() {
                     <h3 
                     // className="text-sm leading-tight text-foreground overflow-hidden text-ellipsis"
                     className="
-                      text-sm leading-tight text-foreground
+                      text-md leading-tight text-foreground
                       overflow-hidden text-ellipsis whitespace-nowrap
                       max-w-[230px]
                     "

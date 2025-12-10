@@ -6,7 +6,7 @@ export default function Page() {
     return (
         <div className="grid h-full w-full gap-4 md:grid-rows-1">
             <Itinerary />
-            <ChatPagePagination />
+            {/* <ChatPagePagination /> */}
         </div>
     )
 }
