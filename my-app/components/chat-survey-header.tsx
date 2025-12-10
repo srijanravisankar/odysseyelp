@@ -1,9 +1,16 @@
-"use client"
+"use client";
 
-import React, { useState } from "react"
-import type { DateRange } from "react-day-picker"
+import React, { useState } from "react";
+import type { DateRange } from "react-day-picker";
 
-import { FormInput as Form, Send, Calendar as CalendarIcon, FormInput, NotebookPen, Filter } from "lucide-react"
+import {
+  FormInput as Form,
+  Send,
+  Calendar as CalendarIcon,
+  FormInput,
+  NotebookPen,
+  Filter,
+} from "lucide-react";
 
 import {
   Dialog,
@@ -13,34 +20,42 @@ import {
   DialogDescription,
   DialogFooter,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
-import { useItinerary } from "@/components/chat-page/itinerary-context"
+import { useItinerary } from "@/components/chat-page/itinerary-context";
 
 // ---------------- Date-range picker (uses shadcn Calendar) -------------------
 
 function formatDate(date?: Date) {
-  if (!date) return ""
+  if (!date) return "";
   return date.toLocaleDateString("en-CA", {
     year: "numeric",
     month: "short",
     day: "numeric",
-  })
+  });
 }
 
 function SurveyDateRangePicker(props: {
-  value: DateRange | undefined
-  onChange: (value: DateRange | undefined) => void
+  value: DateRange | undefined;
+  onChange: (value: DateRange | undefined) => void;
 }) {
-  const { value, onChange } = props
+  const { value, onChange } = props;
 
   return (
     <Popover>
@@ -49,7 +64,7 @@ function SurveyDateRangePicker(props: {
           variant="outline"
           className={cn(
             "w-full justify-start text-left font-normal",
-            !value?.from && "text-muted-foreground",
+            !value?.from && "text-muted-foreground"
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
@@ -76,129 +91,126 @@ function SurveyDateRangePicker(props: {
         />
       </PopoverContent>
     </Popover>
-  )
+  );
 }
 
 // ---------------- Types for the structured survey object --------------------
 
-type TripType = "solo" | "friends" | "family" | "date" | "work"
-type NoiseLevel = "chill" | "balanced" | "energetic"
-type CrowdLevel = "less_crowded" | "average" | "busy"
-type IndoorOutdoor = "indoor" | "outdoor" | "mix"
-type AlcoholPref = "no_alcohol" | "okay_with_alcohol" | "must_have_alcohol"
+type TripType = "solo" | "friends" | "family" | "date" | "work";
+type NoiseLevel = "chill" | "balanced" | "energetic";
+type CrowdLevel = "less_crowded" | "average" | "busy";
+type IndoorOutdoor = "indoor" | "outdoor" | "mix";
+type AlcoholPref = "no_alcohol" | "okay_with_alcohol" | "must_have_alcohol";
 
 export type SurveyContext = {
   trip: {
-    type: TripType
-    vibe: string[]
-    occasion: string
-    people: number
-  }
+    type: TripType;
+    vibe: string[];
+    occasion: string;
+    people: number;
+  };
   location: {
-    area: string
-    dateRange: { start?: string; end?: string }
-    timesOfDay: string[]
-  }
+    area: string;
+    dateRange: { start?: string; end?: string };
+    timesOfDay: string[];
+  };
   budget: {
-    priceLevel: "$" | "$$" | "$$$" | "$$$$"
-    perPersonPerDayRange: string
-    transport: string
-    maxTravelMinutes: number
-  }
+    priceLevel: "$" | "$$" | "$$$" | "$$$$";
+    perPersonPerDayRange: string;
+    transport: string;
+    maxTravelMinutes: number;
+  };
   food: {
-    dietary: string[]
-    cuisines: string[]
-    alcoholPreference: AlcoholPref
-  }
+    dietary: string[];
+    cuisines: string[];
+    alcoholPreference: AlcoholPref;
+  };
   preferences: {
-    noise: NoiseLevel
-    crowd: CrowdLevel
-    indoorOutdoor: IndoorOutdoor
-    kidFriendly: boolean
-  }
+    noise: NoiseLevel;
+    crowd: CrowdLevel;
+    indoorOutdoor: IndoorOutdoor;
+    kidFriendly: boolean;
+  };
   qualityFilters: {
-    minRating: number
-    minReviewCount: number
-    mustTakeReservations: boolean
-  }
+    minRating: number;
+    minReviewCount: number;
+    mustTakeReservations: boolean;
+  };
   avoid: {
-    tags: string[]
-    notes: string
-  }
-}
+    tags: string[];
+    notes: string;
+  };
+};
 
 // toggle helper for chips
 function toggleInArray(
   value: string,
   arr: string[],
-  setArr: (v: string[]) => void,
+  setArr: (v: string[]) => void
 ) {
   if (arr.includes(value)) {
-    setArr(arr.filter((v) => v !== value))
+    setArr(arr.filter((v) => v !== value));
   } else {
-    setArr([...arr, value])
+    setArr([...arr, value]);
   }
 }
 
 // ---------------- Main header component used on /chat -----------------------
 
 export function ChatSurveyHeader() {
-  const [dialogOpen, setDialogOpen] = useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   // search query (right side)
-  const [query, setQuery] = useState("")
+  const [query, setQuery] = useState("");
 
   // last-saved survey context (so we can pair it with query on send)
-  const [savedSurvey, setSavedSurvey] = useState<SurveyContext | null>(null)
+  const [savedSurvey, setSavedSurvey] = useState<SurveyContext | null>(null);
 
   // Trip
-  const [tripType, setTripType] = useState<TripType>("date")
-  const [tripVibe, setTripVibe] = useState<string[]>(["cozy", "food-focused"])
-  const [tripOccasion, setTripOccasion] = useState("anniversary")
-  const [tripPeople, setTripPeople] = useState(2)
+  const [tripType, setTripType] = useState<TripType>("date");
+  const [tripVibe, setTripVibe] = useState<string[]>(["cozy", "food-focused"]);
+  const [tripOccasion, setTripOccasion] = useState("anniversary");
+  const [tripPeople, setTripPeople] = useState(2);
 
   // Location
-  const [area, setArea] = useState("Downtown Toronto")
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
-  const [timesOfDay, setTimesOfDay] = useState<string[]>(["evening"])
+  const [area, setArea] = useState("Downtown Toronto");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [timesOfDay, setTimesOfDay] = useState<string[]>(["evening"]);
 
   // Budget
-  const [priceLevel, setPriceLevel] =
-    useState<"$" | "$$" | "$$$" | "$$$$">("$$")
-  const [perPersonRange, setPerPersonRange] = useState("50-100")
-  const [transport, setTransport] = useState("walking")
-  const [maxMinutes, setMaxMinutes] = useState(15)
+  const [priceLevel, setPriceLevel] = useState<"$" | "$$" | "$$$" | "$$$$">(
+    "$$"
+  );
+  const [perPersonRange, setPerPersonRange] = useState("50-100");
+  const [transport, setTransport] = useState("walking");
+  const [maxMinutes, setMaxMinutes] = useState(15);
 
   // Food
-  const [dietary, setDietary] = useState<string[]>(["halal", "gluten-free"])
-  const [cuisines, setCuisines] = useState("Middle Eastern, Asian")
+  const [dietary, setDietary] = useState<string[]>(["halal", "gluten-free"]);
+  const [cuisines, setCuisines] = useState("Middle Eastern, Asian");
   const [alcoholPreference, setAlcoholPreference] =
-    useState<AlcoholPref>("no_alcohol")
+    useState<AlcoholPref>("no_alcohol");
 
   // Preferences
-  const [noise, setNoise] = useState<NoiseLevel>("chill")
-  const [crowd, setCrowd] = useState<CrowdLevel>("less_crowded")
-  const [indoorOutdoor, setIndoorOutdoor] =
-    useState<IndoorOutdoor>("mix")
-  const [kidFriendly, setKidFriendly] = useState(false)
+  const [noise, setNoise] = useState<NoiseLevel>("chill");
+  const [crowd, setCrowd] = useState<CrowdLevel>("less_crowded");
+  const [indoorOutdoor, setIndoorOutdoor] = useState<IndoorOutdoor>("mix");
+  const [kidFriendly, setKidFriendly] = useState(false);
 
   // Quality filters
-  const [minRating, setMinRating] = useState(4.0)
-  const [minReviews, setMinReviews] = useState(50)
-  const [mustTakeReservations, setMustTakeReservations] =
-    useState(true)
+  const [minRating, setMinRating] = useState(4.0);
+  const [minReviews, setMinReviews] = useState(50);
+  const [mustTakeReservations, setMustTakeReservations] = useState(true);
 
   // Avoid
-  const [avoidTags, setAvoidTags] =
-    useState("nightclubs, tourist_traps")
-  const [avoidNotes, setAvoidNotes] =
-    useState("no rooftop bars")
+  const [avoidTags, setAvoidTags] = useState("nightclubs, tourist_traps");
+  const [avoidNotes, setAvoidNotes] = useState("no rooftop bars");
 
   // ---- helper: build survey context from current state -----------------------
 
   const buildSurveyContext = (): SurveyContext => {
     const toISODate = (d?: Date) =>
-      d ? d.toISOString().slice(0, 10) : undefined
+      d ? d.toISOString().slice(0, 10) : undefined;
 
     return {
       trip: {
@@ -247,151 +259,148 @@ export function ChatSurveyHeader() {
           .filter(Boolean),
         notes: avoidNotes,
       },
-    }
-  }
+    };
+  };
 
   // ---- Save survey inside the dialog --------------------------------------
 
   const handleSaveSurvey = () => {
-    const surveyContext = buildSurveyContext()
+    const surveyContext = buildSurveyContext();
 
     try {
-      localStorage.setItem(
-        "ranger-yelp-survey",
-        JSON.stringify(surveyContext),
-      )
-      setSavedSurvey(surveyContext)
-      console.log("Saved surveyContext", surveyContext)
+      localStorage.setItem("ranger-yelp-survey", JSON.stringify(surveyContext));
+      setSavedSurvey(surveyContext);
+      console.log("Saved surveyContext", surveyContext);
     } catch (e) {
-      console.error("Failed to save survey context", e)
+      console.error("Failed to save survey context", e);
     }
 
-    setDialogOpen(false)
-  }
+    setDialogOpen(false);
+  };
 
   // ---- When user presses send on the search bar ---------------------------
 
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const { setItineraryData } = useItinerary()
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { setItineraryData } = useItinerary();
 
   async function handleSend(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault() // prevent the form from reloading the page
+    e.preventDefault(); // prevent the form from reloading the page
 
-    
-    if (!query.trim()) return
-    
-    setIsLoading(true)
-    setError(null)
-    
+    if (!query.trim()) return;
+
+    setIsLoading(true);
+    setError(null);
+
     // Example:
     setItineraryData({
-        "title": "One-Day Seattle Itinerary",
-        "summary": "Discover Seattle's best coffee shops, scenic views, and dining experiences in a single day.",
-        "date": null,
-        "center": {
-            "lat": 47.61777397467515,
-            "lng": -122.35321090209428
+      title: "One-Day Seattle Itinerary",
+      summary:
+        "Discover Seattle's best coffee shops, scenic views, and dining experiences in a single day.",
+      date: null,
+      center: {
+        lat: 47.61777397467515,
+        lng: -122.35321090209428,
+      },
+      stops: [
+        {
+          id: "stop-1",
+          name: "Storyville Coffee Company",
+          address: "94 Pike St\nSte 34\nSeattle, WA 98101",
+          url: "https://www.yelp.ca/biz/storyville-coffee-company-seattle-9?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+          rating: 4.5,
+          reviewCount: 2535,
+          price: "$$",
+          openStatus: null,
+          phone: "+12067805777",
+          coordinates: {
+            lat: 47.60895949363687,
+            lng: -122.34043157053928,
+          },
+          category: "Coffee & Tea",
         },
-        "stops": [
-            {
-                "id": "stop-1",
-                "name": "Storyville Coffee Company",
-                "address": "94 Pike St\nSte 34\nSeattle, WA 98101",
-                "url": "https://www.yelp.ca/biz/storyville-coffee-company-seattle-9?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
-                "rating": 4.5,
-                "reviewCount": 2535,
-                "price": "$$",
-                "openStatus": null,
-                "phone": "+12067805777",
-                "coordinates": {
-                    "lat": 47.60895949363687,
-                    "lng": -122.34043157053928
-                },
-                "category": "Coffee & Tea"
-            },
-            {
-                "id": "stop-2",
-                "name": "Anchorhead Coffee - CenturyLink Plaza",
-                "address": "1600 7th Ave\nSte 105\nSeattle, WA 98101",
-                "url": "https://www.yelp.ca/biz/anchorhead-coffee-centurylink-plaza-seattle?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
-                "rating": 4.5,
-                "reviewCount": 1012,
-                "price": "$$",
-                "openStatus": null,
-                "phone": "+12062222222",
-                "coordinates": {
-                    "lat": 47.6133808022766,
-                    "lng": -122.334691182469
-                },
-                "category": "Coffee & Tea"
-            },
-            {
-                "id": "stop-3",
-                "name": "Waterfall Garden",
-                "address": "219 2nd Ave S\nSeattle, WA 98104",
-                "url": "https://www.yelp.ca/biz/waterfall-garden-seattle?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
-                "rating": 4.4,
-                "reviewCount": 213,
-                "price": null,
-                "openStatus": null,
-                "phone": "+12066246096",
-                "coordinates": {
-                    "lat": 47.6002476387003,
-                    "lng": -122.332151074236
-                },
-                "category": "Parks"
-            },
-            {
-                "id": "stop-4",
-                "name": "Discovery Park",
-                "address": "3801 Discovery Park Blvd\nSeattle, WA 98199",
-                "url": "https://www.yelp.ca/biz/discovery-park-seattle?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
-                "rating": 4.6,
-                "reviewCount": 487,
-                "price": null,
-                "openStatus": null,
-                "phone": "+12066844075",
-                "coordinates": {
-                    "lat": 47.66133141343713,
-                    "lng": -122.41714398532145
-                },
-                "category": "Parks"
-            },
-            {
-                "id": "stop-5",
-                "name": "The Pink Door",
-                "address": "1919 Post Alley\nSeattle, WA 98101",
-                "url": "https://www.yelp.ca/biz/the-pink-door-seattle-4?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
-                "rating": 4.4,
-                "reviewCount": 7852,
-                "price": "$$$",
-                "openStatus": null,
-                "phone": "+12064433241",
-                "coordinates": {
-                    "lat": 47.6103652,
-                    "lng": -122.3425604
-                },
-                "category": "Italian"
-            },
-            {
-                "id": "stop-6",
-                "name": "Six Seven Restaurant",
-                "address": "2411 Alaskan Way\nPier 67\nSeattle, WA 98121",
-                "url": "https://www.yelp.ca/biz/six-seven-restaurant-seattle-3?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
-                "rating": 4.1,
-                "reviewCount": 1392,
-                "price": "$$$",
-                "openStatus": null,
-                "phone": "+12062694575",
-                "coordinates": {
-                    "lat": 47.6123593,
-                    "lng": -122.3522372
-                },
-                "category": "New American"
-            }
-        ]
-    })
+        {
+          id: "stop-2",
+          name: "Anchorhead Coffee - CenturyLink Plaza",
+          address: "1600 7th Ave\nSte 105\nSeattle, WA 98101",
+          url: "https://www.yelp.ca/biz/anchorhead-coffee-centurylink-plaza-seattle?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+          rating: 4.5,
+          reviewCount: 1012,
+          price: "$$",
+          openStatus: null,
+          phone: "+12062222222",
+          coordinates: {
+            lat: 47.6133808022766,
+            lng: -122.334691182469,
+          },
+          category: "Coffee & Tea",
+        },
+        {
+          id: "stop-3",
+          name: "Waterfall Garden",
+          address: "219 2nd Ave S\nSeattle, WA 98104",
+          url: "https://www.yelp.ca/biz/waterfall-garden-seattle?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+          rating: 4.4,
+          reviewCount: 213,
+          price: null,
+          openStatus: null,
+          phone: "+12066246096",
+          coordinates: {
+            lat: 47.6002476387003,
+            lng: -122.332151074236,
+          },
+          category: "Parks",
+        },
+        {
+          id: "stop-4",
+          name: "Discovery Park",
+          address: "3801 Discovery Park Blvd\nSeattle, WA 98199",
+          url: "https://www.yelp.ca/biz/discovery-park-seattle?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+          rating: 4.6,
+          reviewCount: 487,
+          price: null,
+          openStatus: null,
+          phone: "+12066844075",
+          coordinates: {
+            lat: 47.66133141343713,
+            lng: -122.41714398532145,
+          },
+          category: "Parks",
+        },
+        {
+          id: "stop-5",
+          name: "The Pink Door",
+          address: "1919 Post Alley\nSeattle, WA 98101",
+          url: "https://www.yelp.ca/biz/the-pink-door-seattle-4?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+          rating: 4.4,
+          reviewCount: 7852,
+          price: "$$$",
+          openStatus: null,
+          phone: "+12064433241",
+          coordinates: {
+            lat: 47.6103652,
+            lng: -122.3425604,
+          },
+          category: "Italian",
+        },
+        {
+          id: "stop-6",
+          name: "Six Seven Restaurant",
+          address: "2411 Alaskan Way\nPier 67\nSeattle, WA 98121",
+          url: "https://www.yelp.ca/biz/six-seven-restaurant-seattle-3?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+          rating: 4.1,
+          reviewCount: 1392,
+          price: "$$$",
+          openStatus: null,
+          phone: "+12062694575",
+          coordinates: {
+            lat: 47.6123593,
+            lng: -122.3522372,
+          },
+          category: "New American",
+        },
+      ],
+    });
     return;
 
     try {
@@ -399,39 +408,39 @@ export function ChatSurveyHeader() {
       const payload =
         savedSurvey != null
           ? {
-            query: query.trim(),
-            survey: savedSurvey,
-          }
+              query: query.trim(),
+              survey: savedSurvey,
+            }
           : {
-            query: query.trim(),
-          }
+              query: query.trim(),
+            };
 
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      })
+      });
 
-      const data = await res.json()
+      const data = await res.json();
 
       if (!res.ok) {
-        console.error("Error from API:", data)
+        console.error("Error from API:", data);
         // later: show toast
-        return
+        return;
       }
 
-      console.log("Composed prompt:", data.composedPrompt)
-      console.log("Yelp AI response:", data.yelp)
-      console.log("Itinerary:", data.itinerary)
+      console.log("Composed prompt:", data.composedPrompt);
+      console.log("Yelp AI response:", data.yelp);
+      console.log("Itinerary:", data.itinerary);
 
       if (data.itinerary) {
-        console.log("Setting global itinerary data...")
-        setItineraryData(data.itinerary)
-     }
+        console.log("Setting global itinerary data...");
+        setItineraryData(data.itinerary);
+      }
     } catch (err) {
-      console.error("Network error", err)
+      console.error("Network error", err);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -448,12 +457,9 @@ export function ChatSurveyHeader() {
           >
             <Tooltip>
               <TooltipTrigger asChild>
-
                 <Filter className="text-xl" />
               </TooltipTrigger>
-              <TooltipContent>
-                Trip Variant
-              </TooltipContent>
+              <TooltipContent>Trip Variant</TooltipContent>
             </Tooltip>
             <span className="inline sm:hidden">Trip survey</span>
           </Button>
@@ -463,7 +469,7 @@ export function ChatSurveyHeader() {
           className={cn(
             "max-w-3xl w-[min(100%-2rem,900px)] max-h-[80vh] overflow-y-auto",
             "rounded-2xl border border-border/60 bg-background/80",
-            "backdrop-blur-xl shadow-2xl space-y-6",
+            "backdrop-blur-xl shadow-2xl space-y-6"
           )}
         >
           <DialogHeader>
@@ -502,20 +508,24 @@ export function ChatSurveyHeader() {
               <div className="space-y-2">
                 <Label className="text-xs">Vibe</Label>
                 <div className="flex flex-wrap gap-2">
-                  {["cozy", "food-focused", "adventurous", "romantic", "chill"].map(
-                    (v) => (
-                      <Button
-                        key={v}
-                        type="button"
-                        size="sm"
-                        variant={tripVibe.includes(v) ? "default" : "outline"}
-                        className="rounded-full text-xs"
-                        onClick={() => toggleInArray(v, tripVibe, setTripVibe)}
-                      >
-                        {v}
-                      </Button>
-                    ),
-                  )}
+                  {[
+                    "cozy",
+                    "food-focused",
+                    "adventurous",
+                    "romantic",
+                    "chill",
+                  ].map((v) => (
+                    <Button
+                      key={v}
+                      type="button"
+                      size="sm"
+                      variant={tripVibe.includes(v) ? "default" : "outline"}
+                      className="rounded-full text-xs"
+                      onClick={() => toggleInArray(v, tripVibe, setTripVibe)}
+                    >
+                      {v}
+                    </Button>
+                  ))}
                 </div>
               </div>
             </div>
@@ -539,7 +549,7 @@ export function ChatSurveyHeader() {
                     setTripPeople(
                       Number.isNaN(parseInt(e.target.value))
                         ? 1
-                        : parseInt(e.target.value),
+                        : parseInt(e.target.value)
                     )
                   }
                 />
@@ -628,7 +638,7 @@ export function ChatSurveyHeader() {
                     setMaxMinutes(
                       Number.isNaN(parseInt(e.target.value))
                         ? 0
-                        : parseInt(e.target.value),
+                        : parseInt(e.target.value)
                     )
                   }
                 />
@@ -672,7 +682,7 @@ export function ChatSurveyHeader() {
                     >
                       {d}
                     </Button>
-                  ),
+                  )
                 )}
               </div>
             </div>
@@ -705,9 +715,7 @@ export function ChatSurveyHeader() {
                     type="button"
                     size="sm"
                     variant={
-                      alcoholPreference === opt.value
-                        ? "default"
-                        : "outline"
+                      alcoholPreference === opt.value ? "default" : "outline"
                     }
                     className="rounded-full text-xs"
                     onClick={() =>
@@ -737,13 +745,9 @@ export function ChatSurveyHeader() {
                       key={opt.value}
                       type="button"
                       size="sm"
-                      variant={
-                        noise === opt.value ? "default" : "outline"
-                      }
+                      variant={noise === opt.value ? "default" : "outline"}
                       className="rounded-full text-xs"
-                      onClick={() =>
-                        setNoise(opt.value as NoiseLevel)
-                      }
+                      onClick={() => setNoise(opt.value as NoiseLevel)}
                     >
                       {opt.label}
                     </Button>
@@ -762,13 +766,9 @@ export function ChatSurveyHeader() {
                       key={opt.value}
                       type="button"
                       size="sm"
-                      variant={
-                        crowd === opt.value ? "default" : "outline"
-                      }
+                      variant={crowd === opt.value ? "default" : "outline"}
                       className="rounded-full text-xs"
-                      onClick={() =>
-                        setCrowd(opt.value as CrowdLevel)
-                      }
+                      onClick={() => setCrowd(opt.value as CrowdLevel)}
                     >
                       {opt.label}
                     </Button>
@@ -788,9 +788,7 @@ export function ChatSurveyHeader() {
                       type="button"
                       size="sm"
                       variant={
-                        indoorOutdoor === opt.value
-                          ? "default"
-                          : "outline"
+                        indoorOutdoor === opt.value ? "default" : "outline"
                       }
                       className="rounded-full text-xs"
                       onClick={() =>
@@ -811,10 +809,7 @@ export function ChatSurveyHeader() {
                   Include places that work well with kids.
                 </p>
               </div>
-              <Switch
-                checked={kidFriendly}
-                onCheckedChange={setKidFriendly}
-              />
+              <Switch checked={kidFriendly} onCheckedChange={setKidFriendly} />
             </div>
           </section>
 
@@ -834,7 +829,7 @@ export function ChatSurveyHeader() {
                     setMinRating(
                       Number.isNaN(parseFloat(e.target.value))
                         ? 0
-                        : parseFloat(e.target.value),
+                        : parseFloat(e.target.value)
                     )
                   }
                 />
@@ -849,7 +844,7 @@ export function ChatSurveyHeader() {
                     setMinReviews(
                       Number.isNaN(parseInt(e.target.value))
                         ? 0
-                        : parseInt(e.target.value),
+                        : parseInt(e.target.value)
                     )
                   }
                 />
@@ -907,10 +902,7 @@ export function ChatSurveyHeader() {
       </Dialog>
 
       {/* RIGHT: search bar + send (uses savedSurvey when sending) */}
-      <form
-        onSubmit={handleSend}
-        className="flex flex-1 items-center gap-3"
-      >
+      <form onSubmit={handleSend} className="flex flex-1 items-center gap-3">
         <Input
           type="text"
           placeholder="What do you want to explore!?"
@@ -930,5 +922,5 @@ export function ChatSurveyHeader() {
         </Button>
       </form>
     </div>
-  )
+  );
 }
