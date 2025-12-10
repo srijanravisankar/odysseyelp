@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Timeline,
@@ -7,15 +7,39 @@ import {
   TimelineIcon,
   TimelineItem,
   TimelineSeparator,
-} from "@/components/ui/timeline"
+} from "@/components/ui/timeline";
 
-import { Beer, Coffee, Utensils, Footprints, Music, MapPin, Ticket, ShoppingBag, Palette, Briefcase, SquarePen, Trash2, ExternalLink, Badge, Store, Star, Phone } from "lucide-react"
-import { Button } from "./ui/button"
-import Image from "next/image"
+import {
+  Beer,
+  Coffee,
+  Utensils,
+  Footprints,
+  Music,
+  MapPin,
+  Ticket,
+  ShoppingBag,
+  Palette,
+  Briefcase,
+  SquarePen,
+  Trash2,
+  ExternalLink,
+  Badge,
+  Store,
+  Star,
+  Phone,
+  CheckCheck,
+} from "lucide-react";
+import { Button } from "./ui/button";
+import Image from "next/image";
 
-import { useItinerary } from "@/components/chat-page/itinerary-context"
-import { ItineraryStop } from "@/lib/itinerary-types"
-import { Separator } from "@radix-ui/react-separator"
+import { useItinerary } from "@/components/chat-page/itinerary-context";
+import { ItineraryStop } from "@/lib/itinerary-types";
+import { Separator } from "@radix-ui/react-separator";
+
+import { BorderBeam } from "@/components/ui/border-beam";
+import { MagicCard } from "@/components/ui/magic-card";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 const journeyTimeline = [
   {
@@ -118,106 +142,231 @@ const journeyTimeline = [
     hours: "11 a.m.–12 a.m.", // New
     phone: "416-555-1210", // New
   },
-]
+];
 
 export function JourneyTimeline() {
-  const { itineraryData } = useItinerary()
+  // const { itineraryData } = useItinerary();
+
+  // // which stops are completed (for the green state)
+  // const [completedStops, setCompletedStops] = useState<Record<string, boolean>>(
+  //   {}
+  // );
+  const { itineraryData, selectedStopIds, setSelectedStopIds } = useItinerary();
 
   return (
     <Timeline>
       {itineraryData?.stops?.map((stop: ItineraryStop, index: number) => {
-        // Format address: replace newlines with commas
-        const formattedAddress = stop.address?.split("\n").join(", ") || "Address unavailable"
+        const formattedAddress =
+          stop.address?.split("\n").join(", ") || "Address unavailable";
+
+        const stopId = stop.id ?? String(index);
+        const isCompleted = selectedStopIds.includes(stopId);
+
+        // shared colors for card + icon + status bar
+        const borderColorClass = isCompleted
+          ? "border-emerald-500/70"
+          : "border-rose-400/70";
+
+        const statusBarColorClass = isCompleted
+          ? "bg-emerald-500"
+          : "bg-rose-400";
+
+        const iconColorClass = isCompleted
+          ? "text-emerald-600"
+          : "text-rose-500";
+
+        // SAMPLE CONFIGURATIONS BELOW
+
+        // Pending (Amber) -> Done (Teal)
+        // const borderColorClass = isCompleted
+        //   ? "border-teal-500/70"
+        //   : "border-amber-500/80";
+
+        // const statusBarColorClass = isCompleted
+        //   ? "bg-teal-500"
+        //   : "bg-amber-500";
+
+        // const iconColorClass = isCompleted ? "text-teal-600" : "text-amber-600";
+
+        // Pending (Gray) -> Done (Emerald)
+        // const borderColorClass = isCompleted
+        //   ? "border-emerald-500/70"
+        //   : "border-zinc-400/60";
+
+        // const statusBarColorClass = isCompleted
+        //   ? "bg-emerald-500"
+        //   : "bg-zinc-400";
+
+        // const iconColorClass = isCompleted
+        //   ? "text-emerald-600"
+        //   : "text-zinc-500";
+
+        // Pending (Violet) -> Done (Rose)
+        // const borderColorClass = isCompleted
+        //   ? "border-rose-400/70"
+        //   : "border-violet-500/70";
+
+        // const statusBarColorClass = isCompleted
+        //   ? "bg-rose-400"
+        //   : "bg-violet-500";
+
+        // const iconColorClass = isCompleted
+        //   ? "text-rose-500"
+        //   : "text-violet-600";
 
         return (
-          <TimelineItem key={stop.id || index}>
-            <TimelineHeader>
-              {index !== itineraryData.stops.length - 1 && <TimelineSeparator className="bg-gray-200 w-px" />}
-              <TimelineIcon 
-              // className="bg-primary text-primary-foreground border-primary h-8 w-8 [&_svg]:h-4 [&_svg]:w-4"
-              className="h-8 w-8 [&_svg]:h-4 [&_svg]:w-4 border border-primary bg-muted"
+          <TimelineItem key={stopId} className="items-stretch">
+            {/* LEFT: icon + connecting line, aligned with card */}
+            <TimelineHeader className="flex flex-col items-center pt-1">
+              {index !== itineraryData.stops.length - 1 && (
+                <TimelineSeparator className="bg-gray-200 w-px flex-1 mt-12" />
+              )}
+              <TimelineIcon
+                className={cn(
+                  "mt-12 h-8 w-8 [&_svg]:h-4 [&_svg]:w-4 bg-muted flex items-center justify-center",
+                  borderColorClass,
+                  iconColorClass
+                )}
               >
-                 {/* You can dynamically change this icon based on category if you want */}
                 <Store />
               </TimelineIcon>
             </TimelineHeader>
-            
-            <TimelineBody className="group pl-1 w-full"> 
-              <div className="gap-0 flex flex-col w-full">
-                
-                {/* --- HEADER: Name, Price, Category --- */}
-                <div className="flex justify-between items-start gap-0">
-                  <div className="flex flex-col gap-1">
-                    <h3 
-                    // className="text-sm leading-tight text-foreground overflow-hidden text-ellipsis"
-                    className="
-                      text-md leading-tight text-foreground
-                      overflow-hidden text-ellipsis whitespace-nowrap
-                      max-w-[230px]
-                    "
-                    title={stop.name}
-                    >
-                      {stop.name}
-                    </h3>
-                  </div>
 
-                  {/* Edit/Delete Actions (Visible on Hover) */}
-                  <div className="flex shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="icon-sm" className="h-7 w-7">
-                      <SquarePen className="h-3 w-3 text-yellow-600" />
-                    </Button>
-                    <Button variant="ghost" size="icon-sm" className="h-7 w-7">
-                      <Trash2 className="h-3 w-3 text-red-400" />
-                    </Button>
-                    <Button variant="ghost" size="icon-sm" className="h-7 w-7">
-                      <ExternalLink className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
+            {/* RIGHT: stop info */}
+            <TimelineBody className="group pl-3 w-full">
+              <div
+                className={cn(
+                  "relative w-full overflow-hidden rounded-lg border p-3",
+                  "bg-card/70 hover:bg-accent/40",
+                  "transition-all duration-200",
+                  borderColorClass // card border matches icon border
+                )}
+              >
+                <div className="flex gap-3">
+                  {/* thin status bar on the left of the content */}
+                  <div
+                    className={cn(
+                      "w-1 rounded-full mt-1 mb-1 transition-colors",
+                      statusBarColorClass
+                    )}
+                  />
 
-                <Separator />
-
-                {/* --- DETAILS: Rating, Address, Phone --- */}
-                <div className="grid gap-2 text-sm text-muted-foreground">
-                  
-                  {/* Rating */}
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-xs font-semibold text-foreground">{stop.rating || "N/A"}</span>
-                    <span className="text-xs">
-                      ({stop.reviewCount || 0} reviews)
-                    </span>
-                  </div>
-
-                  {/* Address */}
-                  <div className="flex items-start gap-1">
-                    <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
-                    <span className="leading-tight">{formattedAddress}</span>
-                  </div>
-
-                  {/* Phone */}
-                  {stop.phone && (
-                    <div className="flex items-center gap-1">
-                      <Phone className="h-4 w-4 shrink-0" />
-                      <a 
-                        href={`tel:${stop.phone}`} 
-                        className="hover:text-primary hover:underline transition-colors"
+                  {/* main content */}
+                  <div className="flex-1 flex flex-col gap-2">
+                    {/* HEADER: name + actions */}
+                    <div className="flex justify-between items-start gap-2">
+                      <h3
+                        className="
+                          text-md leading-tight text-foreground
+                          overflow-hidden text-ellipsis whitespace-nowrap
+                          max-w-[230px]
+                        "
+                        title={stop.name}
                       >
-                        {stop.phone}
-                      </a>
+                        {stop.name}
+                      </h3>
+
+                      {/* Actions (show on hover) */}
+                      <div className="flex shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {/* Check / complete */}
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          className="h-7 w-7"
+                          aria-label="Mark stop as done"
+                          onClick={() =>
+                            setSelectedStopIds((prev) =>
+                              prev.includes(stopId)
+                                ? prev.filter((id) => id !== stopId)
+                                : [...prev, stopId]
+                            )
+                          }
+                        >
+                          <CheckCheck
+                            className={cn(
+                              "h-3 w-3",
+                              isCompleted
+                                ? "text-emerald-500"
+                                : "text-muted-foreground"
+                            )}
+                          />
+                        </Button>
+
+                        {/* Edit */}
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          className="h-7 w-7"
+                        >
+                          <SquarePen className="h-3 w-3 text-yellow-600" />
+                        </Button>
+
+                        {/* Delete */}
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          className="h-7 w-7"
+                        >
+                          <Trash2 className="h-3 w-3 text-red-400" />
+                        </Button>
+
+                        {/* External link */}
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          className="h-7 w-7"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
-                  )}
+
+                    <Separator />
+
+                    {/* DETAILS: rating, address, phone */}
+                    <div className="grid gap-2 text-sm text-muted-foreground">
+                      {/* Rating */}
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <span className="text-xs font-semibold text-foreground">
+                          {stop.rating || "N/A"}
+                        </span>
+                        <span className="text-xs">
+                          ({stop.reviewCount || 0} reviews)
+                        </span>
+                      </div>
+
+                      {/* Address */}
+                      <div className="flex items-start gap-1">
+                        <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
+                        <span className="leading-tight">
+                          {formattedAddress}
+                        </span>
+                      </div>
+
+                      {/* Phone */}
+                      {stop.phone && (
+                        <div className="flex items-center gap-1">
+                          <Phone className="h-4 w-4 shrink-0" />
+                          <a
+                            href={`tel:${stop.phone}`}
+                            className="hover:text-primary hover:underline transition-colors"
+                          >
+                            {stop.phone}
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </TimelineBody>
           </TimelineItem>
-        )
+        );
       })}
     </Timeline>
-  )
+  );
 }
-
-
 
 // Example result:
 /*
