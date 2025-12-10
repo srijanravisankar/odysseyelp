@@ -1,3 +1,5 @@
+"use client"
+
 import {
   Timeline,
   TimelineBody,
@@ -7,9 +9,13 @@ import {
   TimelineSeparator,
 } from "@/components/ui/timeline"
 
-import { Beer, Coffee, Utensils, Footprints, Music, MapPin, Ticket, ShoppingBag, Palette, Briefcase, SquarePen, Trash2, ExternalLink } from "lucide-react"
+import { Beer, Coffee, Utensils, Footprints, Music, MapPin, Ticket, ShoppingBag, Palette, Briefcase, SquarePen, Trash2, ExternalLink, Badge, Store, Star, Phone } from "lucide-react"
 import { Button } from "./ui/button"
 import Image from "next/image"
+
+import { useItinerary } from "@/components/chat-page/itinerary-context"
+import { ItineraryStop } from "@/lib/itinerary-types"
+import { Separator } from "@radix-ui/react-separator"
 
 const journeyTimeline = [
   {
@@ -115,62 +121,211 @@ const journeyTimeline = [
 ]
 
 export function JourneyTimeline() {
+  const { itineraryData } = useItinerary()
+
   return (
     <Timeline>
-      {journeyTimeline.map((item) => (
-        <TimelineItem key={item.id}>
-          <TimelineHeader>
-            <TimelineSeparator className="bg-gray-300 w-[1px]" />
-            <TimelineIcon className={`
-              h-8 w-8 [&_svg]:h-4 [&_svg]:w-4 border-1 border-primary
-              ${item.isActive ? "bg-primary text-primary-foreground" : "bg-muted"}
-            `}>
-              {item.icon}
-            </TimelineIcon>
-          </TimelineHeader>
-          <TimelineBody className="group pl-1"> {/* 1. ADD 'group' for hover effects */}
-            {/* 2. Add Flex container to align content and buttons horizontally */}
-            <div className="flex w-full items-start justify-between">
+      {itineraryData?.stops?.map((stop: ItineraryStop, index: number) => {
+        // Format address: replace newlines with commas
+        const formattedAddress = stop.address?.split("\n").join(", ") || "Address unavailable"
 
-              {/* LEFT SIDE: Text Content (needs to be wrapped) */}
-              <div className="flex flex-col gap-1 pr-4">
-                <h3 className="flex items-center gap-1 font-dark text-md leading-none">
-                  <span>{item.title}</span>
-                  <ExternalLink className="h-3.5 w-3.5 pl-0.5 text-muted-foreground/50 hover:text-primary transition-colors" />
-                </h3>
-                <p>
-                  <span className="text-xs text-muted-foreground">Address: </span>
-                  <span className="text-xs">{item.address}</span>
-                </p>
-                <p className="-mt-2">
-                  <span className="text-xs text-muted-foreground">Hours: </span>
-                  <span className="text-xs pr-3">{item.hours}</span>
-                  <span className="text-xs text-muted-foreground">Phone: </span>
-                  <span className="text-xs">{item.phone}</span>
-                </p>
-              </div>
+        return (
+          <TimelineItem key={stop.id || index}>
+            <TimelineHeader>
+              <TimelineSeparator className="bg-gray-200 w-px" />
+              <TimelineIcon 
+              // className="bg-primary text-primary-foreground border-primary h-8 w-8 [&_svg]:h-4 [&_svg]:w-4"
+              className="h-8 w-8 [&_svg]:h-4 [&_svg]:w-4 border border-primary bg-muted"
+              >
+                 {/* You can dynamically change this icon based on category if you want */}
+                <Store />
+              </TimelineIcon>
+            </TimelineHeader>
+            
+            <TimelineBody className="group pl-1 w-full"> 
+              <div className="gap-0 flex flex-col w-full">
+                
+                {/* --- HEADER: Name, Price, Category --- */}
+                <div className="flex justify-between items-start gap-0">
+                  <div className="flex flex-col gap-1">
+                    <h3 
+                    // className="text-sm leading-tight text-foreground overflow-hidden text-ellipsis"
+                    className="
+                      text-sm leading-tight text-foreground
+                      overflow-hidden text-ellipsis whitespace-nowrap
+                      max-w-[230px]
+                    "
+                    title={stop.name}
+                    >
+                      {stop.name}
+                    </h3>
+                  </div>
 
-              {/* RIGHT SIDE: Button Group */}
-              <div className="flex shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 p-0"
-                >
-                  <SquarePen className="text-yellow-600" /> {/* Example Edit Icon */}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 p-0 text-destructive/80 hover:text-destructive"
-                >
-                  <Trash2 className="text-red-400" /> {/* Example Delete Icon */}
-                </Button>
+                  {/* Edit/Delete Actions (Visible on Hover) */}
+                  <div className="flex shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button variant="ghost" size="icon-sm" className="h-7 w-7">
+                      <SquarePen className="h-3 w-3 text-yellow-600" />
+                    </Button>
+                    <Button variant="ghost" size="icon-sm" className="h-7 w-7">
+                      <Trash2 className="h-3 w-3 text-red-400" />
+                    </Button>
+                    <Button variant="ghost" size="icon-sm" className="h-7 w-7">
+                      <ExternalLink className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* --- DETAILS: Rating, Address, Phone --- */}
+                <div className="grid gap-2 text-sm text-muted-foreground">
+                  
+                  {/* Rating */}
+                  <div className="flex items-center gap-1">
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <span className="text-xs font-semibold text-foreground">{stop.rating || "N/A"}</span>
+                    <span className="text-xs">
+                      ({stop.reviewCount || 0} reviews)
+                    </span>
+                  </div>
+
+                  {/* Address */}
+                  <div className="flex items-start gap-1">
+                    <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
+                    <span className="leading-tight">{formattedAddress}</span>
+                  </div>
+
+                  {/* Phone */}
+                  {stop.phone && (
+                    <div className="flex items-center gap-1">
+                      <Phone className="h-4 w-4 shrink-0" />
+                      <a 
+                        href={`tel:${stop.phone}`} 
+                        className="hover:text-primary hover:underline transition-colors"
+                      >
+                        {stop.phone}
+                      </a>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </TimelineBody>
-        </TimelineItem>
-      ))}
+            </TimelineBody>
+          </TimelineItem>
+        )
+      })}
     </Timeline>
   )
 }
+
+
+
+// Example result:
+/*
+{
+    "title": "One-Day Seattle Itinerary",
+    "summary": "Discover Seattle's best coffee shops, scenic views, and dining experiences in a single day.",
+    "date": null,
+    "center": {
+        "lat": 47.61777397467515,
+        "lng": -122.35321090209428
+    },
+    "stops": [
+        {
+            "id": "stop-1",
+            "name": "Storyville Coffee Company",
+            "address": "94 Pike St\nSte 34\nSeattle, WA 98101",
+            "url": "https://www.yelp.ca/biz/storyville-coffee-company-seattle-9?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+            "rating": 4.5,
+            "reviewCount": 2535,
+            "price": "$$",
+            "openStatus": null,
+            "phone": "+12067805777",
+            "coordinates": {
+                "lat": 47.60895949363687,
+                "lng": -122.34043157053928
+            },
+            "category": "Coffee & Tea"
+        },
+        {
+            "id": "stop-2",
+            "name": "Anchorhead Coffee - CenturyLink Plaza",
+            "address": "1600 7th Ave\nSte 105\nSeattle, WA 98101",
+            "url": "https://www.yelp.ca/biz/anchorhead-coffee-centurylink-plaza-seattle?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+            "rating": 4.5,
+            "reviewCount": 1012,
+            "price": "$$",
+            "openStatus": null,
+            "phone": "+12062222222",
+            "coordinates": {
+                "lat": 47.6133808022766,
+                "lng": -122.334691182469
+            },
+            "category": "Coffee & Tea"
+        },
+        {
+            "id": "stop-3",
+            "name": "Waterfall Garden",
+            "address": "219 2nd Ave S\nSeattle, WA 98104",
+            "url": "https://www.yelp.ca/biz/waterfall-garden-seattle?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+            "rating": 4.4,
+            "reviewCount": 213,
+            "price": null,
+            "openStatus": null,
+            "phone": "+12066246096",
+            "coordinates": {
+                "lat": 47.6002476387003,
+                "lng": -122.332151074236
+            },
+            "category": "Parks"
+        },
+        {
+            "id": "stop-4",
+            "name": "Discovery Park",
+            "address": "3801 Discovery Park Blvd\nSeattle, WA 98199",
+            "url": "https://www.yelp.ca/biz/discovery-park-seattle?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+            "rating": 4.6,
+            "reviewCount": 487,
+            "price": null,
+            "openStatus": null,
+            "phone": "+12066844075",
+            "coordinates": {
+                "lat": 47.66133141343713,
+                "lng": -122.41714398532145
+            },
+            "category": "Parks"
+        },
+        {
+            "id": "stop-5",
+            "name": "The Pink Door",
+            "address": "1919 Post Alley\nSeattle, WA 98101",
+            "url": "https://www.yelp.ca/biz/the-pink-door-seattle-4?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+            "rating": 4.4,
+            "reviewCount": 7852,
+            "price": "$$$",
+            "openStatus": null,
+            "phone": "+12064433241",
+            "coordinates": {
+                "lat": 47.6103652,
+                "lng": -122.3425604
+            },
+            "category": "Italian"
+        },
+        {
+            "id": "stop-6",
+            "name": "Six Seven Restaurant",
+            "address": "2411 Alaskan Way\nPier 67\nSeattle, WA 98121",
+            "url": "https://www.yelp.ca/biz/six-seven-restaurant-seattle-3?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+            "rating": 4.1,
+            "reviewCount": 1392,
+            "price": "$$$",
+            "openStatus": null,
+            "phone": "+12062694575",
+            "coordinates": {
+                "lat": 47.6123593,
+                "lng": -122.3522372
+            },
+            "category": "New American"
+        }
+    ]
+}
+*/

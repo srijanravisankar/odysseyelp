@@ -23,6 +23,8 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
+import { useItinerary } from "@/components/chat-page/itinerary-context"
+
 // ---------------- Date-range picker (uses shadcn Calendar) -------------------
 
 function formatDate(date?: Date) {
@@ -269,10 +271,128 @@ export function ChatSurveyHeader() {
 
   // ---- When user presses send on the search bar ---------------------------
 
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const { setItineraryData } = useItinerary()
+
   async function handleSend(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault() // prevent the form from reloading the page
 
+    
     if (!query.trim()) return
+    
+    setIsLoading(true)
+    setError(null)
+    
+    // Example:
+    // setItineraryData({
+    //     "title": "One-Day Seattle Itinerary",
+    //     "summary": "Discover Seattle's best coffee shops, scenic views, and dining experiences in a single day.",
+    //     "date": null,
+    //     "center": {
+    //         "lat": 47.61777397467515,
+    //         "lng": -122.35321090209428
+    //     },
+    //     "stops": [
+    //         {
+    //             "id": "stop-1",
+    //             "name": "Storyville Coffee Company",
+    //             "address": "94 Pike St\nSte 34\nSeattle, WA 98101",
+    //             "url": "https://www.yelp.ca/biz/storyville-coffee-company-seattle-9?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+    //             "rating": 4.5,
+    //             "reviewCount": 2535,
+    //             "price": "$$",
+    //             "openStatus": null,
+    //             "phone": "+12067805777",
+    //             "coordinates": {
+    //                 "lat": 47.60895949363687,
+    //                 "lng": -122.34043157053928
+    //             },
+    //             "category": "Coffee & Tea"
+    //         },
+    //         {
+    //             "id": "stop-2",
+    //             "name": "Anchorhead Coffee - CenturyLink Plaza",
+    //             "address": "1600 7th Ave\nSte 105\nSeattle, WA 98101",
+    //             "url": "https://www.yelp.ca/biz/anchorhead-coffee-centurylink-plaza-seattle?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+    //             "rating": 4.5,
+    //             "reviewCount": 1012,
+    //             "price": "$$",
+    //             "openStatus": null,
+    //             "phone": "+12062222222",
+    //             "coordinates": {
+    //                 "lat": 47.6133808022766,
+    //                 "lng": -122.334691182469
+    //             },
+    //             "category": "Coffee & Tea"
+    //         },
+    //         {
+    //             "id": "stop-3",
+    //             "name": "Waterfall Garden",
+    //             "address": "219 2nd Ave S\nSeattle, WA 98104",
+    //             "url": "https://www.yelp.ca/biz/waterfall-garden-seattle?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+    //             "rating": 4.4,
+    //             "reviewCount": 213,
+    //             "price": null,
+    //             "openStatus": null,
+    //             "phone": "+12066246096",
+    //             "coordinates": {
+    //                 "lat": 47.6002476387003,
+    //                 "lng": -122.332151074236
+    //             },
+    //             "category": "Parks"
+    //         },
+    //         {
+    //             "id": "stop-4",
+    //             "name": "Discovery Park",
+    //             "address": "3801 Discovery Park Blvd\nSeattle, WA 98199",
+    //             "url": "https://www.yelp.ca/biz/discovery-park-seattle?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+    //             "rating": 4.6,
+    //             "reviewCount": 487,
+    //             "price": null,
+    //             "openStatus": null,
+    //             "phone": "+12066844075",
+    //             "coordinates": {
+    //                 "lat": 47.66133141343713,
+    //                 "lng": -122.41714398532145
+    //             },
+    //             "category": "Parks"
+    //         },
+    //         {
+    //             "id": "stop-5",
+    //             "name": "The Pink Door",
+    //             "address": "1919 Post Alley\nSeattle, WA 98101",
+    //             "url": "https://www.yelp.ca/biz/the-pink-door-seattle-4?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+    //             "rating": 4.4,
+    //             "reviewCount": 7852,
+    //             "price": "$$$",
+    //             "openStatus": null,
+    //             "phone": "+12064433241",
+    //             "coordinates": {
+    //                 "lat": 47.6103652,
+    //                 "lng": -122.3425604
+    //             },
+    //             "category": "Italian"
+    //         },
+    //         {
+    //             "id": "stop-6",
+    //             "name": "Six Seven Restaurant",
+    //             "address": "2411 Alaskan Way\nPier 67\nSeattle, WA 98121",
+    //             "url": "https://www.yelp.ca/biz/six-seven-restaurant-seattle-3?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+    //             "rating": 4.1,
+    //             "reviewCount": 1392,
+    //             "price": "$$$",
+    //             "openStatus": null,
+    //             "phone": "+12062694575",
+    //             "coordinates": {
+    //                 "lat": 47.6123593,
+    //                 "lng": -122.3522372
+    //             },
+    //             "category": "New American"
+    //         }
+    //     ]
+    // })
+    // return;
 
     try {
       // ❗ Only include survey if user explicitly saved it
@@ -303,8 +423,15 @@ export function ChatSurveyHeader() {
       console.log("Composed prompt:", data.composedPrompt)
       console.log("Yelp AI response:", data.yelp)
       console.log("Itinerary:", data.itinerary)
+
+      if (data.itinerary) {
+        console.log("Setting global itinerary data...")
+        setItineraryData(data.itinerary)
+     }
     } catch (err) {
       console.error("Network error", err)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -790,12 +917,14 @@ export function ChatSurveyHeader() {
           className="w-full rounded-full"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          disabled={isLoading}
         />
         <Button
           type="submit"
           variant="default"
           size="icon-sm"
           className="rounded-full cursor-pointer"
+          disabled={isLoading}
         >
           <Send className="h-4 w-4" />
         </Button>

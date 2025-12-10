@@ -256,6 +256,7 @@ type ItineraryPlan = {
 Rules:
 - Use the Yelp business data to fill the stops, especially coordinates, rating,
   review_count, price, and phone.
+- id should be unique strings (e.g., "stop-1", "stop-2", etc) for each stop in an ItineraryPlan.
 - address should be the human-readable formatted address if available.
 - openStatus can be a short human readable string like
   "Open now · Closes at 10:00 PM" or null if unknown.
