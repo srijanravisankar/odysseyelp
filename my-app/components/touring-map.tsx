@@ -13,6 +13,10 @@
 //   initialZoom?: number;
 // };
 
+// // Map styles
+// const LIGHT_MAP_STYLE = "mapbox://styles/mapbox/streets-v12";
+// const DARK_MAP_STYLE = "mapbox://styles/mapbox/navigation-night-v1";
+
 // export function TouringMap({
 //   initialLng = -79.3832, // Toronto-ish
 //   initialLat = 43.6532,
@@ -22,21 +26,82 @@
 //   const containerRef = useRef<HTMLDivElement | null>(null);
 //   const mapRef = useRef<mapboxgl.Map | null>(null);
 
-//   // NEW: keep track of markers we’ve added so we can clear them
+//   // Keep track of markers we’ve added so we can clear them
 //   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
-//   // NEW: access itinerary + selected stops from context
-//   const { itineraryData, selectedStopIds } = useItinerary();
+//   // Access itinerary + selected stops + theme from context
+//   const { itineraryData, selectedStopIds, appTheme } = useItinerary();
 
 //   const [viewMode, setViewMode] = useState<"2d" | "3d">("3d");
 //   const [projection, setProjection] = useState<"globe" | "mercator">("globe");
 
+//   // Helper to add 3D buildings (reused for init and theme switch)
+//   const add3DBuildings = (
+//     map: mapboxgl.Map,
+//     theme: "light" | "dark" | "system"
+//   ) => {
+//     // Safety check: ensure style is loaded before accessing layers
+//     if (!map.isStyleLoaded()) return;
+
+//     const layers = map.getStyle().layers;
+//     if (!layers) return;
+
+//     const labelLayerId = layers.find(
+//       (layer) =>
+//         layer.type === "symbol" && (layer.layout as any)?.["text-field"]
+//     )?.id;
+
+//     // Check if layer already exists to avoid errors
+//     if (map.getLayer("3d-buildings")) return;
+
+//     if (labelLayerId) {
+//       map.addLayer(
+//         {
+//           id: "3d-buildings",
+//           source: "composite",
+//           "source-layer": "building",
+//           filter: ["==", "extrude", "true"],
+//           type: "fill-extrusion",
+//           minzoom: 15,
+//           paint: {
+//             // Darker buildings for dark mode, lighter for light mode
+//             "fill-extrusion-color": theme === "dark" ? "#444" : "#aaa",
+//             "fill-extrusion-height": [
+//               "interpolate",
+//               ["linear"],
+//               ["zoom"],
+//               15,
+//               0,
+//               15.05,
+//               ["get", "height"],
+//             ],
+//             "fill-extrusion-base": [
+//               "interpolate",
+//               ["linear"],
+//               ["zoom"],
+//               15,
+//               0,
+//               15.05,
+//               ["get", "min_height"],
+//             ],
+//             "fill-extrusion-opacity": 0.6,
+//           },
+//         },
+//         labelLayerId
+//       );
+//     }
+//   };
+
+//   // 1. Initialize Map
 //   useEffect(() => {
 //     if (!containerRef.current || mapRef.current) return;
 
+//     // Determine initial style
+//     const initialStyle = appTheme === "dark" ? DARK_MAP_STYLE : LIGHT_MAP_STYLE;
+
 //     const map = new mapboxgl.Map({
 //       container: containerRef.current,
-//       style: "mapbox://styles/mapbox/streets-v12", // roads + POIs
+//       style: initialStyle,
 //       center: [initialLng, initialLat],
 //       zoom: initialZoom,
 //       pitch: 60, // start in 3D
@@ -50,62 +115,59 @@
 //     setProjection("globe");
 
 //     map.on("load", () => {
-//       // 3D buildings
-//       const layers = map.getStyle().layers;
-//       if (!layers) return;
-
-//       const labelLayerId = layers.find(
-//         (layer) =>
-//           layer.type === "symbol" && (layer.layout as any)?.["text-field"]
-//       )?.id;
-
-//       if (labelLayerId) {
-//         map.addLayer(
-//           {
-//             id: "3d-buildings",
-//             source: "composite",
-//             "source-layer": "building",
-//             filter: ["==", "extrude", "true"],
-//             type: "fill-extrusion",
-//             minzoom: 15,
-//             paint: {
-//               "fill-extrusion-color": "#aaa",
-//               "fill-extrusion-height": [
-//                 "interpolate",
-//                 ["linear"],
-//                 ["zoom"],
-//                 15,
-//                 0,
-//                 15.05,
-//                 ["get", "height"],
-//               ],
-//               "fill-extrusion-base": [
-//                 "interpolate",
-//                 ["linear"],
-//                 ["zoom"],
-//                 15,
-//                 0,
-//                 15.05,
-//                 ["get", "min_height"],
-//               ],
-//               "fill-extrusion-opacity": 0.6,
-//             },
-//           },
-//           labelLayerId
-//         );
-//       }
+//       add3DBuildings(map, appTheme);
 //     });
 
 //     return () => {
-//       // remove any markers we created
 //       markersRef.current.forEach((marker) => marker.remove());
 //       markersRef.current = [];
-
 //       map.remove();
 //       mapRef.current = null;
 //     };
-//   }, [initialLng, initialLat, initialZoom]);
+//   }, [initialLng, initialLat, initialZoom]); // Run once on mount
 
+//   // 2. Handle Theme Changes (Switch Style)
+//   useEffect(() => {
+//     if (!mapRef.current) return;
+//     const map = mapRef.current;
+
+//     const targetStyle = appTheme === "dark" ? DARK_MAP_STYLE : LIGHT_MAP_STYLE;
+
+//     // Only update if the style has actually changed
+//     // We check if the style is loaded first to avoid errors,
+//     // but map.setStyle is generally safe to call.
+//     // However, we removed the crashing 'map.getStyle()' call here.
+
+//     try {
+//       map.setStyle(targetStyle);
+//     } catch (e) {
+//       console.error("Error setting map style:", e);
+//     }
+
+//     // setStyle removes all layers. We wait for 'style.load' to add 3D buildings back.
+//     map.once("style.load", () => {
+//       add3DBuildings(map, appTheme);
+//       // Ensure projection is maintained
+//       map.setProjection(projection);
+//     });
+//   }, [appTheme]);
+
+//   // 3. Handle Resizing (Fix for Sidebar toggle)
+//   useEffect(() => {
+//     if (!containerRef.current) return;
+
+//     const resizeObserver = new ResizeObserver(() => {
+//       if (mapRef.current) {
+//         mapRef.current.resize();
+//       }
+//     });
+
+//     resizeObserver.observe(containerRef.current);
+
+//     return () => resizeObserver.disconnect();
+//   }, []);
+
+//   // 4. Update Center
 //   useEffect(() => {
 //     if (!mapRef.current || !itineraryData?.center) return;
 
@@ -115,6 +177,7 @@
 //     mapRef.current.setCenter([lng, lat]);
 //   }, [itineraryData?.center?.lat, itineraryData?.center?.lng]);
 
+//   // 5. Update Markers
 //   useEffect(() => {
 //     if (!mapRef.current) return;
 //     if (!itineraryData?.stops) return;
@@ -136,7 +199,6 @@
 //       const stopId = stop.id ?? String(index);
 //       if (!selectedStopIds.includes(stopId)) return;
 
-//       // 🔑 This matches the shape in your example (coordinates.lat / coordinates.lng)
 //       const lat = stop.coordinates?.lat;
 //       const lng = stop.coordinates?.lng;
 
@@ -179,7 +241,6 @@
 //       pitch: 60,
 //       bearing: -20,
 //       duration: 800,
-//       // small upward offset so the scene feels more visually centered
 //       offset: [0, -100],
 //     });
 //   };
@@ -264,6 +325,10 @@ type TouringMapProps = {
   initialZoom?: number;
 };
 
+// Map styles
+const LIGHT_MAP_STYLE = "mapbox://styles/mapbox/streets-v12";
+const DARK_MAP_STYLE = "mapbox://styles/mapbox/navigation-night-v1";
+
 export function TouringMap({
   initialLng = -79.3832, // Toronto-ish
   initialLat = 43.6532,
@@ -273,22 +338,82 @@ export function TouringMap({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
-  // NEW: keep track of markers we’ve added so we can clear them
+  // Keep track of markers we’ve added so we can clear them
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
-  // NEW: access itinerary + selected stops from context
-  const { itineraryData, selectedStopIds } = useItinerary();
+  // Access itinerary + selected stops + theme from context
+  const { itineraryData, selectedStopIds, appTheme } = useItinerary();
 
   const [viewMode, setViewMode] = useState<"2d" | "3d">("3d");
   const [projection, setProjection] = useState<"globe" | "mercator">("globe");
+
+  // Helper to add 3D buildings (reused for init and theme switch)
+  const add3DBuildings = (
+    map: mapboxgl.Map,
+    theme: "light" | "dark" | "system"
+  ) => {
+    // 1. Get the style object safely
+    const style = map.getStyle();
+    if (!style || !style.layers) return;
+
+    const layers = style.layers;
+
+    const labelLayerId = layers.find(
+      (layer) =>
+        layer.type === "symbol" && (layer.layout as any)?.["text-field"]
+    )?.id;
+
+    // Check if layer already exists to avoid errors
+    if (map.getLayer("3d-buildings")) return;
+
+    if (labelLayerId) {
+      map.addLayer(
+        {
+          id: "3d-buildings",
+          source: "composite",
+          "source-layer": "building",
+          filter: ["==", "extrude", "true"],
+          type: "fill-extrusion",
+          minzoom: 15,
+          paint: {
+            // Darker buildings for dark mode, lighter for light mode
+            "fill-extrusion-color": theme === "dark" ? "#444" : "#aaa",
+            "fill-extrusion-height": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              15,
+              0,
+              15.05,
+              ["get", "height"],
+            ],
+            "fill-extrusion-base": [
+              "interpolate",
+              ["linear"],
+              ["zoom"],
+              15,
+              0,
+              15.05,
+              ["get", "min_height"],
+            ],
+            "fill-extrusion-opacity": 0.6,
+          },
+        },
+        labelLayerId
+      );
+    }
+  };
 
   // 1. Initialize Map
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
+    // Determine initial style
+    const initialStyle = appTheme === "dark" ? DARK_MAP_STYLE : LIGHT_MAP_STYLE;
+
     const map = new mapboxgl.Map({
       container: containerRef.current,
-      style: "mapbox://styles/mapbox/streets-v12", // roads + POIs
+      style: initialStyle,
       center: [initialLng, initialLat],
       zoom: initialZoom,
       pitch: 60, // start in 3D
@@ -302,63 +427,41 @@ export function TouringMap({
     setProjection("globe");
 
     map.on("load", () => {
-      // 3D buildings
-      const layers = map.getStyle().layers;
-      if (!layers) return;
-
-      const labelLayerId = layers.find(
-        (layer) =>
-          layer.type === "symbol" && (layer.layout as any)?.["text-field"]
-      )?.id;
-
-      if (labelLayerId) {
-        map.addLayer(
-          {
-            id: "3d-buildings",
-            source: "composite",
-            "source-layer": "building",
-            filter: ["==", "extrude", "true"],
-            type: "fill-extrusion",
-            minzoom: 15,
-            paint: {
-              "fill-extrusion-color": "#aaa",
-              "fill-extrusion-height": [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                15,
-                0,
-                15.05,
-                ["get", "height"],
-              ],
-              "fill-extrusion-base": [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                15,
-                0,
-                15.05,
-                ["get", "min_height"],
-              ],
-              "fill-extrusion-opacity": 0.6,
-            },
-          },
-          labelLayerId
-        );
-      }
+      add3DBuildings(map, appTheme);
     });
 
     return () => {
-      // remove any markers we created
       markersRef.current.forEach((marker) => marker.remove());
       markersRef.current = [];
-
       map.remove();
       mapRef.current = null;
     };
-  }, [initialLng, initialLat, initialZoom]);
+  }, [initialLng, initialLat, initialZoom]); // Run once on mount
 
-  // 2. Handle Resizing (The FIX)
+  // 2. Handle Theme Changes (Switch Style)
+  useEffect(() => {
+    if (!mapRef.current) return;
+    const map = mapRef.current;
+
+    const targetStyle = appTheme === "dark" ? DARK_MAP_STYLE : LIGHT_MAP_STYLE;
+
+    // Avoid switching if already on the correct style to prevent reload flash
+    // (Optional optimization, but map.setStyle handles it reasonably well)
+    try {
+      map.setStyle(targetStyle);
+    } catch (e) {
+      console.error("Error setting map style:", e);
+    }
+
+    // setStyle removes all layers. We wait for 'style.load' to add 3D buildings back.
+    map.once("style.load", () => {
+      add3DBuildings(map, appTheme);
+      // Ensure projection is maintained
+      map.setProjection(projection);
+    });
+  }, [appTheme]);
+
+  // 3. Handle Resizing (Fix for Sidebar toggle)
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -373,7 +476,7 @@ export function TouringMap({
     return () => resizeObserver.disconnect();
   }, []);
 
-  // 3. Update Center
+  // 4. Update Center
   useEffect(() => {
     if (!mapRef.current || !itineraryData?.center) return;
 
@@ -383,7 +486,7 @@ export function TouringMap({
     mapRef.current.setCenter([lng, lat]);
   }, [itineraryData?.center?.lat, itineraryData?.center?.lng]);
 
-  // 4. Update Markers
+  // 5. Update Markers
   useEffect(() => {
     if (!mapRef.current) return;
     if (!itineraryData?.stops) return;
@@ -405,7 +508,6 @@ export function TouringMap({
       const stopId = stop.id ?? String(index);
       if (!selectedStopIds.includes(stopId)) return;
 
-      // 🔑 This matches the shape in your example (coordinates.lat / coordinates.lng)
       const lat = stop.coordinates?.lat;
       const lng = stop.coordinates?.lng;
 
@@ -448,7 +550,6 @@ export function TouringMap({
       pitch: 60,
       bearing: -20,
       duration: 800,
-      // small upward offset so the scene feels more visually centered
       offset: [0, -100],
     });
   };
