@@ -20,6 +20,8 @@
   },
   "registries": {
     "@creative-tim": "https://www.creative-tim.com/ui/r/{name}.json",
-    "@magicui": "https://magicui.design/r/{name}.json"
+    "@magicui": "https://magicui.design/r/{name}.json",
+    "@eldoraui": "https://eldoraui.site/r/{name}.json",
+    "@animate-ui": "https://animate-ui.com/r/{name}.json"
   }
 }
