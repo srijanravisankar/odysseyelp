@@ -73,7 +73,10 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // run on everything except Next internals & static assets
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.svg).*)",
+    // run middleware on all routes EXCEPT:
+    // - Next internals
+    // - favicon
+    // - most static images/assets by file extension
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)).*)",
   ],
 };
