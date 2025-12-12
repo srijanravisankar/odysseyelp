@@ -1,14 +1,27 @@
+// "use client";
+
+// import { useState } from "react";
+// import { Card, CardContent, CardFooter } from "@/components/ui/card";
+// import { ItineraryScrollArea } from "./itinerary-scroll-area";
+// import { TouringMap } from "@/components/touring-map";
+// import { ButtonGroup } from "@/components/ui/button-group";
+// import { Button } from "../ui/button";
+// import { CircleCheckBig, SquarePen, Route } from "lucide-react";
+// import { useItinerary } from "./itinerary-context";
+
 "use client";
 
-import { useState } from "react";
+import React, { Suspense, useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ItineraryScrollArea } from "./itinerary-scroll-area";
 import { TouringMap } from "@/components/touring-map";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Button } from "../ui/button";
-// 1. Import Route icon
 import { CircleCheckBig, SquarePen, Route } from "lucide-react";
 import { useItinerary } from "./itinerary-context";
+
+import { Calendar } from "@/components/calendar/calendar";
+import { CalendarSkeleton } from "@/components/calendar/skeletons/calendar-skeleton";
 
 // 2. Remove LiveButton import
 // import { LiveButton } from "@/components/ui/live-button";
@@ -33,6 +46,8 @@ export function Itinerary() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [startAddress, setStartAddress] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [viewMode, setViewMode] = useState<"map" | "calendar">("map");
 
   // --- Logic to Find Best Route ---
   const handleFindRoute = async () => {
@@ -133,9 +148,49 @@ export function Itinerary() {
         </div>
       </CardContent>
 
-      <CardFooter className="p-0 flex-1 pr-3 pl-3 pt-3 pb-3 shrink-0">
+      {/* <CardFooter className="p-0 flex-1 pr-3 pl-3 pt-3 pb-3 shrink-0">
         <div className="relative w-full flex-1 h-full overflow-hidden rounded-xl border bg-muted">
           <TouringMap />
+        </div>
+      </CardFooter> */}
+      <CardFooter className="p-0 flex-1 pr-3 pl-3 pt-3 pb-3 shrink-0">
+        <div className="flex h-full w-full flex-col gap-2">
+          {/* Top row: Map / Calendar toggle */}
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-muted-foreground">
+              View
+            </span>
+
+            <ButtonGroup>
+              <Button
+                type="button"
+                variant={viewMode === "map" ? "default" : "ghost"}
+                className="cursor-pointer"
+                onClick={() => setViewMode("map")}
+              >
+                Map View
+              </Button>
+              <Button
+                type="button"
+                variant={viewMode === "calendar" ? "default" : "ghost"}
+                className="cursor-pointer"
+                onClick={() => setViewMode("calendar")}
+              >
+                Calendar View
+              </Button>
+            </ButtonGroup>
+          </div>
+
+          {/* Main pane: map OR calendar */}
+          <div className="relative flex-1 overflow-hidden rounded-xl border bg-muted">
+            {viewMode === "map" ? (
+              <TouringMap />
+            ) : (
+              <Suspense fallback={<CalendarSkeleton />}>
+                <Calendar />
+              </Suspense>
+            )}
+          </div>
         </div>
       </CardFooter>
 
