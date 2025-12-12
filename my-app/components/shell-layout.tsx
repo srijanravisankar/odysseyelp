@@ -56,16 +56,20 @@ export default function ShellLayout({
 }) {
   const pathname = usePathname();
 
-  // 1. Identify pages that need the extra wide sidebar
-  const isWideSidebar = pathname === "/" || pathname.startsWith("/touring");
+  // 1. Identify pages that need the extra wide sidebar (not home page anymore since we hide the right sidebar there)
+  const isWideSidebar = pathname.startsWith("/touring");
 
-  // 2. Identify if we're on the home page (hide internal header)
+  // 2. Identify if we're on the home page (hide internal header and right sidebar)
   const isHomePage = pathname === "/";
 
   // 3. Set the width.
-  // We tried 450px and it was too small. Let's try 550px.
-  // You can increase this number (e.g. "600px") if it's still cutting off.
-  const sidebarWidth = isWideSidebar ? "550px" : "350px";
+  // Home page uses narrow sidebar since right panel is hidden
+  // Touring uses wide sidebar for the map content
+  const sidebarWidth = isWideSidebar
+    ? "550px"
+    : isHomePage
+    ? "calc(var(--sidebar-width-icon) + 16px)"
+    : "350px";
 
   return (
     <ItineraryProvider>

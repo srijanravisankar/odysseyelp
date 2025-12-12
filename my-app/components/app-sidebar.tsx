@@ -216,16 +216,20 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
         </SidebarFooter>
       </Sidebar>
 
-      {/* Right sidebar – your "inside navbar" area */}
-      <Sidebar collapsible="none" className="hidden flex-1 md:flex">
-        <SidebarHeader className="gap-3 border-b p-3">
-          {activeItem?.title}
-        </SidebarHeader>
+      {/* Right sidebar – your "inside navbar" area (hidden on home page) */}
+      {pathname !== "/" && (
+        <Sidebar collapsible="none" className="hidden flex-1 md:flex">
+          <SidebarHeader className="gap-3 border-b p-3">
+            {activeItem?.title}
+          </SidebarHeader>
 
-        <SidebarContent className="scrollbar-hide px-0">
-          <SidebarGroup className="px-0">{currentSidebarContent}</SidebarGroup>
-        </SidebarContent>
-      </Sidebar>
+          <SidebarContent className="scrollbar-hide px-0">
+            <SidebarGroup className="px-0">
+              {currentSidebarContent}
+            </SidebarGroup>
+          </SidebarContent>
+        </Sidebar>
+      )}
     </Sidebar>
   );
 }
