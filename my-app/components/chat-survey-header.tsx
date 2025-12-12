@@ -10,6 +10,16 @@ import {
   FormInput,
   NotebookPen,
   Filter,
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  MapPin,
+  Users,
+  DollarSign,
+  Utensils,
+  Sparkles,
+  ShieldCheck,
+  Ban,
 } from "lucide-react";
 
 import {
@@ -37,6 +47,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 
 import { useItinerary } from "@/components/chat-page/itinerary-context";
 
@@ -157,8 +169,37 @@ function toggleInArray(
 
 // ---------------- Main header component used on /chat -----------------------
 
+// Step definitions for multi-step form
+const SURVEY_STEPS = [
+  { id: 1, title: "Trip Basics", description: "Who's traveling?", icon: Users },
+  { id: 2, title: "Location", description: "Where & when?", icon: MapPin },
+  {
+    id: 3,
+    title: "Budget",
+    description: "Your spending range",
+    icon: DollarSign,
+  },
+  {
+    id: 4,
+    title: "Food & Dietary",
+    description: "Dietary preferences",
+    icon: Utensils,
+  },
+  {
+    id: 5,
+    title: "Vibe",
+    description: "Atmosphere preferences",
+    icon: Sparkles,
+  },
+  { id: 6, title: "Quality", description: "Rating filters", icon: ShieldCheck },
+  { id: 7, title: "Avoid", description: "Things to skip", icon: Ban },
+] as const;
+
+const TOTAL_STEPS = SURVEY_STEPS.length;
+
 export function ChatSurveyHeader() {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
 
   // search query (right side)
   const [query, setQuery] = useState("");
@@ -276,6 +317,45 @@ export function ChatSurveyHeader() {
     }
 
     setDialogOpen(false);
+    setCurrentStep(1); // Reset to first step when closing
+  };
+
+  // ---- Save and continue to next step ------------------------------------
+  const handleSaveAndContinue = () => {
+    // Save current progress
+    const surveyContext = buildSurveyContext();
+    try {
+      localStorage.setItem("ranger-yelp-survey", JSON.stringify(surveyContext));
+      setSavedSurvey(surveyContext);
+    } catch (e) {
+      console.error("Failed to save survey context", e);
+    }
+
+    if (currentStep < TOTAL_STEPS) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      handleSaveSurvey();
+    }
+  };
+
+  // ---- Navigation helpers ------------------------------------------------
+  const goToNextStep = () => {
+    if (currentStep < TOTAL_STEPS) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const goToPrevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    setDialogOpen(open);
+    if (!open) {
+      // Don't reset step, so user can continue where they left off
+    }
   };
 
   // ---- When user presses send on the search bar ---------------------------
@@ -446,101 +526,72 @@ export function ChatSurveyHeader() {
 
   // --------------------------- RENDER --------------------------------------
 
-  return (
-    <div className="flex w-full items-center gap-3 max-w-4xl mx-auto">
-      {/* LEFT: survey dialog trigger */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogTrigger asChild>
-          <Button
-            variant="ghost"
-            className="flex items-center gap-0 rounded-full -mr-2 cursor-pointer"
-          >
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Filter className="text-xl" />
-              </TooltipTrigger>
-              <TooltipContent>Trip Variant</TooltipContent>
-            </Tooltip>
-            <span className="inline sm:hidden">Trip survey</span>
-          </Button>
-        </DialogTrigger>
-
-        <DialogContent
-          className={cn(
-            "max-w-3xl w-[min(100%-2rem,900px)] max-h-[80vh] overflow-y-auto",
-            "rounded-2xl border border-border/60 bg-background/80",
-            "backdrop-blur-xl shadow-2xl space-y-6"
-          )}
-        >
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Form className="h-4 w-4" />
-              Trip survey (optional)
-            </DialogTitle>
-            <DialogDescription>
-              Add a bit of context and we&apos;ll use this later to shape a much
-              better Yelp AI itinerary for you.
-            </DialogDescription>
-          </DialogHeader>
-
-          {/* Trip basics */}
-          <section className="space-y-3">
-            <h3 className="text-sm font-semibold">Trip basics</h3>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label className="text-xs">Trip type</Label>
-                <div className="flex flex-wrap gap-2">
-                  {["solo", "friends", "family", "date", "work"].map((t) => (
-                    <Button
-                      key={t}
-                      type="button"
-                      size="sm"
-                      variant={tripType === t ? "default" : "outline"}
-                      className="rounded-full text-xs"
-                      onClick={() => setTripType(t as TripType)}
-                    >
-                      {t}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-xs">Vibe</Label>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    "cozy",
-                    "food-focused",
-                    "adventurous",
-                    "romantic",
-                    "chill",
-                  ].map((v) => (
-                    <Button
-                      key={v}
-                      type="button"
-                      size="sm"
-                      variant={tripVibe.includes(v) ? "default" : "outline"}
-                      className="rounded-full text-xs"
-                      onClick={() => toggleInArray(v, tripVibe, setTripVibe)}
-                    >
-                      {v}
-                    </Button>
-                  ))}
-                </div>
+  // Step content renderer
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                Who&apos;s going on this trip?
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                {["solo", "friends", "family", "date", "work"].map((t) => (
+                  <Button
+                    key={t}
+                    type="button"
+                    size="sm"
+                    variant={tripType === t ? "default" : "outline"}
+                    className="rounded-full capitalize"
+                    onClick={() => setTripType(t as TripType)}
+                  >
+                    {t}
+                  </Button>
+                ))}
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                What vibe are you looking for?
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  "cozy",
+                  "food-focused",
+                  "adventurous",
+                  "romantic",
+                  "chill",
+                  "lively",
+                  "cultural",
+                ].map((v) => (
+                  <Button
+                    key={v}
+                    type="button"
+                    size="sm"
+                    variant={tripVibe.includes(v) ? "default" : "outline"}
+                    className="rounded-full capitalize"
+                    onClick={() => toggleInArray(v, tripVibe, setTripVibe)}
+                  >
+                    {v}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label className="text-xs">Occasion</Label>
+                <Label className="text-sm font-medium">Special occasion?</Label>
                 <Input
                   value={tripOccasion}
                   onChange={(e) => setTripOccasion(e.target.value)}
                   placeholder="anniversary, birthday, first date..."
+                  className="h-10"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs">Number of people</Label>
+                <Label className="text-sm font-medium">Number of people</Label>
                 <Input
                   type="number"
                   min={1}
@@ -552,34 +603,38 @@ export function ChatSurveyHeader() {
                         : parseInt(e.target.value)
                     )
                   }
+                  className="h-10"
                 />
               </div>
             </div>
-          </section>
+          </div>
+        );
 
-          {/* Location & dates */}
-          <section className="space-y-3">
-            <h3 className="text-sm font-semibold">Location &amp; dates</h3>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label className="text-xs">Area / neighborhood</Label>
-                <Input
-                  value={area}
-                  onChange={(e) => setArea(e.target.value)}
-                  placeholder="Downtown Toronto, Central Park, etc."
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs">Date range</Label>
-                <SurveyDateRangePicker
-                  value={dateRange}
-                  onChange={setDateRange}
-                />
-              </div>
+      case 2:
+        return (
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                Where are you exploring?
+              </Label>
+              <Input
+                value={area}
+                onChange={(e) => setArea(e.target.value)}
+                placeholder="Downtown Toronto, Central Park, etc."
+                className="h-10"
+              />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs">Times of day</Label>
+              <Label className="text-sm font-medium">When?</Label>
+              <SurveyDateRangePicker
+                value={dateRange}
+                onChange={setDateRange}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">What time of day?</Label>
               <div className="flex flex-wrap gap-2">
                 {["morning", "afternoon", "evening", "late night"].map((t) => (
                   <Button
@@ -587,7 +642,7 @@ export function ChatSurveyHeader() {
                     type="button"
                     size="sm"
                     variant={timesOfDay.includes(t) ? "default" : "outline"}
-                    className="rounded-full text-xs"
+                    className="rounded-full capitalize"
                     onClick={() => toggleInArray(t, timesOfDay, setTimesOfDay)}
                   >
                     {t}
@@ -595,41 +650,50 @@ export function ChatSurveyHeader() {
                 ))}
               </div>
             </div>
-          </section>
+          </div>
+        );
 
-          {/* Budget & travel */}
-          <section className="space-y-3">
-            <h3 className="text-sm font-semibold">Budget &amp; travel</h3>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="space-y-2">
-                <Label className="text-xs">Price level</Label>
-                <div className="flex flex-wrap gap-2">
-                  {["$", "$$", "$$$", "$$$$"].map((p) => (
-                    <Button
-                      key={p}
-                      type="button"
-                      size="sm"
-                      variant={priceLevel === p ? "default" : "outline"}
-                      className="rounded-full text-xs"
-                      onClick={() =>
-                        setPriceLevel(p as "$" | "$$" | "$$$" | "$$$$")
-                      }
-                    >
-                      {p}
-                    </Button>
-                  ))}
-                </div>
+      case 3:
+        return (
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">
+                Price range preference
+              </Label>
+              <div className="flex flex-wrap gap-2">
+                {["$", "$$", "$$$", "$$$$"].map((p) => (
+                  <Button
+                    key={p}
+                    type="button"
+                    size="sm"
+                    variant={priceLevel === p ? "default" : "outline"}
+                    className="rounded-full min-w-[48px]"
+                    onClick={() =>
+                      setPriceLevel(p as "$" | "$$" | "$$$" | "$$$$")
+                    }
+                  >
+                    {p}
+                  </Button>
+                ))}
               </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label className="text-xs">Per person per day</Label>
+                <Label className="text-sm font-medium">
+                  Budget per person per day
+                </Label>
                 <Input
                   value={perPersonRange}
                   onChange={(e) => setPerPersonRange(e.target.value)}
                   placeholder="e.g. 50-100"
+                  className="h-10"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs">Max travel time (mins)</Label>
+                <Label className="text-sm font-medium">
+                  Max travel time (minutes)
+                </Label>
                 <Input
                   type="number"
                   min={0}
@@ -641,12 +705,15 @@ export function ChatSurveyHeader() {
                         : parseInt(e.target.value)
                     )
                   }
+                  className="h-10"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs">Transport</Label>
+              <Label className="text-sm font-medium">
+                How will you get around?
+              </Label>
               <div className="flex flex-wrap gap-2">
                 {["walking", "public transit", "car", "bike"].map((t) => (
                   <Button
@@ -654,7 +721,7 @@ export function ChatSurveyHeader() {
                     type="button"
                     size="sm"
                     variant={transport === t ? "default" : "outline"}
-                    className="rounded-full text-xs"
+                    className="rounded-full capitalize"
                     onClick={() => setTransport(t)}
                   >
                     {t}
@@ -662,53 +729,57 @@ export function ChatSurveyHeader() {
                 ))}
               </div>
             </div>
-          </section>
+          </div>
+        );
 
-          {/* Food & dietary */}
-          <section className="space-y-3">
-            <h3 className="text-sm font-semibold">Food &amp; dietary</h3>
+      case 4:
+        return (
+          <div className="space-y-6">
             <div className="space-y-2">
-              <Label className="text-xs">Dietary needs</Label>
+              <Label className="text-sm font-medium">
+                Any dietary requirements?
+              </Label>
               <div className="flex flex-wrap gap-2">
-                {["halal", "kosher", "vegan", "vegetarian", "gluten-free"].map(
-                  (d) => (
-                    <Button
-                      key={d}
-                      type="button"
-                      size="sm"
-                      variant={dietary.includes(d) ? "default" : "outline"}
-                      className="rounded-full text-xs"
-                      onClick={() => toggleInArray(d, dietary, setDietary)}
-                    >
-                      {d}
-                    </Button>
-                  )
-                )}
+                {[
+                  "halal",
+                  "kosher",
+                  "vegan",
+                  "vegetarian",
+                  "gluten-free",
+                  "dairy-free",
+                  "nut-free",
+                ].map((d) => (
+                  <Button
+                    key={d}
+                    type="button"
+                    size="sm"
+                    variant={dietary.includes(d) ? "default" : "outline"}
+                    className="rounded-full capitalize"
+                    onClick={() => toggleInArray(d, dietary, setDietary)}
+                  >
+                    {d}
+                  </Button>
+                ))}
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs">Preferred cuisines</Label>
+              <Label className="text-sm font-medium">Cuisine preferences</Label>
               <Input
                 value={cuisines}
                 onChange={(e) => setCuisines(e.target.value)}
-                placeholder="e.g. Middle Eastern, Asian"
+                placeholder="e.g. Middle Eastern, Asian, Italian"
+                className="h-10"
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs">Alcohol preference</Label>
+              <Label className="text-sm font-medium">Alcohol preference</Label>
               <div className="flex flex-wrap gap-2">
                 {[
                   { value: "no_alcohol", label: "No alcohol" },
-                  {
-                    value: "okay_with_alcohol",
-                    label: "Okay with alcohol",
-                  },
-                  {
-                    value: "must_have_alcohol",
-                    label: "Must have alcohol",
-                  },
+                  { value: "okay_with_alcohol", label: "Okay with alcohol" },
+                  { value: "must_have_alcohol", label: "Must have drinks 🍷" },
                 ].map((opt) => (
                   <Button
                     key={opt.value}
@@ -717,7 +788,7 @@ export function ChatSurveyHeader() {
                     variant={
                       alcoholPreference === opt.value ? "default" : "outline"
                     }
-                    className="rounded-full text-xs"
+                    className="rounded-full"
                     onClick={() =>
                       setAlcoholPreference(opt.value as AlcoholPref)
                     }
@@ -727,98 +798,98 @@ export function ChatSurveyHeader() {
                 ))}
               </div>
             </div>
-          </section>
+          </div>
+        );
 
-          {/* Vibe preferences */}
-          <section className="space-y-3">
-            <h3 className="text-sm font-semibold">Vibe preferences</h3>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="space-y-2">
-                <Label className="text-xs">Noise</Label>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { value: "chill", label: "Chill" },
-                    { value: "balanced", label: "Balanced" },
-                    { value: "energetic", label: "Energetic" },
-                  ].map((opt) => (
-                    <Button
-                      key={opt.value}
-                      type="button"
-                      size="sm"
-                      variant={noise === opt.value ? "default" : "outline"}
-                      className="rounded-full text-xs"
-                      onClick={() => setNoise(opt.value as NoiseLevel)}
-                    >
-                      {opt.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs">Crowd</Label>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { value: "less_crowded", label: "Less crowded" },
-                    { value: "average", label: "Average" },
-                    { value: "busy", label: "Busy" },
-                  ].map((opt) => (
-                    <Button
-                      key={opt.value}
-                      type="button"
-                      size="sm"
-                      variant={crowd === opt.value ? "default" : "outline"}
-                      className="rounded-full text-xs"
-                      onClick={() => setCrowd(opt.value as CrowdLevel)}
-                    >
-                      {opt.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs">Indoor / outdoor</Label>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { value: "indoor", label: "Indoor" },
-                    { value: "outdoor", label: "Outdoor" },
-                    { value: "mix", label: "Mix" },
-                  ].map((opt) => (
-                    <Button
-                      key={opt.value}
-                      type="button"
-                      size="sm"
-                      variant={
-                        indoorOutdoor === opt.value ? "default" : "outline"
-                      }
-                      className="rounded-full text-xs"
-                      onClick={() =>
-                        setIndoorOutdoor(opt.value as IndoorOutdoor)
-                      }
-                    >
-                      {opt.label}
-                    </Button>
-                  ))}
-                </div>
+      case 5:
+        return (
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Noise level</Label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { value: "chill", label: "🧘 Chill & quiet" },
+                  { value: "balanced", label: "⚖️ Balanced" },
+                  { value: "energetic", label: "🎉 Energetic" },
+                ].map((opt) => (
+                  <Button
+                    key={opt.value}
+                    type="button"
+                    size="sm"
+                    variant={noise === opt.value ? "default" : "outline"}
+                    className="rounded-full"
+                    onClick={() => setNoise(opt.value as NoiseLevel)}
+                  >
+                    {opt.label}
+                  </Button>
+                ))}
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Crowd preference</Label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { value: "less_crowded", label: "Less crowded" },
+                  { value: "average", label: "Average" },
+                  { value: "busy", label: "Don't mind busy" },
+                ].map((opt) => (
+                  <Button
+                    key={opt.value}
+                    type="button"
+                    size="sm"
+                    variant={crowd === opt.value ? "default" : "outline"}
+                    className="rounded-full"
+                    onClick={() => setCrowd(opt.value as CrowdLevel)}
+                  >
+                    {opt.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Indoor or outdoor?</Label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { value: "indoor", label: "🏠 Indoor" },
+                  { value: "outdoor", label: "🌳 Outdoor" },
+                  { value: "mix", label: "🔄 Mix of both" },
+                ].map((opt) => (
+                  <Button
+                    key={opt.value}
+                    type="button"
+                    size="sm"
+                    variant={
+                      indoorOutdoor === opt.value ? "default" : "outline"
+                    }
+                    className="rounded-full"
+                    onClick={() => setIndoorOutdoor(opt.value as IndoorOutdoor)}
+                  >
+                    {opt.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
               <div className="space-y-0.5">
-                <Label className="text-xs">Kid friendly</Label>
-                <p className="text-[10px] text-muted-foreground">
-                  Include places that work well with kids.
+                <Label className="text-sm font-medium">Kid friendly</Label>
+                <p className="text-xs text-muted-foreground">
+                  Include places suitable for children
                 </p>
               </div>
               <Switch checked={kidFriendly} onCheckedChange={setKidFriendly} />
             </div>
-          </section>
+          </div>
+        );
 
-          {/* Quality filters */}
-          <section className="space-y-3">
-            <h3 className="text-sm font-semibold">Quality filters</h3>
-            <div className="grid gap-3 sm:grid-cols-3">
+      case 6:
+        return (
+          <div className="space-y-6">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label className="text-xs">Min rating</Label>
+                <Label className="text-sm font-medium">Minimum rating</Label>
                 <Input
                   type="number"
                   min={1}
@@ -832,10 +903,14 @@ export function ChatSurveyHeader() {
                         : parseFloat(e.target.value)
                     )
                   }
+                  className="h-10"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Only show places rated {minRating}+ stars
+                </p>
               </div>
               <div className="space-y-2">
-                <Label className="text-xs">Min review count</Label>
+                <Label className="text-sm font-medium">Minimum reviews</Label>
                 <Input
                   type="number"
                   min={0}
@@ -847,57 +922,232 @@ export function ChatSurveyHeader() {
                         : parseInt(e.target.value)
                     )
                   }
+                  className="h-10"
                 />
-              </div>
-              <div className="flex items-center justify-between space-y-0">
-                <div className="space-y-0.5">
-                  <Label className="text-xs">Must take reservations</Label>
-                  <p className="text-[10px] text-muted-foreground">
-                    Only suggest places that accept reservations.
-                  </p>
-                </div>
-                <Switch
-                  checked={mustTakeReservations}
-                  onCheckedChange={setMustTakeReservations}
-                />
+                <p className="text-xs text-muted-foreground">
+                  At least {minReviews} reviews
+                </p>
               </div>
             </div>
-          </section>
 
-          {/* Avoid */}
-          <section className="space-y-3">
-            <h3 className="text-sm font-semibold">Avoid</h3>
+            <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
+              <div className="space-y-0.5">
+                <Label className="text-sm font-medium">
+                  Reservations required
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Only show places that take reservations
+                </p>
+              </div>
+              <Switch
+                checked={mustTakeReservations}
+                onCheckedChange={setMustTakeReservations}
+              />
+            </div>
+          </div>
+        );
+
+      case 7:
+        return (
+          <div className="space-y-6">
             <div className="space-y-2">
-              <Label className="text-xs">Avoid tags</Label>
+              <Label className="text-sm font-medium">
+                Types of places to avoid
+              </Label>
               <Input
                 value={avoidTags}
                 onChange={(e) => setAvoidTags(e.target.value)}
-                placeholder="nightclubs, tourist_traps, etc."
+                placeholder="e.g. nightclubs, tourist traps, fast food"
+                className="h-10"
               />
+              <p className="text-xs text-muted-foreground">
+                Separate with commas
+              </p>
             </div>
+
             <div className="space-y-2">
-              <Label className="text-xs">Anything to avoid?</Label>
+              <Label className="text-sm font-medium">
+                Anything else to avoid?
+              </Label>
               <Input
                 value={avoidNotes}
                 onChange={(e) => setAvoidNotes(e.target.value)}
-                placeholder="e.g. no rooftop bars"
+                placeholder="e.g. no rooftop bars, avoid chain restaurants"
+                className="h-10"
               />
             </div>
-          </section>
 
-          <DialogFooter className="mt-4">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => setDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button size="sm" onClick={handleSaveSurvey}>
-              Save survey
-            </Button>
-          </DialogFooter>
+            {/* Summary preview */}
+            <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 space-y-2">
+              <p className="text-sm font-medium text-primary">
+                Survey Complete! 🎉
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Your preferences will be used to personalize your itinerary
+                recommendations. You can always come back and update these
+                settings.
+              </p>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  const currentStepData = SURVEY_STEPS.find((s) => s.id === currentStep)!;
+  const StepIcon = currentStepData.icon;
+  const progressPercentage = (currentStep / TOTAL_STEPS) * 100;
+
+  return (
+    <div className="flex w-full items-center gap-3 max-w-4xl mx-auto">
+      {/* LEFT: survey dialog trigger */}
+      <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
+        <DialogTrigger asChild>
+          <Button
+            variant="ghost"
+            className={cn(
+              "flex items-center gap-2 rounded-full -mr-2 cursor-pointer",
+              savedSurvey && "text-primary"
+            )}
+          >
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="relative">
+                  <Filter className="h-5 w-5" />
+                  {savedSurvey && (
+                    <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary" />
+                  )}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                {savedSurvey
+                  ? "Survey saved - Click to edit"
+                  : "Add trip preferences"}
+              </TooltipContent>
+            </Tooltip>
+            <span className="hidden sm:inline text-sm">
+              {savedSurvey ? "Survey ✓" : "Filters"}
+            </span>
+          </Button>
+        </DialogTrigger>
+
+        <DialogContent
+          className={cn(
+            "max-w-lg w-[min(100%-2rem,520px)] p-0 gap-0",
+            "rounded-2xl border border-border/60 bg-background/95",
+            "backdrop-blur-xl shadow-2xl overflow-hidden"
+          )}
+        >
+          {/* Header with progress */}
+          <div className="px-6 pt-6 pb-4 border-b bg-muted/30">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                  <StepIcon className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <DialogTitle className="text-base font-semibold">
+                    {currentStepData.title}
+                  </DialogTitle>
+                  <DialogDescription className="text-xs">
+                    {currentStepData.description}
+                  </DialogDescription>
+                </div>
+              </div>
+              <Badge variant="secondary" className="text-xs">
+                {currentStep} / {TOTAL_STEPS}
+              </Badge>
+            </div>
+
+            {/* Progress bar */}
+            <Progress value={progressPercentage} className="h-1.5" />
+
+            {/* Step indicators */}
+            <div className="flex justify-between mt-3">
+              {SURVEY_STEPS.map((step) => {
+                const Icon = step.icon;
+                const isActive = step.id === currentStep;
+                const isCompleted = step.id < currentStep;
+                return (
+                  <button
+                    key={step.id}
+                    onClick={() => setCurrentStep(step.id)}
+                    className={cn(
+                      "flex h-8 w-8 items-center justify-center rounded-full transition-all",
+                      isActive &&
+                        "bg-primary text-primary-foreground scale-110",
+                      isCompleted && "bg-primary/20 text-primary",
+                      !isActive &&
+                        !isCompleted &&
+                        "bg-muted text-muted-foreground hover:bg-muted/80"
+                    )}
+                  >
+                    {isCompleted ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Icon className="h-4 w-4" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Step content */}
+          <div className="px-6 py-6 min-h-[320px]">{renderStepContent()}</div>
+
+          {/* Footer with navigation */}
+          <div className="px-6 py-4 border-t bg-muted/30 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              {currentStep > 1 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={goToPrevStep}
+                  className="gap-1"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Back
+                </Button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleSaveSurvey}
+              >
+                Save & Close
+              </Button>
+
+              {currentStep < TOTAL_STEPS ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={goToNextStep}
+                  className="gap-1"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handleSaveSurvey}
+                  className="gap-1"
+                >
+                  <Check className="h-4 w-4" />
+                  Complete
+                </Button>
+              )}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 
