@@ -1,69 +1,3 @@
-// "use client";
-
-// import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-// import { createClient } from "@/lib/supabase/client";
-
-// interface User {
-//   name: string;
-//   email: string;
-//   avatar: string;
-// }
-
-// interface UserContextType {
-//   user: User | null;
-//   setUser: (user: User | null) => void;
-// }
-
-// const UserContext = createContext<UserContextType | undefined>(undefined);
-
-// export function UserProvider({ children }: { children: ReactNode }) {
-//   const supabase = createClient();
-//   const [user, setUser] = useState<User | null>(null);
-
-//   useEffect(() => {
-//     // Fetch current user on mount
-//     const fetchUser = async () => {
-//       const { data, error } = await supabase.auth.getUser();
-//       if (error) return console.error(error);
-
-//       if (data.user) {
-//         setUser({
-//           name: data.user.user_metadata?.name || "Unknown User",
-//           email: data.user.email || "",
-//           avatar: data.user.user_metadata?.avatar || "/default-avatar.png",
-//         });
-//       }
-//     };
-
-//     fetchUser();
-
-//     // Listen to auth changes
-//     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-//       if (session?.user) {
-//         setUser({
-//           name: session.user.user_metadata?.name || "Unknown User",
-//           email: session.user.email || "",
-//           avatar: session.user.user_metadata?.avatar || "/default-avatar.png",
-//         });
-//       } else {
-//         setUser(null);
-//       }
-//     });
-
-//     return () => {
-//       listener.subscription.unsubscribe();
-//     };
-//   }, [supabase]);
-
-//   return <UserContext.Provider value={{ user, setUser }}>{children}</UserContext.Provider>;
-// }
-
-// export function useUser() {
-//   const context = useContext(UserContext);
-//   if (!context) throw new Error("useUser must be used within a UserProvider");
-//   return context;
-// }
-
 "use client";
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
@@ -106,7 +40,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
           .single();
 
         if (profileData && profileData.name) {
-          name = profileData.name; // ✅ OVERRIDE with the name from the DB
+          name = profileData.name;
         }
       } catch (error) {
         console.error("Error fetching user profile:", error);

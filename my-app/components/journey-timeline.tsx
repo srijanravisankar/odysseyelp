@@ -215,15 +215,15 @@ export function JourneyTimeline() {
         //   : "text-violet-600";
 
         return (
-          <TimelineItem key={stopId} className="items-stretch">
+          <TimelineItem key={stopId} className="">
             {/* LEFT: icon + connecting line, aligned with card */}
-            <TimelineHeader className="flex flex-col items-center pt-1">
+            <TimelineHeader className="flex flex-col items-center">
               {index !== itineraryData.stops.length - 1 && (
-                <TimelineSeparator className="bg-gray-200 w-px flex-1 mt-12" />
+                <TimelineSeparator className="bg-gray-300 w-px flex-1 mt-12" />
               )}
               <TimelineIcon
                 className={cn(
-                  "mt-12 h-8 w-8 [&_svg]:h-4 [&_svg]:w-4 bg-muted flex items-center justify-center",
+                  "mt-4 h-9 w-9 [&_svg]:h-5 [&_svg]:w-5 bg-muted flex items-center justify-center border",
                   borderColorClass,
                   iconColorClass
                 )}
@@ -233,7 +233,7 @@ export function JourneyTimeline() {
             </TimelineHeader>
 
             {/* RIGHT: stop info */}
-            <TimelineBody className="group pl-3 w-full">
+            <TimelineBody className="group pl-0.5 w-full">
               <div
                 className={cn(
                   "relative w-full overflow-hidden rounded-lg border p-3",
@@ -246,20 +246,20 @@ export function JourneyTimeline() {
                   {/* thin status bar on the left of the content */}
                   <div
                     className={cn(
-                      "w-1 rounded-full mt-1 mb-1 transition-colors",
+                      "w-0.5 rounded-full mt-3 mb-3 transition-colors",
                       statusBarColorClass
                     )}
                   />
 
                   {/* main content */}
-                  <div className="flex-1 flex flex-col gap-2">
+                  <div className="flex-1 flex flex-col gap-0.5">
                     {/* HEADER: name + actions */}
                     <div className="flex justify-between items-start gap-2">
                       <h3
                         className="
                           text-md leading-tight text-foreground
                           overflow-hidden text-ellipsis whitespace-nowrap
-                          max-w-[230px]
+                          max-w-[195]
                         "
                         title={stop.name}
                       >
@@ -272,7 +272,7 @@ export function JourneyTimeline() {
                         <Button
                           variant="ghost"
                           size="icon-sm"
-                          className="h-7 w-7"
+                          className="h-6 w-6"
                           aria-label="Mark stop as done"
                           onClick={() =>
                             setSelectedStopIds((prev) =>
@@ -296,7 +296,7 @@ export function JourneyTimeline() {
                         <Button
                           variant="ghost"
                           size="icon-sm"
-                          className="h-7 w-7"
+                          className="h-6 w-6"
                         >
                           <SquarePen className="h-3 w-3 text-yellow-600" />
                         </Button>
@@ -305,7 +305,7 @@ export function JourneyTimeline() {
                         <Button
                           variant="ghost"
                           size="icon-sm"
-                          className="h-7 w-7"
+                          className="h-6 w-6"
                         >
                           <Trash2 className="h-3 w-3 text-red-400" />
                         </Button>
@@ -314,7 +314,7 @@ export function JourneyTimeline() {
                         <Button
                           variant="ghost"
                           size="icon-sm"
-                          className="h-7 w-7"
+                          className="h-6 w-6"
                         >
                           <ExternalLink className="h-3 w-3" />
                         </Button>
