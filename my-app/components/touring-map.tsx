@@ -622,7 +622,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useItinerary } from "@/components/chat-page/itinerary-context";
+import { useItinerary } from "@/hooks/context/itinerary-context";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 

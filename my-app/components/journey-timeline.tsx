@@ -32,7 +32,7 @@ import {
 import { Button } from "./ui/button";
 import Image from "next/image";
 
-import { useItinerary } from "@/components/chat-page/itinerary-context";
+import { useItinerary } from "@/hooks/context/itinerary-context";
 import { ItineraryStop } from "@/lib/itinerary-types";
 import { Separator } from "@radix-ui/react-separator";
 
@@ -153,10 +153,12 @@ export function JourneyTimeline() {
   //   {}
   // );
   const { itineraryData, selectedStopIds, setSelectedStopIds } = useItinerary();
+  console.log("JourneyTimeline itineraryData:", itineraryData.stops);
+  // return;
 
   return (
     <Timeline>
-      {itineraryData?.stops?.map((stop: ItineraryStop, index: number) => {
+      {itineraryData?.stops?.stops.map((stop: ItineraryStop, index: number) => {
         const formattedAddress =
           stop.address?.split("\n").join(", ") || "Address unavailable";
 
@@ -260,7 +262,7 @@ export function JourneyTimeline() {
                         className="
                           text-md leading-tight text-foreground
                           overflow-hidden text-ellipsis whitespace-nowrap
-                          max-w-[185]
+                          max-w-[183]
                         "
                         title={stop.name}
                       >

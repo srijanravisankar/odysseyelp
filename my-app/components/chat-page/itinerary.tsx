@@ -7,7 +7,6 @@ import { TouringMap } from "@/components/touring-map";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Button } from "../ui/button";
 import { CircleCheckBig, SquarePen, Route } from "lucide-react";
-import { useItinerary } from "./itinerary-context";
 import {
   PlannerCalendar,
   type CalendarEvent,
@@ -27,6 +26,8 @@ import {
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 
+import { useItinerary } from '@/hooks/context/itinerary-context'
+
 export function Itinerary() {
   const { itineraryData, selectedStopIds, setRouteGeoJSON } = useItinerary();
 
@@ -35,6 +36,8 @@ export function Itinerary() {
   const [loading, setLoading] = useState(false);
 
   const [viewMode, setViewMode] = useState<"map" | "calendar">("map");
+
+  const { itineraries, loadingItineraries, itinerariesError } = useItinerary()
 
   // Calendar events state (for now, just a simple example event)
   // Later you can derive this from itineraryData.
@@ -114,6 +117,12 @@ export function Itinerary() {
     throw new Error("Function not implemented.");
   }
 
+  if (loadingItineraries) return <div>Loading itineraries...</div>
+  if (itinerariesError) return <div>Error: {itinerariesError}</div>
+  if (itineraries.length === 0) return <div>No itineraries found</div>
+  // else return <pre>{JSON.stringify(itineraries[0].stops, null, 2)}</pre>
+
+  console.log("ItineraryData in Itinerary component:", itineraryData);
   return (
     <Card className="flex flex-row p-0 bg-muted/50 h-full overflow-hidden">
       <CardContent className="flex flex-col flex-1 min-h-0 pr-2 pl-2 pt-2 pb-2 overflow-y-auto w-50">
