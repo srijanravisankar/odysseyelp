@@ -259,7 +259,7 @@ export function JourneyTimeline() {
                         className="
                           text-md leading-tight text-foreground
                           overflow-hidden text-ellipsis whitespace-nowrap
-                          max-w-[195]
+                          max-w-[185]
                         "
                         title={stop.name}
                       >
