@@ -15,6 +15,9 @@ type ItineraryContextType = {
   // 🔑 NEW: Store the route geometry (GeoJSON) here
   routeGeoJSON: any;
   setRouteGeoJSON: (json: any) => void;
+
+  // 🗑️ Remove a stop from the itinerary
+  removeStop: (stopId: string) => void;
 };
 
 const ItineraryContext = createContext<ItineraryContextType | undefined>(
@@ -31,6 +34,22 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
   // 🔑 Initialize route state
   const [routeGeoJSON, setRouteGeoJSON] = useState<any>(null);
 
+  // 🗑️ Remove a stop from the itinerary
+  const removeStop = (stopId: string) => {
+    if (!itineraryData?.stops) return;
+
+    setItineraryData({
+      ...itineraryData,
+      stops: itineraryData.stops.filter((stop: any) => {
+        const id = stop.id ?? String(itineraryData.stops.indexOf(stop));
+        return id !== stopId;
+      }),
+    });
+
+    // Also remove from selected stops if it was selected
+    setSelectedStopIds((prev) => prev.filter((id) => id !== stopId));
+  };
+
   return (
     <ItineraryContext.Provider
       value={{
@@ -40,8 +59,9 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
         setSelectedStopIds,
         appTheme,
         setAppTheme,
-        routeGeoJSON, // 👈
-        setRouteGeoJSON, // 👈
+        routeGeoJSON,
+        setRouteGeoJSON,
+        removeStop,
       }}
     >
       {children}

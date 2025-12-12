@@ -40,6 +40,7 @@ import { BorderBeam } from "@/components/ui/border-beam";
 import { MagicCard } from "@/components/ui/magic-card";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { DeletePlaceDialog } from "@/components/chat-page/delete-place-dialog";
 
 const journeyTimeline = [
   {
@@ -302,13 +303,10 @@ export function JourneyTimeline() {
                         </Button>
 
                         {/* Delete */}
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          className="h-6 w-6"
-                        >
-                          <Trash2 className="h-3 w-3 text-red-400" />
-                        </Button>
+                        <DeletePlaceDialog
+                          stopId={stopId}
+                          placeName={stop.name || "this place"}
+                        />
 
                         {/* External link */}
                         <Button
