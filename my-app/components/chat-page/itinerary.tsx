@@ -110,9 +110,13 @@ export function Itinerary() {
     }
   };
 
+  function handleItineraryAdd(): void {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <Card className="flex flex-row p-0 bg-muted/50 h-full overflow-hidden">
-      <CardContent className="flex flex-col flex-1 min-h-0 pr-3 pl-3 pt-3 pb-3 overflow-y-auto w-50">
+      <CardContent className="flex flex-col flex-1 min-h-0 pr-2 pl-2 pt-2 pb-2 overflow-y-auto w-50">
         <ItineraryScrollArea />
         <div className="w-full flex justify-end shrink-0 pt-1">
           <ButtonGroup>
@@ -121,15 +125,16 @@ export function Itinerary() {
               className="hover:bg-gray-300 cursor-pointer"
               onClick={() => setIsDialogOpen(true)}
             >
-              <Route className="text-blue-600 h-4 w-4 mr-2" />
+              <Route className="text-blue-600 h-3 w-3" />
               Find Best Route
             </Button>
 
             <Button
               variant="ghost"
               className="hover:bg-gray-300 cursor-pointer"
+              onClick={handleItineraryAdd}
             >
-              <CircleCheckBig className="text-green-600 h-4 w-4 mr-2" />
+              <CircleCheckBig className="text-green-600 h-3 w-3" />
               Add to My Space
             </Button>
 
@@ -137,7 +142,7 @@ export function Itinerary() {
               variant="ghost"
               className="hover:bg-gray-300 cursor-pointer"
             >
-              <SquarePen className="text-yellow-600 h-4 w-4 mr-2" />
+              <SquarePen className="text-yellow-600 h-3 w-3" />
               Modify
             </Button>
           </ButtonGroup>
