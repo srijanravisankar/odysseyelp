@@ -8,54 +8,52 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Star, MapPin, TrendingUp, ArrowRight } from "lucide-react";
+import { TrendingUp, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
-import Image from "next/image";
+import { PlanCard } from "@/components/plan-card";
+import { TouringMap } from "@/components/touring-map";
 
-type Destination = {
+type TrendingItinerary = {
   id: string;
-  name: string;
-  category: string;
-  rating: number;
-  reviewCount: number;
-  image: string;
-  trending: boolean;
-  priceRange: string;
+  title: string;
+  createdBy: string;
+  meta: string;
+  isLiked: boolean;
+  lng: number;
+  lat: number;
+  zoom: number;
 };
 
-// These would typically come from Yelp API
-const featuredDestinations: Destination[] = [
+const trendingItineraries: TrendingItinerary[] = [
   {
     id: "1",
-    name: "Pai Northern Thai Kitchen",
-    category: "Thai Restaurant",
-    rating: 4.8,
-    reviewCount: 2341,
-    image: "/traveller-image.jpg",
-    trending: true,
-    priceRange: "$$",
+    title: "Pai Northern Thai Kitchen & Bar Raval evening",
+    createdBy: "Toronto Foodies",
+    meta: "4 stops · 2.3k saves",
+    isLiked: false,
+    lng: -79.4,
+    lat: 43.654,
+    zoom: 14,
   },
   {
     id: "2",
-    name: "Bar Raval",
-    category: "Wine Bar",
-    rating: 4.7,
-    reviewCount: 1892,
-    image: "/traveller-image.jpg",
-    trending: true,
-    priceRange: "$$$",
+    title: "Kensington Market food crawl adventure",
+    createdBy: "Local Explorer",
+    meta: "6 stops · 1.8k saves",
+    isLiked: true,
+    lng: -79.4025,
+    lat: 43.6545,
+    zoom: 15,
   },
   {
     id: "3",
-    name: "Kensington Market",
-    category: "Neighborhood",
-    rating: 4.6,
-    reviewCount: 3421,
-    image: "/traveller-image.jpg",
-    trending: false,
-    priceRange: "$",
+    title: "Waterfront sunset walk & dinner",
+    createdBy: "DateNight TO",
+    meta: "3 stops · 956 saves",
+    isLiked: false,
+    lng: -79.3762,
+    lat: 43.6393,
+    zoom: 14,
   },
 ];
 
@@ -68,7 +66,7 @@ export function FeaturedDestinations() {
             <TrendingUp className="h-5 w-5 text-primary" />
             Trending Near You
           </CardTitle>
-          <CardDescription>Popular places to explore</CardDescription>
+          <CardDescription>Popular itineraries to explore</CardDescription>
         </div>
         <Link href="/explore">
           <Button variant="ghost" size="sm" className="gap-1">
@@ -78,64 +76,26 @@ export function FeaturedDestinations() {
         </Link>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4 sm:grid-cols-3">
-          {featuredDestinations.map((destination) => (
-            <div
-              key={destination.id}
-              className={cn(
-                "group relative overflow-hidden rounded-xl border",
-                "hover:border-primary/50 transition-all duration-200 cursor-pointer"
-              )}
-            >
-              {/* Image */}
-              <div className="relative aspect-[4/3] overflow-hidden">
-                <Image
-                  src={destination.image}
-                  alt={destination.name}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {trendingItineraries.map((itinerary) => (
+            <PlanCard
+              key={itinerary.id}
+              title={itinerary.title}
+              createdBy={itinerary.createdBy}
+              meta={itinerary.meta}
+              isLiked={itinerary.isLiked}
+              isPublished={false}
+              onClick={() => console.log("Open itinerary", itinerary.id)}
+              onToggleLike={() => console.log("Toggle like", itinerary.id)}
+              onTogglePublish={() => console.log("Toggle publish", itinerary.id)}
+              thumbnail={
+                <TouringMap
+                  initialLng={itinerary.lng}
+                  initialLat={itinerary.lat}
+                  initialZoom={itinerary.zoom}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-
-                {/* Trending badge */}
-                {destination.trending && (
-                  <Badge className="absolute top-2 left-2 gap-1 bg-primary/90">
-                    <TrendingUp className="h-3 w-3" />
-                    Trending
-                  </Badge>
-                )}
-
-                {/* Price */}
-                <Badge
-                  variant="secondary"
-                  className="absolute top-2 right-2 bg-black/50 text-white border-0"
-                >
-                  {destination.priceRange}
-                </Badge>
-              </div>
-
-              {/* Content */}
-              <div className="p-3">
-                <h4 className="font-semibold text-sm line-clamp-1">
-                  {destination.name}
-                </h4>
-                <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                  <MapPin className="h-3 w-3" />
-                  {destination.category}
-                </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <div className="flex items-center gap-1">
-                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                    <span className="text-xs font-medium">
-                      {destination.rating}
-                    </span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    ({destination.reviewCount.toLocaleString()} reviews)
-                  </span>
-                </div>
-              </div>
-            </div>
+              }
+            />
           ))}
         </div>
       </CardContent>
