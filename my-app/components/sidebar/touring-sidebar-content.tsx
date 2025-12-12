@@ -3,7 +3,7 @@ import {JourneyTimeline} from "@/components/journey-timeline";
 
 export function TouringSidebarContent() {
   return (
-    <SidebarGroupContent className="scrollbar-hide px-0 px-4 py-2">
+    <SidebarGroupContent className="flex flex-col gap-3 p-4 text-sm">
       <JourneyTimeline />
     </SidebarGroupContent>
   );

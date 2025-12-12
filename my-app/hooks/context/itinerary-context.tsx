@@ -40,8 +40,8 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
         setSelectedStopIds,
         appTheme,
         setAppTheme,
-        routeGeoJSON, // 👈
-        setRouteGeoJSON, // 👈
+        routeGeoJSON,
+        setRouteGeoJSON,
       }}
     >
       {children}

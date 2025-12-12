@@ -34,7 +34,7 @@ import { ChatSidebarContent } from "./sidebar/chat-sidebar-content";
 import { TouringSidebarContent } from "./sidebar/touring-sidebar-content";
 import { MySpaceSidebarContent } from "@/components/sidebar/my-space-sidebar-content";
 import { HomeSidebarContent } from "./sidebar/home-sidebar-content";
-import { useItinerary } from "@/components/chat-page/itinerary-context";
+import { useItinerary } from "@/hooks/context/itinerary-context";
 
 // ----------------------
 // Sample data

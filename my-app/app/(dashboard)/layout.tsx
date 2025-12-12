@@ -1,4 +1,5 @@
 import ShellLayout from "@/components/shell-layout";
+import { ChatProvider } from "@/hooks/context/session-context";
 
 // pr check
 export default function Layout({
@@ -7,6 +8,8 @@ export default function Layout({
   children: React.ReactNode
 }) {
   return (
-    <ShellLayout>{children}</ShellLayout>
+    <ChatProvider>
+      <ShellLayout>{children}</ShellLayout>
+    </ChatProvider>
   );
 }

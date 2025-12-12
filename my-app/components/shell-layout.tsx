@@ -47,7 +47,7 @@ import { usePathname } from "next/navigation";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { ShellHeader } from "@/components/shell-header";
-import { ItineraryProvider } from "@/components/chat-page/itinerary-context";
+import { ItineraryProvider } from "@/hooks/context/itinerary-context";
 
 export default function ShellLayout({
   children,

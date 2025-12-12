@@ -32,7 +32,7 @@ import {
 import { Button } from "./ui/button";
 import Image from "next/image";
 
-import { useItinerary } from "@/components/chat-page/itinerary-context";
+import { useItinerary } from "@/hooks/context/itinerary-context";
 import { ItineraryStop } from "@/lib/itinerary-types";
 import { Separator } from "@radix-ui/react-separator";
 
@@ -144,7 +144,7 @@ const journeyTimeline = [
   },
 ];
 
-export function JourneyTimeline() {
+export function JourneyTimeline({ itinerary }: { itinerary: any }) {
   // const { itineraryData } = useItinerary();
 
   // // which stops are completed (for the green state)
@@ -259,7 +259,7 @@ export function JourneyTimeline() {
                         className="
                           text-md leading-tight text-foreground
                           overflow-hidden text-ellipsis whitespace-nowrap
-                          max-w-[185]
+                          max-w-[183]
                         "
                         title={stop.name}
                       >

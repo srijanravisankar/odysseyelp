@@ -3,18 +3,17 @@
 import { SidebarContent } from "../ui/sidebar";
 import { Button } from "../ui/button";
 import {
-  MoreHorizontal,
-  MessageSquare,
-  Clock,
   Bot,
   MessageCircle,
   Plus,
+  MoreVertical,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
-import { useUser } from "@/components/user-context";
+import { useUser } from "@/hooks/context/user-context";
+import { useChat } from "@/hooks/context/session-context";
 
 interface Session {
   id: number;
@@ -28,6 +27,7 @@ export function ChatSidebarContent() {
   const supabase = createClient();
   const { user } = useUser();
   const [sessions, setSessions] = useState<Session[]>([]);
+  const {active, setActive} = useChat();
   const [loading, setLoading] = useState(true);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
 
@@ -133,6 +133,11 @@ export function ChatSidebarContent() {
     }
   };
 
+  const handleGetChat = async (id: number) => {
+    setActive(id)
+    console.log("Open chat", id)
+  };
+ 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     const now = new Date();
@@ -189,14 +194,11 @@ export function ChatSidebarContent() {
                 tabIndex={0}
                 className={cn(
                   "group flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-left text-md transition",
-                  item.isActive
+                  item.id === active
                     ? "bg-primary/10 text-primary"
                     : "hover:bg-muted/70"
                 )}
-                onClick={() => console.log("Open chat", item.id)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") console.log("Open chat", item.id);
-                }}
+                onClick={() => handleGetChat(item.id)}
               >
                 {/* Left icon */}
                 <div className="flex items-center justify-center pt-1">
@@ -219,13 +221,13 @@ export function ChatSidebarContent() {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="ml-auto h-6 w-6 p-0 opacity-100 hover:opacity-100"
+                  className="ml-auto h-6 w-6 p-0 opacity-100 hover:opacity-100 cursor-pointer rounded-full bg-transparent hover:bg-muted/50 focus:bg-muted/50"
                   onClick={(e) => {
                     e.stopPropagation();
                     console.log("More actions for", item.id);
                   }}
                 >
-                  <MoreHorizontal className="h-3.5 w-3.5" />
+                  <MoreVertical className="h-3.5 w-3.5" />
                 </Button>
               </div>
             ))
@@ -234,4 +236,8 @@ export function ChatSidebarContent() {
       </div>
     </SidebarContent>
   );
+}
+
+function async(id: any) {
+  throw new Error("Function not implemented.");
 }

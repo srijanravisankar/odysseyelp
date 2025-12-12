@@ -320,7 +320,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useUser } from "@/components/user-context"; // <-- UserContext
+import { useUser } from "@/hooks/context/user-context"; // <-- UserContext
 
 export function NavUser() {
   const { isMobile } = useSidebar();
