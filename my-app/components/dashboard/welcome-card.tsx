@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useUser } from "@/components/user-context";
+import { useUser } from "@/hooks/context/user-context";
 import { Sparkles, ArrowRight } from "lucide-react";
 import Link from "next/link";
 

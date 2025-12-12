@@ -144,7 +144,7 @@ const journeyTimeline = [
   },
 ];
 
-export function JourneyTimeline({ itinerary }: { itinerary: any }) {
+export function JourneyTimeline() {
   // const { itineraryData } = useItinerary();
 
   // // which stops are completed (for the green state)
@@ -152,10 +152,12 @@ export function JourneyTimeline({ itinerary }: { itinerary: any }) {
   //   {}
   // );
   const { itineraryData, selectedStopIds, setSelectedStopIds } = useItinerary();
+  console.log("JourneyTimeline itineraryData:", itineraryData.stops);
+  // return;
 
   return (
     <Timeline>
-      {itineraryData?.stops?.map((stop: ItineraryStop, index: number) => {
+      {itineraryData?.stops?.stops.map((stop: ItineraryStop, index: number) => {
         const formattedAddress =
           stop.address?.split("\n").join(", ") || "Address unavailable";
 
