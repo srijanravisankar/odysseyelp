@@ -1,13 +1,19 @@
 import Image from "next/image";
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "../ui/empty";
+import { CircleOff, Icon, PiIcon } from "lucide-react";
+import { Button } from "../ui/button";
 
 export function EmptyItinerariesPage() {
   return (
-    <div className="bg-muted relative hidden md:block h-[calc(100dvh-210px)] w-full rounded-2xl overflow-hidden">
-      <img
-        src="/empty-page.jpg"
-        alt="Image"
-        className="absolute inset-0 h-full w-full object-cover"
-      />
-    </div>
+    <Empty>
+      <EmptyHeader>
+        <EmptyMedia variant="default">
+          <CircleOff />
+        </EmptyMedia>
+        <EmptyTitle>No data</EmptyTitle>
+        <EmptyDescription>No Itineraies Generated</EmptyDescription>
+      </EmptyHeader>
+    </Empty>
   );
 }
+

@@ -629,7 +629,7 @@ export function JourneyTimeline() {
               </TimelineIcon>
             </TimelineHeader>
             
-            <TimelineBody className="group pl-1 w-full"> 
+            <TimelineBody className="group pl-1 w-full relative"> 
               <div className="gap-0 flex flex-col w-full">
                 
                 {/* --- HEADER: Name, Price, Category --- */}
@@ -694,6 +694,11 @@ export function JourneyTimeline() {
                       </a>
                     </div>
                   )}
+
+                  {/* Index Letter Badge */}
+                  <div className="absolute -bottom-1 right-4 flex items-center justify-center h-6 w-6 rounded-full text-sm font-medium border border-primary bg-primary/10 text-primary">
+                    {String.fromCharCode(65 + index)}
+                  </div>
                 </div>
               </div>
             </TimelineBody>

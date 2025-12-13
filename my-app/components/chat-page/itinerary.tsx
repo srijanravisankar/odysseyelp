@@ -167,7 +167,8 @@ export function Itinerary() {
           {/* Main pane: map OR calendar */}
           <div className="relative flex-1 overflow-hidden rounded-xl border bg-muted">
             {viewMode === "map" ? (
-              <TouringMap />
+              // <TouringMap />
+              <EmptyItinerariesPage />
             ) : (
               <PlannerCalendar
                 events={calendarEvents}

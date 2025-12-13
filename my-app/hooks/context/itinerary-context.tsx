@@ -60,6 +60,8 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
       if (!active || !user?.email) {
         setItineraries([]);
         setItineraryData(null);
+        // ensure loading flag is false when there's no active session/user
+        setLoadingItineraries(false);
         return;
       }
 

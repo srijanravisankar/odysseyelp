@@ -389,8 +389,7 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
 
-            <DropdownMenuSeparator />
-
+            {/* <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
                 <Sparkles />
@@ -413,7 +412,7 @@ export function NavUser() {
                 <Bell />
                 Notifications
               </DropdownMenuItem>
-            </DropdownMenuGroup>
+            </DropdownMenuGroup> */}
 
             <DropdownMenuSeparator />
 

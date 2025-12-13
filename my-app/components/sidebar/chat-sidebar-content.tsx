@@ -14,6 +14,8 @@ import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { useUser } from "@/hooks/context/user-context";
 import { useChat } from "@/hooks/context/session-context";
+import { Spinner } from "../ui/spinner";
+import { DropdownMenuDialog } from "./chat-history-options";
 
 interface Session {
   id: number;
@@ -179,8 +181,9 @@ export function ChatSidebarContent() {
         {/* History List */}
         <div className="flex-1 space-y-1 overflow-y-auto pr-1">
           {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <span className="text-sm text-muted-foreground">Loading chats...</span>
+            <div className="flex flex-1 items-center justify-center py-8">
+              <Spinner />
+              <div className="pl-2 text-md text-muted-foreground">Loading chats...</div>
             </div>
           ) : sessions.length === 0 ? (
             <div className="flex items-center justify-center py-8">
@@ -217,7 +220,7 @@ export function ChatSidebarContent() {
                 </div>
 
                 {/* Ellipsis actions */}
-                <Button
+                {/* <Button
                   type="button"
                   variant="ghost"
                   size="icon"
@@ -228,7 +231,8 @@ export function ChatSidebarContent() {
                   }}
                 >
                   <MoreVertical className="h-3.5 w-3.5" />
-                </Button>
+                </Button> */}
+                {/* <DropdownMenuDialog /> */}
               </div>
             ))
           )}
