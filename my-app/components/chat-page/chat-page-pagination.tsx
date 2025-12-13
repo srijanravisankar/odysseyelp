@@ -83,8 +83,9 @@ export function ChatPagePagination() {
       <PaginationContent className="gap-2">
         <PaginationItem>
           <PaginationPrevious 
-            href="#" 
-            className="h-7 w-7 p-0 text-sm"
+            className={`h-7 w-7 p-0 text-sm ${
+              currentPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"
+            }`}
             onClick={(e) => {
               e.preventDefault()
               handlePageChange(currentPage - 1)
@@ -100,8 +101,7 @@ export function ChatPagePagination() {
           ) : (
             <PaginationItem key={page}>
               <PaginationLink 
-                href="#" 
-                className="h-7 w-7 p-0 text-xs"
+                className="h-7 w-7 p-0 text-xs cursor-pointer"
                 isActive={currentPage === page}
                 onClick={(e) => {
                   e.preventDefault()
@@ -116,8 +116,10 @@ export function ChatPagePagination() {
 
         <PaginationItem>
           <PaginationNext 
-            href="#" 
-            className="h-7 w-7 p-0 text-sm"
+            // className="h-7 w-7 p-0 text-sm"
+            className={`h-7 w-7 p-0 text-sm ${
+              currentPage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"
+            }`}
             onClick={(e) => {
               e.preventDefault()
               handlePageChange(currentPage + 1)

@@ -319,6 +319,7 @@ type ItineraryStop = {
   coordinates: { lat: number; lng: number }
   category: string | null
   schedule: {
+    date: string; // Format: "YYYY-MM-DD" (e.g. "2025-12-15")
     start: string; // Format: "HH:MM AM/PM" (e.g. "10:00 AM")
     end: string;   // Format: "HH:MM AM/PM" (e.g. "11:30 AM")
     durationMinutes: number; 
@@ -340,9 +341,10 @@ Rules:
 4. **Contextual Info:** title/summary must reflect the user's specific intent (e.g., "Quiet Anniversary Dinner").
 
 **CRITICAL SCHEDULING RULES:**
-- **Boundaries:** Check the 'query' and 'survey' for start/end times (e.g., "morning coffee" implies 8-10 AM, "late night" implies 10 PM+). If unspecified, assume a standard day (10:00 AM to 8:00 PM).
-- **Sequence:** Stops must be ordered chronologically.
-- **No Overlaps:** The 'schedule.start' of a stop must be AFTER the 'schedule.end' of the previous stop.
+- **Trip Date:** Determine the start date from the survey's dateRange or assume today's date. Format as YYYY-MM-DD.
+- **Time Boundaries:** Check the 'query' and 'survey' for start/end times (e.g., "morning coffee" implies 8-10 AM, "late night" implies 10 PM+). If unspecified, assume a standard day (10:00 AM to 10:00 PM).
+- **Sequence:** Stops must be ordered chronologically by date, then by time within each date.
+- **No Overlaps:** The 'schedule.start' of a stop must be AFTER the 'schedule.end' of the previous stop (or after travel buffer on next day).
 - **Realistic Durations:** Assign logical durations based on category:
   - Coffee/Bakery: 30-45 mins
   - Lunch/Dinner: 60-90 mins

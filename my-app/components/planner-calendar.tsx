@@ -3,15 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   addDays,
-  addMonths,
-  endOfMonth,
-  endOfWeek,
+  addWeeks,
   format,
   isSameDay,
-  isSameMonth,
-  startOfMonth,
   startOfWeek,
-  subMonths,
+  subWeeks,
 } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -21,23 +17,15 @@ import { cn } from "@/lib/utils";
 export type CalendarEvent = {
   id: string;
   title: string;
-  date: Date; // single-day events
+  date: Date;
+  startTime?: string;
+  endTime?: string;
+  durationMinutes?: number;
 };
 
 type PlannerCalendarProps = {
-  /**
-   * Events to display on the calendar.
-   * You can store them in parent state and pass down.
-   */
   events: CalendarEvent[];
-  /**
-   * Called whenever an event is moved to another day.
-   * Use this to sync back to your DB / parent component.
-   */
   onEventsChange?: (events: CalendarEvent[]) => void;
-  /**
-   * Optional initial month to show (defaults to today’s month).
-   */
   initialMonth?: Date;
 };
 
@@ -46,48 +34,42 @@ export function PlannerCalendar({
   onEventsChange,
   initialMonth,
 }: PlannerCalendarProps) {
-  const [currentMonth, setCurrentMonth] = useState<Date>(() =>
-    startOfMonth(initialMonth ?? new Date())
+  // Start with the week containing the initial date (or today)
+  const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() =>
+    startOfWeek(initialMonth ?? new Date(), { weekStartsOn: 0 }) // Sunday
   );
 
-  // Internal copy of events so the calendar can update immediately
   const [internalEvents, setInternalEvents] = useState<CalendarEvent[]>(events);
 
-  // Keep internal events in sync if parent passes new ones
   useEffect(() => {
     setInternalEvents(events);
   }, [events]);
 
   const today = new Date();
 
-  const handlePrevMonth = () => {
-    setCurrentMonth((prev) => startOfMonth(subMonths(prev, 1)));
+  const handlePrevWeek = () => {
+    setCurrentWeekStart((prev) => startOfWeek(subWeeks(prev, 1), { weekStartsOn: 0 }));
   };
 
-  const handleNextMonth = () => {
-    setCurrentMonth((prev) => startOfMonth(addMonths(prev, 1)));
+  const handleNextWeek = () => {
+    setCurrentWeekStart((prev) => startOfWeek(addWeeks(prev, 1), { weekStartsOn: 0 }));
   };
 
   const handleToday = () => {
     const now = new Date();
-    setCurrentMonth(startOfMonth(now));
+    setCurrentWeekStart(startOfWeek(now, { weekStartsOn: 0 }));
   };
 
-  const monthLabel = format(currentMonth, "MMMM yyyy");
-
-  // Build a 6x7 grid of dates covering the visible calendar
+  // Build array of 7 days in the current week
   const days = useMemo(() => {
-    const start = startOfWeek(startOfMonth(currentMonth), { weekStartsOn: 0 }); // Sunday
-    const end = endOfWeek(endOfMonth(currentMonth), { weekStartsOn: 0 });
-
     const tempDays: Date[] = [];
-    let day = start;
-    while (day <= end) {
-      tempDays.push(day);
-      day = addDays(day, 1);
+    for (let i = 0; i < 7; i++) {
+      tempDays.push(addDays(currentWeekStart, i));
     }
     return tempDays;
-  }, [currentMonth]);
+  }, [currentWeekStart]);
+
+  const weekLabel = `${format(days[0], "MMM d")} - ${format(days[6], "MMM d, yyyy")}`;
 
   const handleDropOnDate = (targetDate: Date, eventId: string) => {
     setInternalEvents((prev) => {
@@ -102,16 +84,15 @@ export function PlannerCalendar({
   const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
-    // <div className="flex h-full w-full flex-col rounded-xl border bg-background">
-    <div className="absolute inset-0 h-full w-full">
+    <div className="absolute inset-0 h-full w-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between border-b px-3 py-2">
+      <div className="flex items-center justify-between border-b px-3 py-2 shrink-0">
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="icon"
             className="h-8 w-8"
-            onClick={handlePrevMonth}
+            onClick={handlePrevWeek}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -119,7 +100,7 @@ export function PlannerCalendar({
             variant="outline"
             size="icon"
             className="h-8 w-8"
-            onClick={handleNextMonth}
+            onClick={handleNextWeek}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -133,34 +114,19 @@ export function PlannerCalendar({
           </Button>
         </div>
 
-        <div className="text-sm font-semibold">{monthLabel}</div>
+        <div className="text-sm font-semibold">{weekLabel}</div>
       </div>
 
-      {/* Weekday row */}
-      <div className="grid grid-cols-7 border-b bg-muted/50 text-xs text-muted-foreground">
-        {weekdayLabels.map((label) => (
-          <div
-            key={label}
-            className="flex items-center justify-center py-1.5 font-medium"
-          >
-            {label}
-          </div>
-        ))}
-      </div>
-
-      {/* Month grid */}
-      <div className="grid flex-1 grid-cols-7 text-xs">
-        {days.map((day) => {
+      {/* Week grid */}
+      <div className="flex flex-1 min-h-0 overflow-hidden">
+        {days.map((day, dayIndex) => {
           const dayEvents = internalEvents.filter((event) =>
             isSameDay(event.date, day)
           );
 
-          const isCurrentMonthDay = isSameMonth(day, currentMonth);
           const isTodayDay = isSameDay(day, today);
 
-          const handleDragOver: React.DragEventHandler<HTMLDivElement> = (
-            e
-          ) => {
+          const handleDragOver: React.DragEventHandler<HTMLDivElement> = (e) => {
             e.preventDefault();
             e.dataTransfer.dropEffect = "move";
           };
@@ -176,18 +142,23 @@ export function PlannerCalendar({
             <div
               key={day.toISOString()}
               className={cn(
-                "min-h-[5.5rem] border-r border-b p-1 flex flex-col gap-1 overflow-hidden",
-                "bg-background",
-                !isCurrentMonthDay && "bg-muted/40 text-muted-foreground"
+                "flex flex-col flex-1 border-r min-h-0",
+                dayIndex === 6 && "border-r-0" // No border on last day
               )}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
             >
-              {/* Date bubble */}
-              <div className="flex items-center justify-between">
+              {/* Day header */}
+              <div
+                className={cn(
+                  "flex flex-col items-center justify-center py-2 border-b shrink-0",
+                  isTodayDay ? "bg-primary/10" : "bg-muted/50"
+                )}
+              >
+                <span className="text-xs font-medium text-muted-foreground">
+                  {weekdayLabels[dayIndex]}
+                </span>
                 <span
                   className={cn(
-                    "inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium",
+                    "inline-flex h-7 w-7 items-center justify-center rounded-full text-sm font-semibold",
                     isTodayDay
                       ? "bg-primary text-primary-foreground"
                       : "text-foreground"
@@ -197,26 +168,40 @@ export function PlannerCalendar({
                 </span>
               </div>
 
-              {/* Events list for this day */}
-              <div className="flex flex-1 flex-col gap-1 overflow-hidden">
-                {dayEvents.map((event) => (
-                  <button
-                    key={event.id}
-                    draggable
-                    onDragStart={(e) => {
-                      e.dataTransfer.setData("text/plain", event.id);
-                      e.dataTransfer.effectAllowed = "move";
-                    }}
-                    className={cn(
-                      "w-full truncate rounded-md border px-2 py-0.5 text-left text-[11px] leading-tight",
-                      "bg-primary/5 text-foreground hover:bg-primary/10"
-                    )}
-                  >
-                    {event.title}
-                  </button>
-                ))}
-                {dayEvents.length === 0 && (
-                  <div className="flex-1" aria-hidden="true" />
+              {/* Events for the day */}
+              <div
+                className="flex-1 overflow-y-auto p-1 flex flex-col gap-1"
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+              >
+                {dayEvents.length > 0 ? (
+                  dayEvents.map((event) => (
+                    <button
+                      key={event.id}
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData("text/plain", event.id);
+                        e.dataTransfer.effectAllowed = "move";
+                      }}
+                      className={cn(
+                        "w-full rounded-md border px-2 py-1 text-left text-[10px] leading-tight",
+                        "bg-primary/5 text-foreground hover:bg-primary/10 transition-colors",
+                        "flex flex-col gap-0.5"
+                      )}
+                    >
+                      <div className="font-semibold truncate">{event.title}</div>
+                      {event.startTime && (
+                        <div className="text-[9px] text-muted-foreground">
+                          {event.startTime}
+                          {event.endTime && ` - ${event.endTime}`}
+                        </div>
+                      )}
+                    </button>
+                  ))
+                ) : (
+                  <div className="text-center text-xs text-muted-foreground py-2">
+                    No events
+                  </div>
                 )}
               </div>
             </div>

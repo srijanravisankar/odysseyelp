@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ItineraryScrollArea } from "./itinerary-scroll-area";
 import { TouringMap } from "@/components/touring-map";
@@ -29,8 +29,10 @@ import { Label } from "../ui/label";
 import { useItinerary } from '@/hooks/context/itinerary-context'
 import { EmptyItinerariesPage } from "./empty-itineraries-page";
 
+import { mapItineraryToCalendarEvents } from "@/lib/schedule-parser";
+
 export function Itinerary() {
-  const { itineraryData, selectedStopIds, setRouteGeoJSON } = useItinerary();
+  const { itineraryData, setItineraryData, selectedStopIds, setRouteGeoJSON } = useItinerary();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [startAddress, setStartAddress] = useState("");
@@ -42,13 +44,24 @@ export function Itinerary() {
 
   // Calendar events state (for now, just a simple example event)
   // Later you can derive this from itineraryData.
-  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([
-    {
-      id: "sample-1",
-      title: "Plan this trip",
-      date: new Date(),
-    },
-  ]);
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+
+  useEffect(() => {
+    if (itineraryData?.stops) {
+      // Get the start date from itinerary or default to today
+      const baseDate = itineraryData.stops.date 
+        ? new Date(itineraryData.stops.date) 
+        : new Date();
+
+      const events = mapItineraryToCalendarEvents(
+        itineraryData.stops.stops,
+        baseDate
+      );
+      
+      setCalendarEvents(events);
+      console.log("📅 Calendar events updated:", events);
+    }
+  }, [itineraryData]);
 
   // --- Logic to Find Best Route ---
   const handleFindRoute = async () => {
@@ -173,6 +186,11 @@ export function Itinerary() {
               <PlannerCalendar
                 events={calendarEvents}
                 onEventsChange={setCalendarEvents}
+                initialMonth={
+                  itineraryData?.stops.date 
+                    ? new Date(itineraryData.stops.date )
+                    : undefined
+                }
               />
             )}
           </div>
