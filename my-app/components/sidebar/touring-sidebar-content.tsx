@@ -1,5 +1,5 @@
 import { SidebarGroupContent } from "../ui/sidebar";
-import {JourneyTimeline} from "@/components/journey-timeline";
+import {JourneyTimeline} from "@/components/chat-page/journey-timeline";
 
 export function TouringSidebarContent() {
   return (

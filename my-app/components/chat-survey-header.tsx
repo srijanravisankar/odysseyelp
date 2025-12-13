@@ -51,6 +51,11 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
 import { useItinerary } from "@/hooks/context/itinerary-context";
+import { saveItineraryToDatabase } from "@/lib/supabase/itinerary-db";
+import { useSaveItinerary } from "@/hooks/use-save-itinerary";
+
+import { createClient } from "@/lib/supabase/client";
+import { useChat } from "@/hooks/context/session-context";
 
 // ---------------- Date-range picker (uses shadcn Calendar) -------------------
 
@@ -247,6 +252,8 @@ export function ChatSurveyHeader() {
   const [avoidTags, setAvoidTags] = useState("nightclubs, tourist_traps");
   const [avoidNotes, setAvoidNotes] = useState("no rooftop bars");
 
+  const {active, setActive} = useChat();
+
   // ---- helper: build survey context from current state -----------------------
 
   const buildSurveyContext = (): SurveyContext => {
@@ -362,7 +369,8 @@ export function ChatSurveyHeader() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { setItineraryData } = useItinerary();
+  const { itineraryData, setItineraryData } = useItinerary();
+  const { save: saveItinerary } = useSaveItinerary();
 
   async function handleSend(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault(); // prevent the form from reloading the page
@@ -373,115 +381,115 @@ export function ChatSurveyHeader() {
     setError(null);
 
     // Example:
-    setItineraryData({
-      title: "One-Day Seattle Itinerary",
-      summary:
-        "Discover Seattle's best coffee shops, scenic views, and dining experiences in a single day.",
-      date: null,
-      center: {
-        lat: 47.61777397467515,
-        lng: -122.35321090209428,
-      },
-      stops: [
-        {
-          id: "stop-1",
-          name: "Storyville Coffee Company",
-          address: "94 Pike St\nSte 34\nSeattle, WA 98101",
-          url: "https://www.yelp.ca/biz/storyville-coffee-company-seattle-9?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
-          rating: 4.5,
-          reviewCount: 2535,
-          price: "$$",
-          openStatus: null,
-          phone: "+12067805777",
-          coordinates: {
-            lat: 47.60895949363687,
-            lng: -122.34043157053928,
-          },
-          category: "Coffee & Tea",
-        },
-        {
-          id: "stop-2",
-          name: "Anchorhead Coffee - CenturyLink Plaza",
-          address: "1600 7th Ave\nSte 105\nSeattle, WA 98101",
-          url: "https://www.yelp.ca/biz/anchorhead-coffee-centurylink-plaza-seattle?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
-          rating: 4.5,
-          reviewCount: 1012,
-          price: "$$",
-          openStatus: null,
-          phone: "+12062222222",
-          coordinates: {
-            lat: 47.6133808022766,
-            lng: -122.334691182469,
-          },
-          category: "Coffee & Tea",
-        },
-        {
-          id: "stop-3",
-          name: "Waterfall Garden",
-          address: "219 2nd Ave S\nSeattle, WA 98104",
-          url: "https://www.yelp.ca/biz/waterfall-garden-seattle?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
-          rating: 4.4,
-          reviewCount: 213,
-          price: null,
-          openStatus: null,
-          phone: "+12066246096",
-          coordinates: {
-            lat: 47.6002476387003,
-            lng: -122.332151074236,
-          },
-          category: "Parks",
-        },
-        {
-          id: "stop-4",
-          name: "Discovery Park",
-          address: "3801 Discovery Park Blvd\nSeattle, WA 98199",
-          url: "https://www.yelp.ca/biz/discovery-park-seattle?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
-          rating: 4.6,
-          reviewCount: 487,
-          price: null,
-          openStatus: null,
-          phone: "+12066844075",
-          coordinates: {
-            lat: 47.66133141343713,
-            lng: -122.41714398532145,
-          },
-          category: "Parks",
-        },
-        {
-          id: "stop-5",
-          name: "The Pink Door",
-          address: "1919 Post Alley\nSeattle, WA 98101",
-          url: "https://www.yelp.ca/biz/the-pink-door-seattle-4?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
-          rating: 4.4,
-          reviewCount: 7852,
-          price: "$$$",
-          openStatus: null,
-          phone: "+12064433241",
-          coordinates: {
-            lat: 47.6103652,
-            lng: -122.3425604,
-          },
-          category: "Italian",
-        },
-        {
-          id: "stop-6",
-          name: "Six Seven Restaurant",
-          address: "2411 Alaskan Way\nPier 67\nSeattle, WA 98121",
-          url: "https://www.yelp.ca/biz/six-seven-restaurant-seattle-3?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
-          rating: 4.1,
-          reviewCount: 1392,
-          price: "$$$",
-          openStatus: null,
-          phone: "+12062694575",
-          coordinates: {
-            lat: 47.6123593,
-            lng: -122.3522372,
-          },
-          category: "New American",
-        },
-      ],
-    });
-    return;
+    // setItineraryData({
+    //   title: "One-Day Seattle Itinerary",
+    //   summary:
+    //     "Discover Seattle's best coffee shops, scenic views, and dining experiences in a single day.",
+    //   date: null,
+    //   center: {
+    //     lat: 47.61777397467515,
+    //     lng: -122.35321090209428,
+    //   },
+    //   stops: [
+    //     {
+    //       id: "stop-1",
+    //       name: "Storyville Coffee Company",
+    //       address: "94 Pike St\nSte 34\nSeattle, WA 98101",
+    //       url: "https://www.yelp.ca/biz/storyville-coffee-company-seattle-9?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+    //       rating: 4.5,
+    //       reviewCount: 2535,
+    //       price: "$$",
+    //       openStatus: null,
+    //       phone: "+12067805777",
+    //       coordinates: {
+    //         lat: 47.60895949363687,
+    //         lng: -122.34043157053928,
+    //       },
+    //       category: "Coffee & Tea",
+    //     },
+    //     {
+    //       id: "stop-2",
+    //       name: "Anchorhead Coffee - CenturyLink Plaza",
+    //       address: "1600 7th Ave\nSte 105\nSeattle, WA 98101",
+    //       url: "https://www.yelp.ca/biz/anchorhead-coffee-centurylink-plaza-seattle?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+    //       rating: 4.5,
+    //       reviewCount: 1012,
+    //       price: "$$",
+    //       openStatus: null,
+    //       phone: "+12062222222",
+    //       coordinates: {
+    //         lat: 47.6133808022766,
+    //         lng: -122.334691182469,
+    //       },
+    //       category: "Coffee & Tea",
+    //     },
+    //     {
+    //       id: "stop-3",
+    //       name: "Waterfall Garden",
+    //       address: "219 2nd Ave S\nSeattle, WA 98104",
+    //       url: "https://www.yelp.ca/biz/waterfall-garden-seattle?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+    //       rating: 4.4,
+    //       reviewCount: 213,
+    //       price: null,
+    //       openStatus: null,
+    //       phone: "+12066246096",
+    //       coordinates: {
+    //         lat: 47.6002476387003,
+    //         lng: -122.332151074236,
+    //       },
+    //       category: "Parks",
+    //     },
+    //     {
+    //       id: "stop-4",
+    //       name: "Discovery Park",
+    //       address: "3801 Discovery Park Blvd\nSeattle, WA 98199",
+    //       url: "https://www.yelp.ca/biz/discovery-park-seattle?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+    //       rating: 4.6,
+    //       reviewCount: 487,
+    //       price: null,
+    //       openStatus: null,
+    //       phone: "+12066844075",
+    //       coordinates: {
+    //         lat: 47.66133141343713,
+    //         lng: -122.41714398532145,
+    //       },
+    //       category: "Parks",
+    //     },
+    //     {
+    //       id: "stop-5",
+    //       name: "The Pink Door",
+    //       address: "1919 Post Alley\nSeattle, WA 98101",
+    //       url: "https://www.yelp.ca/biz/the-pink-door-seattle-4?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+    //       rating: 4.4,
+    //       reviewCount: 7852,
+    //       price: "$$$",
+    //       openStatus: null,
+    //       phone: "+12064433241",
+    //       coordinates: {
+    //         lat: 47.6103652,
+    //         lng: -122.3425604,
+    //       },
+    //       category: "Italian",
+    //     },
+    //     {
+    //       id: "stop-6",
+    //       name: "Six Seven Restaurant",
+    //       address: "2411 Alaskan Way\nPier 67\nSeattle, WA 98121",
+    //       url: "https://www.yelp.ca/biz/six-seven-restaurant-seattle-3?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+    //       rating: 4.1,
+    //       reviewCount: 1392,
+    //       price: "$$$",
+    //       openStatus: null,
+    //       phone: "+12062694575",
+    //       coordinates: {
+    //         lat: 47.6123593,
+    //         lng: -122.3522372,
+    //       },
+    //       category: "New American",
+    //     },
+    //   ],
+    // });
+    // return;
 
     try {
       // ❗ Only include survey if user explicitly saved it
@@ -516,7 +524,131 @@ export function ChatSurveyHeader() {
       if (data.itinerary) {
         console.log("Setting global itinerary data...");
         setItineraryData(data.itinerary);
+        
+        console.log("Saving itinerary data to database...");
+        console.log(data.itinerary);
+        console.log(query);
+        // await saveItinerary(data.itinerary, query);
+        await saveItinerary(data.itinerary, query);
       }
+        
+      // const mockItinerary = {
+      //     title: "One-Day Seattle Itinerary",
+      //     summary:
+      //       "Discover Seattle's best coffee shops, scenic views, and dining experiences in a single day.",
+      //     date: null,
+      //     center: {
+      //       lat: 47.61777397467515,
+      //       lng: -122.35321090209428,
+      //     },
+      //     stops: [
+      //       {
+      //         id: "stop-1",
+      //         name: "Storyville Coffee Company",
+      //         address: "94 Pike St\nSte 34\nSeattle, WA 98101",
+      //         url: "https://www.yelp.ca/biz/storyville-coffee-company-seattle-9?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+      //         rating: 4.5,
+      //         reviewCount: 2535,
+      //         price: "$$",
+      //         openStatus: null,
+      //         phone: "+12067805777",
+      //         coordinates: {
+      //           lat: 47.60895949363687,
+      //           lng: -122.34043157053928,
+      //         },
+      //         category: "Coffee & Tea",
+      //       },
+      //       {
+      //         id: "stop-2",
+      //         name: "Anchorhead Coffee - CenturyLink Plaza",
+      //         address: "1600 7th Ave\nSte 105\nSeattle, WA 98101",
+      //         url: "https://www.yelp.ca/biz/anchorhead-coffee-centurylink-plaza-seattle?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+      //         rating: 4.5,
+      //         reviewCount: 1012,
+      //         price: "$$",
+      //         openStatus: null,
+      //         phone: "+12062222222",
+      //         coordinates: {
+      //           lat: 47.6133808022766,
+      //           lng: -122.334691182469,
+      //         },
+      //         category: "Coffee & Tea",
+      //       },
+      //       {
+      //         id: "stop-3",
+      //         name: "Waterfall Garden",
+      //         address: "219 2nd Ave S\nSeattle, WA 98104",
+      //         url: "https://www.yelp.ca/biz/waterfall-garden-seattle?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+      //         rating: 4.4,
+      //         reviewCount: 213,
+      //         price: null,
+      //         openStatus: null,
+      //         phone: "+12066246096",
+      //         coordinates: {
+      //           lat: 47.6002476387003,
+      //           lng: -122.332151074236,
+      //         },
+      //         category: "Parks",
+      //       },
+      //       {
+      //         id: "stop-4",
+      //         name: "Discovery Park",
+      //         address: "3801 Discovery Park Blvd\nSeattle, WA 98199",
+      //         url: "https://www.yelp.ca/biz/discovery-park-seattle?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+      //         rating: 4.6,
+      //         reviewCount: 487,
+      //         price: null,
+      //         openStatus: null,
+      //         phone: "+12066844075",
+      //         coordinates: {
+      //           lat: 47.66133141343713,
+      //           lng: -122.41714398532145,
+      //         },
+      //         category: "Parks",
+      //       },
+      //       {
+      //         id: "stop-5",
+      //         name: "The Pink Door",
+      //         address: "1919 Post Alley\nSeattle, WA 98101",
+      //         url: "https://www.yelp.ca/biz/the-pink-door-seattle-4?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+      //         rating: 4.4,
+      //         reviewCount: 7852,
+      //         price: "$$$",
+      //         openStatus: null,
+      //         phone: "+12064433241",
+      //         coordinates: {
+      //           lat: 47.6103652,
+      //           lng: -122.3425604,
+      //         },
+      //         category: "Italian",
+      //       },
+      //       {
+      //         id: "stop-6",
+      //         name: "Six Seven Restaurant",
+      //         address: "2411 Alaskan Way\nPier 67\nSeattle, WA 98121",
+      //         url: "https://www.yelp.ca/biz/six-seven-restaurant-seattle-3?adjust_creative=6eaRMnBeuAhtxZmiJyu5tA&utm_campaign=yelp_api_v3&utm_medium=api_v3_public_ai_api_chat_v2&utm_source=6eaRMnBeuAhtxZmiJyu5tA",
+      //         rating: 4.1,
+      //         reviewCount: 1392,
+      //         price: "$$$",
+      //         openStatus: null,
+      //         phone: "+12062694575",
+      //         coordinates: {
+      //           lat: 47.6123593,
+      //           lng: -122.3522372,
+      //         },
+      //         category: "New American",
+      //       },
+      //     ],
+      //   }
+
+      // if (true) {
+      //   console.log("Setting global itinerary data...");
+      //   setItineraryData(mockItinerary);
+
+      //   console.log("Saving itinerary data to database...");
+      //   // await saveItinerary(data.itinerary, query);
+      //   await saveItinerary(mockItinerary, query);
+      // }
     } catch (err) {
       console.error("Network error", err);
     } finally {
@@ -524,9 +656,6 @@ export function ChatSurveyHeader() {
     }
   }
 
-  // --------------------------- RENDER --------------------------------------
-
-  // Step content renderer
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:

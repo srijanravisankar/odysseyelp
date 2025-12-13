@@ -29,7 +29,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const userId = authData.user.id;
       const email = authData.user.email || "";
       let name = authData.user.user_metadata?.name; // Default to metadata if available
-      const avatar = authData.user.user_metadata?.avatar || "/default-avatar.png";
+      const avatar = authData.user.user_metadata?.avatar || "/vercel.svg";
 
       // 2. Fetch the actual profile from the 'users' table
       try {
@@ -70,7 +70,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         setUser({
           name: profileData?.name || session.user.user_metadata?.name || "Unknown User",
           email: session.user.email || "",
-          avatar: session.user.user_metadata?.avatar || "/default-avatar.png",
+          avatar: session.user.user_metadata?.avatar || "/vercel.svg",
         });
       } else {
         setUser(null);

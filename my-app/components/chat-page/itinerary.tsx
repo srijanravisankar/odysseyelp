@@ -123,7 +123,7 @@ export function Itinerary() {
   // if (itineraries.length === 0) return <div>No itineraries found</div>
   // else return <pre>{JSON.stringify(itineraries[0].stops, null, 2)}</pre>
 
-  console.log("ItineraryData in Itinerary component:", itineraryData);
+  // console.log("ItineraryData in Itinerary component:", itineraryData);
   return (
     <Card className="flex flex-row p-0 bg-muted/50 h-full overflow-hidden">
       <CardContent className="flex flex-col flex-1 min-h-0 pr-2 pl-2 pt-2 pb-2 overflow-y-auto w-50">

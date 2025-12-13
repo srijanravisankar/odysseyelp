@@ -1,5 +1,5 @@
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { JourneyTimeline } from "../journey-timeline"
+import { JourneyTimeline } from "./journey-timeline"
 
 export function ItineraryScrollArea() {
   return (

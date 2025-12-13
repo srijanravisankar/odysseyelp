@@ -13,7 +13,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { useItinerary } from "@/components/chat-page/itinerary-context";
+import { useItinerary } from "@/hooks/context/itinerary-context";
 import { toast } from "sonner";
 
 interface DeletePlaceDialogProps {

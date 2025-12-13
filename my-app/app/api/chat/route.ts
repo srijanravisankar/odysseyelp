@@ -318,7 +318,6 @@ type ItineraryStop = {
   phone: string | null
   coordinates: { lat: number; lng: number }
   category: string | null
-  // NEW: Strict schedule format
   schedule: {
     start: string; // Format: "HH:MM AM/PM" (e.g. "10:00 AM")
     end: string;   // Format: "HH:MM AM/PM" (e.g. "11:30 AM")

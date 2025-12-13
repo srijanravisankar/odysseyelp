@@ -16,6 +16,7 @@ import { useUser } from "@/hooks/context/user-context";
 import { useChat } from "@/hooks/context/session-context";
 import { Spinner } from "../ui/spinner";
 import { DropdownMenuDialog } from "./chat-history-options";
+import { useItinerary } from "@/hooks/context/itinerary-context";
 
 interface Session {
   id: number;
@@ -32,6 +33,7 @@ export function ChatSidebarContent() {
   const {active, setActive} = useChat();
   const [loading, setLoading] = useState(true);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
+  const { itineraryData } = useItinerary();
 
   // Fetch sessions on mount
   useEffect(() => {
@@ -121,7 +123,8 @@ export function ChatSidebarContent() {
           newSessionFormatted,
           ...prevSessions.map((s) => ({ ...s, isActive: false })),
         ]);
-
+        setActive(newSession.id);
+        
         toast.success("New chat created!");
         
         // Optional: Navigate to the new chat
@@ -211,7 +214,7 @@ export function ChatSidebarContent() {
                 {/* Title + subtitle */}
                 <div className="flex min-w-0 flex-1 flex-col">
                   <span className="text-md leading-tight line-clamp-2 wrap-break-word">
-                    {item.title}
+                    {itineraryData?.stops && itineraryData.stops.length > 0 ? itineraryData.title : item.title}
                   </span>
 
                   <span className="flex items-center gap-1 text-[10px] text-muted-foreground">

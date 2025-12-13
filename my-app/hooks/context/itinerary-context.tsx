@@ -16,7 +16,7 @@ export interface Itinerary {
 }
 
 type ItineraryContextType = {
-  itineraryData: any;
+  itineraryData: Itinerary | null;
   setItineraryData: (data: any) => void;
   selectedStopIds: string[];
   setSelectedStopIds: React.Dispatch<React.SetStateAction<string[]>>;
@@ -26,6 +26,8 @@ type ItineraryContextType = {
   >;
   routeGeoJSON: any;
   setRouteGeoJSON: (json: any) => void;
+
+  removeStop: (stopId: string) => void;
 
   // 🔑 NEW: Fetched itineraries from Supabase
   itineraries: Itinerary[];
@@ -53,6 +55,21 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
   const [itineraries, setItineraries] = useState<Itinerary[]>([]);
   const [loadingItineraries, setLoadingItineraries] = useState(false);
   const [itinerariesError, setItinerariesError] = useState<string | null>(null);
+
+  const removeStop = (stopId: string) => {
+    if (!itineraryData?.stops) return;
+
+    setItineraryData({
+      ...itineraryData,
+      stops: itineraryData.stops.filter((stop: any) => {
+        const id = stop.id ?? String(itineraryData.stops.indexOf(stop));
+        return id !== stopId;
+      }),
+    });
+
+    // Also remove from selected stops if it was selected
+    setSelectedStopIds((prev) => prev.filter((id) => id !== stopId));
+  };
 
   // 🔑 NEW: Fetch itineraries whenever active session or user changes
   useEffect(() => {
@@ -119,6 +136,7 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
         setAppTheme,
         routeGeoJSON,
         setRouteGeoJSON,
+        removeStop,
         itineraries,
         loadingItineraries,
         itinerariesError,
