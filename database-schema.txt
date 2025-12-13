@@ -1,0 +1,30 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.itineraries (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  user_id uuid NOT NULL,
+  title text NOT NULL,
+  prompt text NOT NULL,
+  stops jsonb NOT NULL,
+  session_id bigint NOT NULL,
+  CONSTRAINT itineraries_pkey PRIMARY KEY (id),
+  CONSTRAINT itineraries_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id),
+  CONSTRAINT itineraries_session_id_fkey FOREIGN KEY (session_id) REFERENCES public.sessions(id)
+);
+CREATE TABLE public.sessions (
+  id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
+  user_id uuid NOT NULL,
+  title text NOT NULL,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT sessions_pkey PRIMARY KEY (id),
+  CONSTRAINT sessions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.users (
+  id uuid NOT NULL,
+  name text NOT NULL,
+  email text NOT NULL UNIQUE,
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  CONSTRAINT users_pkey PRIMARY KEY (id)
+);
