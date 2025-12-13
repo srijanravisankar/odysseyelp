@@ -6,7 +6,7 @@ import { ItineraryScrollArea } from "./itinerary-scroll-area";
 import { TouringMap } from "@/components/touring-map";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Button } from "../ui/button";
-import { CircleCheckBig, SquarePen, Route } from "lucide-react";
+import { CircleCheckBig, SquarePen, Route, Map, CalendarDays } from "lucide-react";
 import {
   PlannerCalendar,
   type CalendarEvent,
@@ -27,6 +27,7 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 
 import { useItinerary } from '@/hooks/context/itinerary-context'
+import { EmptyItinerariesPage } from "./empty-itineraries-page";
 
 export function Itinerary() {
   const { itineraryData, selectedStopIds, setRouteGeoJSON } = useItinerary();
@@ -119,14 +120,15 @@ export function Itinerary() {
 
   if (loadingItineraries) return <div>Loading itineraries...</div>
   if (itinerariesError) return <div>Error: {itinerariesError}</div>
-  if (itineraries.length === 0) return <div>No itineraries found</div>
+  // if (itineraries.length === 0) return <div>No itineraries found</div>
   // else return <pre>{JSON.stringify(itineraries[0].stops, null, 2)}</pre>
 
   console.log("ItineraryData in Itinerary component:", itineraryData);
   return (
     <Card className="flex flex-row p-0 bg-muted/50 h-full overflow-hidden">
       <CardContent className="flex flex-col flex-1 min-h-0 pr-2 pl-2 pt-2 pb-2 overflow-y-auto w-50">
-        <ItineraryScrollArea />
+        {itineraries.length === 0 ? <EmptyItinerariesPage /> : <ItineraryScrollArea />}
+        {/* <ItineraryScrollArea /> */}
         <div className="w-full flex justify-end shrink-0 pt-1">
           <ButtonGroup>
             <Button
@@ -134,7 +136,7 @@ export function Itinerary() {
               className="hover:bg-gray-300 cursor-pointer"
               onClick={() => setIsDialogOpen(true)}
             >
-              <Route className="text-blue-600 h-3 w-3" />
+              <Route className="text-fuchsia-600 h-3 w-3" />
               Find Best Route
             </Button>
 
@@ -158,33 +160,9 @@ export function Itinerary() {
         </div>
       </CardContent>
 
-      <CardFooter className="p-0 flex-1 pr-3 pl-3 pt-3 pb-3 shrink-0">
+      <CardFooter className="flex-1 pr-2 pl-2 pt-2 pb-2 shrink-0">
         <div className="flex h-full w-full flex-col gap-2">
           {/* Top row: Map / Calendar toggle */}
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground">
-              View
-            </span>
-
-            <ButtonGroup>
-              <Button
-                type="button"
-                variant={viewMode === "map" ? "default" : "ghost"}
-                className="cursor-pointer"
-                onClick={() => setViewMode("map")}
-              >
-                Map View
-              </Button>
-              <Button
-                type="button"
-                variant={viewMode === "calendar" ? "default" : "ghost"}
-                className="cursor-pointer"
-                onClick={() => setViewMode("calendar")}
-              >
-                Calendar View
-              </Button>
-            </ButtonGroup>
-          </div>
 
           {/* Main pane: map OR calendar */}
           <div className="relative flex-1 overflow-hidden rounded-xl border bg-muted">
@@ -196,6 +174,26 @@ export function Itinerary() {
                 onEventsChange={setCalendarEvents}
               />
             )}
+          </div>
+          <div className="flex items-end justify-end">
+            <ButtonGroup>
+              <Button
+                variant="ghost"
+                className="hover:bg-gray-300 cursor-pointer"
+                onClick={() => setViewMode("map")}
+              >
+                <Map className="text-red-600 h-3 w-3" />
+                Map View
+              </Button>
+              <Button
+                variant="ghost"
+                className="hover:bg-gray-300 cursor-pointer"
+                onClick={() => setViewMode("calendar")}
+              >
+                <CalendarDays className="text-blue-600 h-3 w-3" />
+                Calendar View
+              </Button>
+            </ButtonGroup>
           </div>
         </div>
       </CardFooter>
