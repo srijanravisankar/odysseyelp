@@ -236,7 +236,7 @@ export function JourneyTimeline() {
             </TimelineHeader>
 
             {/* RIGHT: stop info */}
-            <TimelineBody className="group pl-0.5 w-full">
+            <TimelineBody className="group pl-1 w-full relative">
               <div
                 className={cn(
                   "relative w-full overflow-hidden rounded-lg border p-3",
@@ -339,9 +339,11 @@ export function JourneyTimeline() {
                       {/* Address */}
                       <div className="flex items-start gap-1">
                         <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
-                        <span className="leading-tight">
+                        <div className="leading-tight text-foreground
+                          overflow-hidden text-ellipsis whitespace-nowrap
+                          max-w-[250]" title={formattedAddress}> 
                           {formattedAddress}
-                        </span>
+                        </div>
                       </div>
 
                       {/* Phone */}
@@ -356,6 +358,11 @@ export function JourneyTimeline() {
                           </a>
                         </div>
                       )}
+
+                      {/* Index Letter Badge */}
+                      <div className={cn("absolute bottom-3 right-4 flex items-center justify-center h-6 w-6 rounded-full text-md font-medium border border-primary bg-primary/10 text-primary", borderColorClass)}>
+                        {String.fromCharCode(65 + index)}
+                      </div>
                     </div>
                   </div>
                 </div>

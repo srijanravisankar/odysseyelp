@@ -185,7 +185,7 @@ export function PlannerCalendar({
                         <button
                           key={event.id}
                           title={event.title}
-                          draggable
+                          // draggable
                           onDragStart={(e) => {
                             e.dataTransfer.setData("text/plain", event.id);
                             e.dataTransfer.effectAllowed = "move";
