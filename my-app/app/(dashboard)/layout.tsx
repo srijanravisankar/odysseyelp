@@ -1,5 +1,6 @@
 import ShellLayout from "@/components/shell-layout";
 import { ChatProvider } from "@/hooks/context/session-context";
+import { ItineraryProvider } from "@/components/chat-page/itinerary-context";
 
 // pr check
 export default function Layout({
@@ -9,7 +10,9 @@ export default function Layout({
 }) {
   return (
     <ChatProvider>
-      <ShellLayout>{children}</ShellLayout>
+      <ItineraryProvider>
+        <ShellLayout>{children}</ShellLayout>
+      </ItineraryProvider>
     </ChatProvider>
   );
 }

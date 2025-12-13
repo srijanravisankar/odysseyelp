@@ -102,7 +102,8 @@ export function PlannerCalendar({
   const weekdayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   return (
-    <div className="flex h-full w-full flex-col rounded-xl border bg-background">
+    // <div className="flex h-full w-full flex-col rounded-xl border bg-background">
+    <div className="absolute inset-0 h-full w-full">
       {/* Header */}
       <div className="flex items-center justify-between border-b px-3 py-2">
         <div className="flex items-center gap-2">
