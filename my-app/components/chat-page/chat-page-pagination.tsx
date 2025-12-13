@@ -1,42 +1,3 @@
-// import {
-//   Pagination,
-//   PaginationContent,
-//   PaginationEllipsis,
-//   PaginationItem,
-//   PaginationLink,
-//   PaginationNext,
-//   PaginationPrevious,
-// } from "@/components/ui/pagination"
-
-// export function ChatPagePagination() {
-//   return (
-//     <Pagination>
-//       <PaginationContent className="gap-2">
-//         <PaginationItem>
-//           <PaginationPrevious href="#" className="h-7 w-7 p-0 text-sm" />
-//         </PaginationItem>
-//         <PaginationItem>
-//           <PaginationLink href="#" className="h-7 w-7 p-0 text-xs">1</PaginationLink>
-//         </PaginationItem>
-//         <PaginationItem>
-//           <PaginationLink href="#" isActive className="h-7 w-7 p-0 text-sm">
-//             2
-//           </PaginationLink>
-//         </PaginationItem>
-//         <PaginationItem>
-//           <PaginationLink href="#" className="h-7 w-7 p-0 text-sm">3</PaginationLink>
-//         </PaginationItem>
-//         <PaginationItem>
-//           <PaginationEllipsis className="h-7 w-7 p-0" />
-//         </PaginationItem>
-//         <PaginationItem>
-//           <PaginationNext href="#" className="h-7 w-7 p-0 text-sm" />
-//         </PaginationItem>
-//       </PaginationContent>
-//     </Pagination>
-//   )
-// }
-
 'use client'
 
 import { useState, useEffect } from "react"
@@ -50,23 +11,36 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { useItinerary } from "@/hooks/context/itinerary-context"
+import { it } from "node:test"
 
 export function ChatPagePagination() {
-  const { itineraries } = useItinerary()
+  const { itineraries, setItineraryData } = useItinerary()
   // console.log("Itineraries in Pagination:", itineraries)
   const [currentPage, setCurrentPage] = useState(1)
   
   const itemsPerPage = 1 // 1 itinerary per page
   const totalPages = Math.ceil(itineraries.length / itemsPerPage)
 
-  // Reset to page 1 when itineraries change
   useEffect(() => {
-    setCurrentPage(1)
-  }, [itineraries])
+    if (itineraries.length > 0) {
+        setCurrentPage(totalPages)
+        const newestItinerary = itineraries[itineraries.length - 1];
+        setItineraryData(newestItinerary);
+    }
+  }, [itineraries, totalPages, setItineraryData])
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page)
+
+      // 2. THE FIX: Update the global display data
+      // Page 1 = Index 0, Page 2 = Index 1, etc.
+      const selectedItinerary = itineraries[page - 1];
+      
+      if (selectedItinerary) {
+          setItineraryData(selectedItinerary);
+          console.log("Switched to itinerary:", selectedItinerary.title);
+      }
     }
   }
 
@@ -101,6 +75,8 @@ export function ChatPagePagination() {
     
     return pages
   }
+
+  if (!itineraries || itineraries.length <= 1) return null;
 
   return (
     <Pagination>

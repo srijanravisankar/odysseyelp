@@ -97,7 +97,7 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
           .select("*")
           .eq("user_id", authData.user.id)
           .eq("session_id", active)
-          .order("created_at", { ascending: false });
+          .order("created_at", { ascending: true });
 
         if (queryError) {
           setItinerariesError(queryError.message);

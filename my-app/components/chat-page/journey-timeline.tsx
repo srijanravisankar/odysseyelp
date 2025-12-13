@@ -222,7 +222,7 @@ export function JourneyTimeline() {
             {/* LEFT: icon + connecting line, aligned with card */}
             <TimelineHeader className="flex flex-col items-center">
               {index !== itineraryData.stops.stops.length - 1 && (
-                <TimelineSeparator className="bg-gray-300 w-px flex-1 mt-12" />
+                <TimelineSeparator className="bg-gray-300 w-px flex-1 mt-1" />
               )}
               <TimelineIcon
                 className={cn(
