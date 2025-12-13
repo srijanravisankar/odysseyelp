@@ -13,6 +13,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@radix-ui/react-tooltip";
 
 export type CalendarEvent = {
   id: string;
@@ -175,34 +176,40 @@ export function PlannerCalendar({
                 onDrop={handleDrop}
               >
                 {dayEvents.length > 0 ? (
-                  dayEvents.map((event) => (
-                    <button
-                      key={event.id}
-                      draggable
-                      onDragStart={(e) => {
-                        e.dataTransfer.setData("text/plain", event.id);
-                        e.dataTransfer.effectAllowed = "move";
-                      }}
-                      className={cn(
-                        "w-full rounded-md border px-2 py-1 text-left text-[10px] leading-tight",
-                        "bg-primary/5 text-foreground hover:bg-primary/10 transition-colors",
-                        "flex flex-col gap-0.5"
-                      )}
-                    >
-                      <div className="font-semibold truncate">{event.title}</div>
-                      {event.startTime && (
-                        <div className="text-[9px] text-muted-foreground">
-                          {event.startTime}
-                          {event.endTime && ` - ${event.endTime}`}
-                        </div>
-                      )}
-                    </button>
-                  ))
-                ) : (
-                  <div className="text-center text-xs text-muted-foreground py-2">
-                    No events
-                  </div>
-                )}
+                    dayEvents.map((event, index) => {
+                      // Find the index of this event in ALL events to assign a letter
+                      const eventIndex = internalEvents.findIndex((e) => e.id === event.id);
+                      const letter = String.fromCharCode(65 + eventIndex); // A, B, C, etc.
+
+                      return (
+                        <button
+                          key={event.id}
+                          title={event.title}
+                          draggable
+                          onDragStart={(e) => {
+                            e.dataTransfer.setData("text/plain", event.id);
+                            e.dataTransfer.effectAllowed = "move";
+                          }}
+                          className={cn(
+                            "w-9 h-9 rounded-4xl border ml-auto mr-auto px-1 py-2.5 text-left text-[12px] leading-tight",
+                            "bg-primary/5 text-foreground hover:bg-primary/10 transition-colors border border-accent-foreground",
+                            "flex flex-col gap-1 shrink-0"
+                          )}
+                        >
+                          <div className="font-bold text-center">{letter}</div>
+                          {event.startTime && (
+                            <div className="text-[9px] text-muted-foreground whitespace-nowrap text-center">
+                              {event.startTime}
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <div className="text-center text-[9px] text-muted-foreground py-2">
+                      No events
+                    </div>
+                  )}
               </div>
             </div>
           );
