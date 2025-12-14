@@ -14,6 +14,7 @@ export function ShellHeader() {
   const pathname = usePathname();
   const isTouring = pathname.startsWith("/touring");
   const isChat = pathname.startsWith("/chat");
+  const isGroup = pathname.startsWith("/groups");
   const isExplore = pathname.startsWith("/explore");
 
   return (
