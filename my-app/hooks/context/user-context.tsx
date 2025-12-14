@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, useCallback, ReactNode 
 import { useSupabase } from "./supabase-context";
 
 interface User {
+  id: string;
   name: string;
   email: string;
   avatar: string;
@@ -49,6 +50,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     // Update State
     setUser({
+      id: userId,
       name: name || email.split("@")[0] || "Unknown User",
       email,
       avatar,
