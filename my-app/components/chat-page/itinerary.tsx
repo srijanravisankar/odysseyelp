@@ -68,6 +68,21 @@ export function Itinerary() {
     }
   }, [user, active, itineraryData]);
 
+  useEffect(() => {
+    if (itineraries && itineraries.length > 0) {
+      // Only set if we haven't selected one yet OR if the current one doesn't match the new list
+      // (This prevents overwriting if the user manually selected a different one)
+      const currentExistsInList = itineraries.find((i: any) => i.id === itineraryData?.id);
+      
+      if (!itineraryData || !currentExistsInList) {
+        setItineraryData(itineraries[0]);
+      }
+    } else if (itineraries && itineraries.length === 0) {
+        // If no itineraries exist for this chat, clear the view
+        setItineraryData(null);
+    }
+  }, [itineraries, itineraryData, setItineraryData, active]);
+
   // --- Logic to Find Best Route ---
   const handleFindRoute = async () => {
     if (!startAddress.trim()) return;

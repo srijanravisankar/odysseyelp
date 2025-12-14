@@ -30,20 +30,53 @@ export function GroupsSidebarContent() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
 
+  // const fetchGroups = useCallback(async () => {
+  //   if (!user?.email) return;
+  //   try {
+  //     setLoading(true);
+  //     const { data: authData } = await supabase.auth.getUser();
+  //     if (!authData.user) return;
+  //     const { data, error } = await supabase
+  //       .from("groups")
+  //       .select("*")
+  //       .eq("created_by", authData.user.id)
+  //       .order("created_at", { ascending: false });
+
+  //     if (error) throw error;
+
+  //     const transformedGroups = (data || []).map((group: any) => ({
+  //       id: group.id,
+  //       name: group.name || "Untitled Group",
+  //       createdAt: group.created_at,
+  //     }));
+  //     setGroups(transformedGroups);
+  //   } catch (error) {
+  //     console.error("Error fetching groups:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, [user, supabase]);
+
   const fetchGroups = useCallback(async () => {
+    // 1. Basic checks
     if (!user?.email) return;
+
     try {
       setLoading(true);
       const { data: authData } = await supabase.auth.getUser();
       if (!authData.user) return;
+
+      // 2. ✅ NEW: Call the Database Function (RPC) instead of a simple select
+      // This gets groups you own AND groups you are a member of.
       const { data, error } = await supabase
-        .from("groups")
-        .select("*")
-        .eq("created_by", authData.user.id)
-        .order("created_at", { ascending: false });
+        .rpc("get_user_groups", {
+          current_user_id: authData.user.id,
+        })
+        .order("created_at", { ascending: false }); // We can still sort the results!
 
       if (error) throw error;
 
+      // 3. Transform and set state (same as before)
       const transformedGroups = (data || []).map((group: any) => ({
         id: group.id,
         name: group.name || "Untitled Group",
@@ -52,11 +85,12 @@ export function GroupsSidebarContent() {
       setGroups(transformedGroups);
     } catch (error) {
       console.error("Error fetching groups:", error);
+      toast.error("Failed to load groups");
     } finally {
       setLoading(false);
     }
   }, [user, supabase]);
-
+  
   useEffect(() => {
     fetchGroups();
   }, [fetchGroups]);
