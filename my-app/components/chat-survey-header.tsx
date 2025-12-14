@@ -538,10 +538,17 @@ export function ChatSurveyHeader() {
         console.log(query);
         
         try {
-          await saveItinerary(data.itinerary, query);
+          const result = await saveItinerary(data.itinerary, query);
+          if (result && result.sessionId) {
+            setActive(result.sessionId);
+            console.log("✅ Session set to:", result.sessionId);
+          } else {
+            console.warn("⚠️ No sessionId returned from save");
+          }
         } catch (dbErr) {
           console.error("Database save failed:", dbErr);
         }
+
       }
         
       // const mockItinerary = {

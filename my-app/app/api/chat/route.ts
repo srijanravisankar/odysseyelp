@@ -8,7 +8,7 @@ const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY!,
 })
 
-const model = "gemma-3-27b-it"
+const model = "gemini-2.5-flash-lite"
 
 export async function POST(req: NextRequest) {
     try {

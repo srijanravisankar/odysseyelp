@@ -23,13 +23,15 @@ export function useSaveItinerary() {
 
       console.log("Saving itinerary:", itinerary, query, authData.user.id, active);
 
-      await saveItineraryToDatabase(
+      const result = await saveItineraryToDatabase(
         itinerary,
         query,
         authData.user.id,
         active
       );
       setError(null);
+
+      return result;
     } catch (err: any) {
       const errorMsg = err.message || "Failed to save itinerary";
       setError(errorMsg);

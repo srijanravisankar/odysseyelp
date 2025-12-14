@@ -36,6 +36,47 @@ export function ChatSidebarContent() {
   const { itineraryData } = useItinerary();
 
   // Fetch sessions on mount
+  // useEffect(() => {
+  //   const fetchSessions = async () => {
+  //     if (!user?.email) return;
+
+  //     try {
+  //       setLoading(true);
+        
+  //       // Get the authenticated user ID
+  //       const { data: authData } = await supabase.auth.getUser();
+  //       if (!authData.user) return;
+
+  //       // Fetch sessions for this user
+  //       const { data, error } = await supabase
+  //         .from("sessions")
+  //         .select("*")
+  //         .eq("user_id", authData.user.id)
+  //         .order("created_at", { ascending: false });
+
+  //       if (error) throw error;
+
+  //       // Transform the data to match our Session interface
+  //       const transformedSessions = (data || []).map((session: any) => ({
+  //         id: session.id,
+  //         title: session.title || "Untitled Chat",
+  //         subtitle: `Created ${formatDate(session.created_at)}`,
+  //         createdAt: session.created_at,
+  //         isActive: false,
+  //       }));
+
+  //       setSessions(transformedSessions);
+  //     } catch (error) {
+  //       console.error("Error fetching sessions:", error);
+  //       toast.error("Failed to load chat history");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchSessions();
+  // }, [user, active]);
+
   useEffect(() => {
     const fetchSessions = async () => {
       if (!user?.email) return;
@@ -43,11 +84,9 @@ export function ChatSidebarContent() {
       try {
         setLoading(true);
         
-        // Get the authenticated user ID
         const { data: authData } = await supabase.auth.getUser();
         if (!authData.user) return;
 
-        // Fetch sessions for this user
         const { data, error } = await supabase
           .from("sessions")
           .select("*")
@@ -56,7 +95,6 @@ export function ChatSidebarContent() {
 
         if (error) throw error;
 
-        // Transform the data to match our Session interface
         const transformedSessions = (data || []).map((session: any) => ({
           id: session.id,
           title: session.title || "Untitled Chat",
@@ -75,7 +113,7 @@ export function ChatSidebarContent() {
     };
 
     fetchSessions();
-  }, [user]);
+  }, [user, active, supabase]); // ✅ Keep the same dependencies
 
   const handleNewChat = async () => {
     if (!user?.email) {

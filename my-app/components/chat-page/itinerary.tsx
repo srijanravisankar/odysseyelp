@@ -30,6 +30,8 @@ import { useItinerary } from '@/hooks/context/itinerary-context'
 import { EmptyItinerariesPage } from "./empty-itineraries-page";
 
 import { mapItineraryToCalendarEvents } from "@/lib/schedule-parser";
+import { useUser } from "@/hooks/context/user-context";
+import { useChat } from "@/hooks/context/session-context";
 
 export function Itinerary() {
   const { itineraryData, setItineraryData, selectedStopIds, setRouteGeoJSON } = useItinerary();
@@ -46,6 +48,9 @@ export function Itinerary() {
   // Later you can derive this from itineraryData.
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
 
+  const { user } = useUser();
+  const { active } = useChat();
+
   useEffect(() => {
     if (itineraryData?.stops) {
       // Get the start date from itinerary or default to today
@@ -61,7 +66,7 @@ export function Itinerary() {
       setCalendarEvents(events);
       console.log("📅 Calendar events updated:", events);
     }
-  }, [itineraryData]);
+  }, [user, active, itineraryData]);
 
   // --- Logic to Find Best Route ---
   const handleFindRoute = async () => {

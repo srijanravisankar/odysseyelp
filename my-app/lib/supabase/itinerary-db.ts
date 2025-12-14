@@ -43,7 +43,7 @@ export async function saveItineraryToDatabase(
     }
 
     console.log("Itinerary saved successfully:", data);
-    return data;
+    return { data, sessionId: newSession.id };
   } catch (err: any) {
     console.error("Error saving to database:", err);
     throw err;
