@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import {Earth, Heart} from "lucide-react"
+import {Earth, Heart, Hash} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import {
@@ -14,6 +14,8 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 type PlanCardProps = {
     /** Main title of the plan */
@@ -30,8 +32,8 @@ type PlanCardProps = {
     onClick?: () => void
     /** Called when user toggles like */
     onToggleLike?: () => void
-    /** Called when user toggles publish */
-    onTogglePublish?: () => void
+    /** Called when user toggles publish, with optional tags */
+    onTogglePublish?: (tags?: string[]) => void
     /** Thumbnail area (e.g. <TouringMap />). If not passed, a gradient placeholder is shown. */
     thumbnail?: React.ReactNode
     /** Optional className override */
@@ -51,6 +53,8 @@ export function PlanCard({
                              className,
                          }: PlanCardProps) {
     const [publishDialogOpen, setPublishDialogOpen] = useState(false)
+    const [tagsDialogOpen, setTagsDialogOpen] = useState(false)
+    const [tagsInput, setTagsInput] = useState("")
 
     return (
         <>
@@ -177,12 +181,74 @@ export function PlanCard({
                         <AlertDialogCancel>No</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={() => {
-                                onTogglePublish?.()
                                 setPublishDialogOpen(false)
+                                if (isPublished) {
+                                    // Unpublishing - just call onTogglePublish directly
+                                    onTogglePublish?.()
+                                } else {
+                                    // Publishing - show tags dialog
+                                    setTagsDialogOpen(true)
+                                }
                             }}
                             className={isPublished ? "" : "bg-emerald-600 hover:bg-emerald-700"}
                         >
                             Yes
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Tags Input Dialog */}
+            <AlertDialog open={tagsDialogOpen} onOpenChange={setTagsDialogOpen}>
+                <AlertDialogContent className="sm:max-w-md">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2">
+                            <Hash className="h-5 w-5 text-emerald-500" />
+                            Add Tags (Optional)
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Add hashtags to help others discover your itinerary. Separate multiple tags with commas.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className="py-4">
+                        <Label htmlFor="tags-input" className="text-sm font-medium">
+                            Tags
+                        </Label>
+                        <Input
+                            id="tags-input"
+                            placeholder="e.g. #nightlife, #toronto, #foodie"
+                            value={tagsInput}
+                            onChange={(e) => setTagsInput(e.target.value)}
+                            className="mt-2"
+                        />
+                        <p className="text-xs text-muted-foreground mt-2">
+                            Example: #nightlife, #toronto, #datenight
+                        </p>
+                    </div>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => {
+                            // Skip tags but still publish
+                            onTogglePublish?.([])
+                            setTagsInput("")
+                        }}>
+                            Skip
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => {
+                                // Parse tags from input
+                                const tags = tagsInput
+                                    .split(",")
+                                    .map(tag => tag.trim())
+                                    .filter(tag => tag.length > 0)
+                                    .map(tag => tag.startsWith("#") ? tag : `#${tag}`)
+
+                                onTogglePublish?.(tags)
+                                setTagsInput("")
+                                setTagsDialogOpen(false)
+                            }}
+                            className="bg-emerald-600 hover:bg-emerald-700"
+                        >
+                            Publish
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

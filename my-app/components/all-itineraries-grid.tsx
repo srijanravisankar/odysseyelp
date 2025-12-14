@@ -24,6 +24,7 @@ import { Store, MapPin, Star, Phone } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { toast } from "sonner"
 
 export function AllItinerariesGrid() {
     const supabase = useSupabase()
@@ -77,6 +78,57 @@ export function AllItinerariesGrid() {
 
         fetchAllItineraries()
     }, [user?.email, supabase])
+
+    // Handle publish/unpublish with tags
+    const handleTogglePublish = async (itineraryId: number, currentlyPublished: boolean, tags?: string[]) => {
+        try {
+            const newPublishedState = !currentlyPublished
+
+            // Build update object
+            const updateData: { published: boolean; tags?: string[] } = {
+                published: newPublishedState,
+            }
+
+            // Only update tags if publishing (not unpublishing) and tags are provided
+            if (newPublishedState && tags && tags.length > 0) {
+                updateData.tags = tags
+            }
+
+            // If unpublishing, clear the tags
+            if (!newPublishedState) {
+                updateData.tags = []
+            }
+
+            const { error: updateError } = await supabase
+                .from("itineraries")
+                .update(updateData)
+                .eq("id", itineraryId)
+
+            if (updateError) {
+                console.error("Error updating publish status:", updateError)
+                toast.error("Failed to update publish status")
+                return
+            }
+
+            // Update local state
+            setItineraries(prev =>
+                prev.map(itinerary =>
+                    itinerary.id === itineraryId
+                        ? {
+                            ...itinerary,
+                            published: newPublishedState,
+                            tags: newPublishedState ? (tags || []) : []
+                          }
+                        : itinerary
+                )
+            )
+
+            toast.success(newPublishedState ? "Itinerary published!" : "Itinerary unpublished")
+        } catch (err: any) {
+            console.error("Toggle publish error:", err)
+            toast.error("Failed to update publish status")
+        }
+    }
 
     const formatDate = (dateString: string): string => {
         const date = new Date(dateString)
@@ -164,14 +216,14 @@ export function AllItinerariesGrid() {
                             title={itinerary.title}
                             createdBy="You"
                             meta={`${stopsCount} stop${stopsCount !== 1 ? 's' : ''} · ${formatDate(itinerary.created_at)}`}
-                            isLiked={false}
-                            isPublished={false}
+                            isLiked={itinerary.favorites}
+                            isPublished={itinerary.published}
                             onClick={() => {
                                 setSelectedItinerary(itinerary)
                                 setDialogOpen(true)
                             }}
                             onToggleLike={() => console.log("Toggle like", itinerary.id)}
-                            onTogglePublish={() => console.log("Toggle publish", itinerary.id)}
+                            onTogglePublish={(tags) => handleTogglePublish(itinerary.id, itinerary.published, tags)}
                             thumbnail={
                                 <TouringMap
                                     initialLng={center.lng}
