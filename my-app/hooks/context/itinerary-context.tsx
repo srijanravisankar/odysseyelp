@@ -13,6 +13,9 @@ export interface Itinerary {
   prompt: string;
   stops: any;
   session_id: number;
+  favorites: boolean;
+  published: boolean;
+  tags: string[];
 }
 
 type ItineraryContextType = {

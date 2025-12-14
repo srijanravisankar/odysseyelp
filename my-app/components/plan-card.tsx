@@ -1,9 +1,21 @@
 "use client"
 
-import React from "react"
-import {Earth, Heart, Waypoints} from "lucide-react"
+import React, { useState } from "react"
+import {Earth, Heart, Hash} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 type PlanCardProps = {
     /** Main title of the plan */
@@ -20,8 +32,8 @@ type PlanCardProps = {
     onClick?: () => void
     /** Called when user toggles like */
     onToggleLike?: () => void
-    /** Called when user toggles publish */
-    onTogglePublish?: () => void
+    /** Called when user toggles publish, with optional tags */
+    onTogglePublish?: (tags?: string[]) => void
     /** Thumbnail area (e.g. <TouringMap />). If not passed, a gradient placeholder is shown. */
     thumbnail?: React.ReactNode
     /** Optional className override */
@@ -40,20 +52,25 @@ export function PlanCard({
                              thumbnail,
                              className,
                          }: PlanCardProps) {
+    const [publishDialogOpen, setPublishDialogOpen] = useState(false)
+    const [tagsDialogOpen, setTagsDialogOpen] = useState(false)
+    const [tagsInput, setTagsInput] = useState("")
+
     return (
-        <div
-            role="button"
-            tabIndex={0}
-            onClick={onClick}
-            onKeyDown={(e) => {
-                if (e.key === "Enter") onClick?.()
-            }}
-            className={cn(
-                "group flex flex-col overflow-hidden rounded-2xl border bg-card/80 shadow-sm transition " +
-                "hover:border-primary/60 hover:shadow-lg cursor-pointer",
-                className
-            )}
-        >
+        <>
+            <div
+                role="button"
+                tabIndex={0}
+                onClick={onClick}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") onClick?.()
+                }}
+                className={cn(
+                    "group flex flex-col overflow-hidden rounded-2xl border bg-card/80 shadow-sm transition " +
+                    "hover:border-primary/60 hover:shadow-lg cursor-pointer",
+                    className
+                )}
+            >
             {/* Thumbnail / Map area */}
             <div className="relative aspect-video w-full overflow-hidden">
                 {thumbnail ? (
@@ -137,7 +154,7 @@ export function PlanCard({
                             )}
                             onClick={(e) => {
                                 e.stopPropagation()
-                                onTogglePublish?.()
+                                setPublishDialogOpen(true)
                             }}
                         >
                             <Earth className="h-4 w-4" />
@@ -146,5 +163,96 @@ export function PlanCard({
                 </div>
             </div>
         </div>
+
+            {/* Publish Confirmation Dialog */}
+            <AlertDialog open={publishDialogOpen} onOpenChange={setPublishDialogOpen}>
+                <AlertDialogContent className="sm:max-w-md">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            {isPublished ? "Unpublish Itinerary?" : "Publish Itinerary?"}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {isPublished
+                                ? "This will remove your itinerary from the public explore page. Others will no longer be able to see it."
+                                : "This will share your itinerary on the public explore page. Others will be able to see and save it."}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>No</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => {
+                                setPublishDialogOpen(false)
+                                if (isPublished) {
+                                    // Unpublishing - just call onTogglePublish directly
+                                    onTogglePublish?.()
+                                } else {
+                                    // Publishing - show tags dialog
+                                    setTagsDialogOpen(true)
+                                }
+                            }}
+                            className={isPublished ? "" : "bg-emerald-600 hover:bg-emerald-700"}
+                        >
+                            Yes
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Tags Input Dialog */}
+            <AlertDialog open={tagsDialogOpen} onOpenChange={setTagsDialogOpen}>
+                <AlertDialogContent className="sm:max-w-md">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2">
+                            <Hash className="h-5 w-5 text-emerald-500" />
+                            Add Tags (Optional)
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Add hashtags to help others discover your itinerary. Separate multiple tags with commas.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className="py-4">
+                        <Label htmlFor="tags-input" className="text-sm font-medium">
+                            Tags
+                        </Label>
+                        <Input
+                            id="tags-input"
+                            placeholder="e.g. #nightlife, #toronto, #foodie"
+                            value={tagsInput}
+                            onChange={(e) => setTagsInput(e.target.value)}
+                            className="mt-2"
+                        />
+                        <p className="text-xs text-muted-foreground mt-2">
+                            Example: #nightlife, #toronto, #datenight
+                        </p>
+                    </div>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => {
+                            // Skip tags but still publish
+                            onTogglePublish?.([])
+                            setTagsInput("")
+                        }}>
+                            Skip
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => {
+                                // Parse tags from input
+                                const tags = tagsInput
+                                    .split(",")
+                                    .map(tag => tag.trim())
+                                    .filter(tag => tag.length > 0)
+                                    .map(tag => tag.startsWith("#") ? tag : `#${tag}`)
+
+                                onTogglePublish?.(tags)
+                                setTagsInput("")
+                                setTagsDialogOpen(false)
+                            }}
+                            className="bg-emerald-600 hover:bg-emerald-700"
+                        >
+                            Publish
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
     )
 }
