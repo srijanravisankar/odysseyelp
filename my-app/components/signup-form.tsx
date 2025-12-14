@@ -13,15 +13,15 @@ import {
   FieldSeparator,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import { useSupabase } from '@/hooks/context/supabase-context'
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = useSupabase()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

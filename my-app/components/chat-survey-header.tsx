@@ -54,9 +54,9 @@ import { useItinerary } from "@/hooks/context/itinerary-context";
 import { saveItineraryToDatabase } from "@/lib/supabase/itinerary-db";
 import { useSaveItinerary } from "@/hooks/use-save-itinerary";
 
-import { createClient } from "@/lib/supabase/client";
 import { useChat } from "@/hooks/context/session-context";
 import { createChatSession } from "@/lib/supabase/chat-session-db";
+import { useSupabase } from "@/hooks/context/supabase-context";
 
 // ---------------- Date-range picker (uses shadcn Calendar) -------------------
 
@@ -204,7 +204,7 @@ const SURVEY_STEPS = [
 const TOTAL_STEPS = SURVEY_STEPS.length;
 
 export function ChatSurveyHeader() {
-  const supabase = createClient();
+  const supabase = useSupabase();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);

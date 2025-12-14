@@ -4,6 +4,7 @@ import "./globals.css"
 import ShellLayout from "@/components/shell-layout"
 import { ThemeProvider } from "@/components/theme-provider"
 import { UserProvider } from "@/hooks/context/user-context"
+import { SupabaseProvider } from "@/hooks/context/supabase-context"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,16 +29,18 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <UserProvider>
-            {children}
-          </UserProvider>
-        </ThemeProvider>
+        <SupabaseProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <UserProvider>
+              {children}
+            </UserProvider>
+          </ThemeProvider>
+        </SupabaseProvider>
       </body>
     </html>
   )

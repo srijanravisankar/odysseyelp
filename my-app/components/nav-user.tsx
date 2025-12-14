@@ -30,16 +30,16 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useUser } from "@/hooks/context/user-context"; // <-- UserContext
+import { useSupabase } from "@/hooks/context/supabase-context";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { user, setUser } = useUser();
   const router = useRouter();
-  const supabase = createClient();
+  const supabase = useSupabase();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {

@@ -10,13 +10,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { useUser } from "@/hooks/context/user-context";
 import { useChat } from "@/hooks/context/session-context";
 import { Spinner } from "../ui/spinner";
 import { DropdownMenuDialog } from "./chat-history-options";
 import { useItinerary } from "@/hooks/context/itinerary-context";
+import { useSupabase } from "@/hooks/context/supabase-context";
 
 interface Session {
   id: number;
@@ -27,7 +27,7 @@ interface Session {
 }
 
 export function ChatSidebarContent() {
-  const supabase = createClient();
+  const supabase = useSupabase();
   const { user } = useUser();
   const [sessions, setSessions] = useState<Session[]>([]);
   const {active, setActive} = useChat();

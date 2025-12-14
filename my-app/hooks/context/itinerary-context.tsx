@@ -1,9 +1,9 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { useChat } from "@/hooks/context/session-context";
 import { useUser } from "@/hooks/context/user-context";
+import { useSupabase } from "./supabase-context";
 
 export interface Itinerary {
   id: number;
@@ -40,7 +40,7 @@ const ItineraryContext = createContext<ItineraryContextType | undefined>(
 );
 
 export function ItineraryProvider({ children }: { children: React.ReactNode }) {
-  const supabase = createClient();
+  const supabase = useSupabase();
   const { active } = useChat();
   const { user } = useUser();
 
