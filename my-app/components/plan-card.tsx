@@ -1,9 +1,19 @@
 "use client"
 
-import React from "react"
-import {Earth, Heart, Waypoints} from "lucide-react"
+import React, { useState } from "react"
+import {Earth, Heart} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 type PlanCardProps = {
     /** Main title of the plan */
@@ -40,20 +50,23 @@ export function PlanCard({
                              thumbnail,
                              className,
                          }: PlanCardProps) {
+    const [publishDialogOpen, setPublishDialogOpen] = useState(false)
+
     return (
-        <div
-            role="button"
-            tabIndex={0}
-            onClick={onClick}
-            onKeyDown={(e) => {
-                if (e.key === "Enter") onClick?.()
-            }}
-            className={cn(
-                "group flex flex-col overflow-hidden rounded-2xl border bg-card/80 shadow-sm transition " +
-                "hover:border-primary/60 hover:shadow-lg cursor-pointer",
-                className
-            )}
-        >
+        <>
+            <div
+                role="button"
+                tabIndex={0}
+                onClick={onClick}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") onClick?.()
+                }}
+                className={cn(
+                    "group flex flex-col overflow-hidden rounded-2xl border bg-card/80 shadow-sm transition " +
+                    "hover:border-primary/60 hover:shadow-lg cursor-pointer",
+                    className
+                )}
+            >
             {/* Thumbnail / Map area */}
             <div className="relative aspect-video w-full overflow-hidden">
                 {thumbnail ? (
@@ -137,7 +150,7 @@ export function PlanCard({
                             )}
                             onClick={(e) => {
                                 e.stopPropagation()
-                                onTogglePublish?.()
+                                setPublishDialogOpen(true)
                             }}
                         >
                             <Earth className="h-4 w-4" />
@@ -146,5 +159,34 @@ export function PlanCard({
                 </div>
             </div>
         </div>
+
+            {/* Publish Confirmation Dialog */}
+            <AlertDialog open={publishDialogOpen} onOpenChange={setPublishDialogOpen}>
+                <AlertDialogContent className="sm:max-w-md">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            {isPublished ? "Unpublish Itinerary?" : "Publish Itinerary?"}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {isPublished
+                                ? "This will remove your itinerary from the public explore page. Others will no longer be able to see it."
+                                : "This will share your itinerary on the public explore page. Others will be able to see and save it."}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>No</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => {
+                                onTogglePublish?.()
+                                setPublishDialogOpen(false)
+                            }}
+                            className={isPublished ? "" : "bg-emerald-600 hover:bg-emerald-700"}
+                        >
+                            Yes
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
     )
 }
