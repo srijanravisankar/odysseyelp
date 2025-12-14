@@ -179,11 +179,11 @@ export function Itinerary() {
       </CardContent>
 
       <CardFooter className="flex-1 pr-2 pl-2 pt-2 pb-2 shrink-0">
-        <div className="flex h-full w-full flex-col gap-2">
+        <div className="flex h-full w-full flex-col gap-1">
           {/* Top row: Map / Calendar toggle */}
 
           {/* Main pane: map OR calendar */}
-          <div className="relative flex-1 overflow-hidden rounded-xl border bg-muted">
+          <div className="relative flex-1 overflow-hidden rounded-lg border bg-muted">
             {viewMode === "map" ? (
               // <TouringMap />
               <EmptyItinerariesPage />
@@ -206,7 +206,7 @@ export function Itinerary() {
                 className="hover:bg-gray-300 cursor-pointer"
                 onClick={() => setViewMode("map")}
               >
-                <Map className="text-red-600 h-3 w-3" />
+                <Map className="text-red-600 h-2 w-2" />
                 Map View
               </Button>
               <Button
@@ -214,7 +214,7 @@ export function Itinerary() {
                 className="hover:bg-gray-300 cursor-pointer"
                 onClick={() => setViewMode("calendar")}
               >
-                <CalendarDays className="text-blue-600 h-3 w-3" />
+                <CalendarDays className="text-blue-600 h-2 w-2" />
                 Calendar View
               </Button>
             </ButtonGroup>

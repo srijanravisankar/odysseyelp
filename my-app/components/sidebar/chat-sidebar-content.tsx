@@ -204,10 +204,10 @@ export function ChatSidebarContent() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-md">
             <MessageCircle className="h-4 w-4" />
-            <span>Chats</span>
+            <span>My Chats</span>
           </div>
 
-          <Button
+          {/* <Button
             size="sm"
             className="h-7 px-2 text-xs"
             variant="outline"
@@ -216,7 +216,7 @@ export function ChatSidebarContent() {
           >
             <Plus />
             {isCreatingSession ? "Creating..." : "New Chat"}
-          </Button>
+          </Button> */}
         </div>
 
         {/* History List */}

@@ -11,6 +11,7 @@ import {
   Home,
   Moon,
   Sun,
+  UsersRound,
 } from "lucide-react";
 
 import {
@@ -36,6 +37,8 @@ import { TouringSidebarContent } from "./sidebar/touring-sidebar-content";
 import { MySpaceSidebarContent } from "@/components/sidebar/my-space-sidebar-content";
 import { HomeSidebarContent } from "./sidebar/home-sidebar-content";
 import { useItinerary } from "@/hooks/context/itinerary-context";
+import { Chat } from "@google/genai";
+import { GroupsSidebarContent } from "./sidebar/groups-sidebar-content";
 
 // ----------------------
 // Sample data
@@ -57,15 +60,20 @@ const data = {
       url: "/chat",
       icon: BotMessageSquare,
     },
-    {
-      title: "Touring",
-      url: "/touring",
-      icon: Binoculars,
-    },
+    // {
+    //   title: "Touring",
+    //   url: "/touring",
+    //   icon: Binoculars,
+    // },
     {
       title: "My Space",
       url: "/my-space",
       icon: Brain,
+    },
+    {
+      title: "Groups",
+      url: "/groups",
+      icon: UsersRound,
     },
     {
       title: "Explore",
@@ -112,8 +120,9 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const sidebarContentMap: Record<string, React.ReactNode> = {
     Home: <HomeSidebarContent />,
     Chat: <ChatSidebarContent />,
-    Touring: <TouringSidebarContent />,
+    // Touring: <TouringSidebarContent />,
     "My Space": <MySpaceSidebarContent />,
+    Groups: <GroupsSidebarContent />,
     Explore: <ExploreSidebarContent />,
   };
 
