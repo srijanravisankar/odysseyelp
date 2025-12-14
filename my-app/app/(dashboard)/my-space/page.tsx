@@ -1,10 +1,6 @@
-import { PlanCardGrid } from "@/components/plan-card-grid"
+import { redirect } from "next/navigation"
 
 export default function MySpacePage() {
-    return (
-        <div className="flex flex-1 flex-col gap-4">
-            <h1 className="text-xl font-semibold tracking-tight">Explore</h1>
-            <PlanCardGrid />
-        </div>
-    )
+    redirect("/my-space/all")
 }
+
