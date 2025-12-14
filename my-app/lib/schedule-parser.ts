@@ -5,6 +5,7 @@ type ItineraryStop = {
   id: string;
   name: string;
   schedule: {
+    date: string;
     start: string; // "09:00 AM"
     end: string;
     durationMinutes: number;
@@ -28,8 +29,13 @@ export function mapItineraryToCalendarEvents(
 
     if (stop.schedule?.start) {
       try {
+        const scheduleDate = stop.schedule.date ? new Date(stop.schedule.date + "T00:00:00"): baseDate;
+
+        console.log("📅 Schedule date parsed as:", scheduleDate);
+
+
         // Parse "09:00 AM" against the reference date
-        const parsedTime = parse(stop.schedule.start, "hh:mm aa", baseDate);
+        const parsedTime = parse(stop.schedule.start, "hh:mm aa", scheduleDate);
         
         // Check if valid
         if (!isNaN(parsedTime.getTime())) {

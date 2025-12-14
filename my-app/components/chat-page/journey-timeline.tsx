@@ -158,7 +158,7 @@ export function JourneyTimeline() {
 
   return (
     <Timeline>
-      {itineraryData?.stops?.stops.map((stop: ItineraryStop, index: number) => {
+      {itineraryData?.stops?.stops?.map((stop: ItineraryStop, index: number) => {
         const formattedAddress =
           stop.address?.split("\n").join(", ") || "Address unavailable";
 

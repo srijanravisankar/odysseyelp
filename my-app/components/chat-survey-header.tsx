@@ -56,6 +56,7 @@ import { useSaveItinerary } from "@/hooks/use-save-itinerary";
 
 import { createClient } from "@/lib/supabase/client";
 import { useChat } from "@/hooks/context/session-context";
+import { createChatSession } from "@/lib/supabase/chat-session-db";
 
 // ---------------- Date-range picker (uses shadcn Calendar) -------------------
 
@@ -203,6 +204,8 @@ const SURVEY_STEPS = [
 const TOTAL_STEPS = SURVEY_STEPS.length;
 
 export function ChatSurveyHeader() {
+  const supabase = createClient();
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -375,6 +378,11 @@ export function ChatSurveyHeader() {
   async function handleSend(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault(); // prevent the form from reloading the page
 
+    // if (!active) {
+    //   console.log("Enter a session")
+    //   return;
+    // }
+
     if (!query.trim()) return;
 
     setIsLoading(true);
@@ -528,8 +536,12 @@ export function ChatSurveyHeader() {
         console.log("Saving itinerary data to database...");
         console.log(data.itinerary);
         console.log(query);
-        // await saveItinerary(data.itinerary, query);
-        await saveItinerary(data.itinerary, query);
+        
+        try {
+          await saveItinerary(data.itinerary, query);
+        } catch (dbErr) {
+          console.error("Database save failed:", dbErr);
+        }
       }
         
       // const mockItinerary = {

@@ -17,9 +17,9 @@ export function useSaveItinerary() {
         throw new Error("User not authenticated");
       }
 
-      if (!active) {
-        throw new Error("No active session");
-      }
+      // if (!active) {
+      //   throw new Error("No active session");
+      // }
 
       console.log("Saving itinerary:", itinerary, query, authData.user.id, active);
 

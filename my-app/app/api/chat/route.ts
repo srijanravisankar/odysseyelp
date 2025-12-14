@@ -8,6 +8,8 @@ const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY!,
 })
 
+const model = "gemma-3-27b-it"
+
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json()
@@ -23,7 +25,7 @@ export async function POST(req: NextRequest) {
 
         // 1) Compose Yelp-specific prompt from query (+ optional survey) via Gemini
         const composedRes = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: model,
             contents: [
                 {
                     role: "user",
@@ -82,7 +84,7 @@ export async function POST(req: NextRequest) {
         })
 
         const itineraryRes = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: model,
             contents: [
                 {
                     role: "user",
@@ -356,5 +358,7 @@ IMPORTANT:
 - Respond with ONLY the valid JSON object.
 - Do NOT wrap the response in markdown blocks (no \`\`\`json).
 - Do NOT add any text before or after the JSON.
+
+CRITICAL: You MUST return the complete ItineraryPlan object with this EXACT structure:
 `
 }

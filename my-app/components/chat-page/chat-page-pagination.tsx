@@ -11,21 +11,39 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { useItinerary } from "@/hooks/context/itinerary-context"
-import { it } from "node:test"
 
 export function ChatPagePagination() {
-  const { itineraries, setItineraryData } = useItinerary()
+  const { itineraries, setItineraryData, itineraryData } = useItinerary()
   // console.log("Itineraries in Pagination:", itineraries)
   const [currentPage, setCurrentPage] = useState(1)
   
   const itemsPerPage = 1 // 1 itinerary per page
   const totalPages = Math.ceil(itineraries.length / itemsPerPage)
 
+  // useEffect(() => {
+  //   if (itineraries.length > 0) {
+  //       setCurrentPage(totalPages)
+  //       const newestItinerary = itineraries[itineraries.length - 1];
+  //       setItineraryData(newestItinerary);
+  //   }
+  // }, [itineraries, totalPages, setItineraryData])
+
   useEffect(() => {
     if (itineraries.length > 0) {
-        setCurrentPage(totalPages)
+        // 1. Update the page number to the end (Visual only)
+        setCurrentPage(totalPages);
+
         const newestItinerary = itineraries[itineraries.length - 1];
-        setItineraryData(newestItinerary);
+        
+        const isCurrentItemInList = itineraryData && itineraries.some(i => i.id === itineraryData.id);
+        const isCurrentItemNew = itineraryData && !itineraryData.id; // Or however you identify unsaved items
+
+        // If the current data on screen is seemingly "saved" (in the list) or null, 
+        // it's safe to auto-jump to the newest one.
+        // If it's a new generation (not in list), DON'T touch it.
+        if (!itineraryData || isCurrentItemInList) {
+             setItineraryData(newestItinerary);
+        }
     }
   }, [itineraries, totalPages, setItineraryData])
 

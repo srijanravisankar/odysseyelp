@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { createChatSession } from "./chat-session-db";
 
 export async function saveItineraryToDatabase(
   itinerary: any,
@@ -9,12 +10,26 @@ export async function saveItineraryToDatabase(
   const supabase = createClient();
 
   try {
+    // 1. Get User ID (pseudo-code)
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.log("No user");
+      return;
+    }
+
+    // 2. Create the session using your new DB function
+    const newSession = await createChatSession(user.id, itinerary.title);
+
+    if (newSession) {
+      console.log("Created Session:", newSession.id);
+    }
+
     const { data, error } = await supabase
       .from("itineraries")
       .insert([
         {
           user_id: userId,
-          session_id: sessionId,
+          session_id: newSession.id,
           title: itinerary.title || "Untitled Itinerary",
           prompt: query.trim(),
           stops: itinerary,
