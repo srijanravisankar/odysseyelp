@@ -130,6 +130,38 @@ export function AllItinerariesGrid() {
         }
     }
 
+    // Handle favorite/unfavorite
+    const handleToggleFavorite = async (itineraryId: number, currentlyFavorited: boolean) => {
+        try {
+            const newFavoritedState = !currentlyFavorited
+
+            const { error: updateError } = await supabase
+                .from("itineraries")
+                .update({ favorites: newFavoritedState })
+                .eq("id", itineraryId)
+
+            if (updateError) {
+                console.error("Error updating favorite status:", updateError)
+                toast.error("Failed to update favorite status")
+                return
+            }
+
+            // Update local state
+            setItineraries(prev =>
+                prev.map(itinerary =>
+                    itinerary.id === itineraryId
+                        ? { ...itinerary, favorites: newFavoritedState }
+                        : itinerary
+                )
+            )
+
+            toast.success(newFavoritedState ? "Added to favorites!" : "Removed from favorites")
+        } catch (err: any) {
+            console.error("Toggle favorite error:", err)
+            toast.error("Failed to update favorite status")
+        }
+    }
+
     const formatDate = (dateString: string): string => {
         const date = new Date(dateString)
         const now = new Date()
@@ -222,7 +254,7 @@ export function AllItinerariesGrid() {
                                 setSelectedItinerary(itinerary)
                                 setDialogOpen(true)
                             }}
-                            onToggleLike={() => console.log("Toggle like", itinerary.id)}
+                            onToggleLike={() => handleToggleFavorite(itinerary.id, itinerary.favorites)}
                             onTogglePublish={(tags) => handleTogglePublish(itinerary.id, itinerary.published, tags)}
                             thumbnail={
                                 <TouringMap
