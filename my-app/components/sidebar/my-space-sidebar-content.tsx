@@ -3,10 +3,16 @@
 import React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import {Heart, Waypoints, MapPinCheckInside, Earth} from "lucide-react"
+import {Heart, MapPinCheckInside, Earth, LayoutGrid} from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const items = [
+    {
+        href: "/my-space/all",
+        icon: LayoutGrid,
+        label: "All",
+        description: "All your created itineraries.",
+    },
     {
         href: "/my-space/favorites",
         icon: Heart,
