@@ -7,6 +7,24 @@ import { useSupabase } from "@/hooks/context/supabase-context"
 import { useUser } from "@/hooks/context/user-context"
 import { Spinner } from "@/components/ui/spinner"
 import { Itinerary } from "@/hooks/context/itinerary-context"
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
+import {
+    Timeline,
+    TimelineBody,
+    TimelineHeader,
+    TimelineIcon,
+    TimelineItem,
+    TimelineSeparator,
+} from "@/components/ui/timeline"
+import { Store, MapPin, Star, Phone } from "lucide-react"
+import { Separator } from "@/components/ui/separator"
+import { cn } from "@/lib/utils"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 export function AllItinerariesGrid() {
     const supabase = useSupabase()
@@ -14,6 +32,8 @@ export function AllItinerariesGrid() {
     const [itineraries, setItineraries] = useState<Itinerary[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [dialogOpen, setDialogOpen] = useState(false)
+    const [selectedItinerary, setSelectedItinerary] = useState<Itinerary | null>(null)
 
     useEffect(() => {
         const fetchAllItineraries = async () => {
@@ -132,33 +152,142 @@ export function AllItinerariesGrid() {
     }
 
     return (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {itineraries.map((itinerary) => {
-                const stopsCount = getStopsCount(itinerary.stops)
-                const center = getMapCenter(itinerary.stops)
+        <>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {itineraries.map((itinerary) => {
+                    const stopsCount = getStopsCount(itinerary.stops)
+                    const center = getMapCenter(itinerary.stops)
 
-                return (
-                    <PlanCard
-                        key={itinerary.id}
-                        title={itinerary.title}
-                        createdBy="You"
-                        meta={`${stopsCount} stop${stopsCount !== 1 ? 's' : ''} · ${formatDate(itinerary.created_at)}`}
-                        isLiked={false}
-                        isPublished={false}
-                        onClick={() => console.log("Open itinerary", itinerary.id)}
-                        onToggleLike={() => console.log("Toggle like", itinerary.id)}
-                        onTogglePublish={() => console.log("Toggle publish", itinerary.id)}
-                        thumbnail={
-                            <TouringMap
-                                initialLng={center.lng}
-                                initialLat={center.lat}
-                                initialZoom={12}
-                            />
-                        }
-                    />
-                )
-            })}
-        </div>
+                    return (
+                        <PlanCard
+                            key={itinerary.id}
+                            title={itinerary.title}
+                            createdBy="You"
+                            meta={`${stopsCount} stop${stopsCount !== 1 ? 's' : ''} · ${formatDate(itinerary.created_at)}`}
+                            isLiked={false}
+                            isPublished={false}
+                            onClick={() => {
+                                setSelectedItinerary(itinerary)
+                                setDialogOpen(true)
+                            }}
+                            onToggleLike={() => console.log("Toggle like", itinerary.id)}
+                            onTogglePublish={() => console.log("Toggle publish", itinerary.id)}
+                            thumbnail={
+                                <TouringMap
+                                    initialLng={center.lng}
+                                    initialLat={center.lat}
+                                    initialZoom={12}
+                                />
+                            }
+                        />
+                    )
+                })}
+            </div>
+
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogContent className="max-w-lg max-h-[80vh] p-0 gap-0">
+                    <DialogHeader className="px-6 py-4 border-b">
+                        <DialogTitle>{selectedItinerary?.title}</DialogTitle>
+                    </DialogHeader>
+                    <ScrollArea className="max-h-[60vh] px-4 py-4">
+                        <Timeline>
+                            {selectedItinerary?.stops?.stops?.map((stop: any, index: number) => {
+                                const formattedAddress =
+                                    stop.address?.split("\n").join(", ") || "Address unavailable"
+                                const stopId = stop.id ?? String(index)
+                                const totalStops = selectedItinerary?.stops?.stops?.length || 0
+
+                                return (
+                                    <TimelineItem key={stopId}>
+                                        <TimelineHeader className="flex flex-col items-center">
+                                            {index !== totalStops - 1 && (
+                                                <TimelineSeparator className="bg-gray-300 w-px flex-1 mt-1" />
+                                            )}
+                                            <TimelineIcon
+                                                className={cn(
+                                                    "mt-4 h-9 w-9 [&_svg]:h-5 [&_svg]:w-5 bg-muted flex items-center justify-center border",
+                                                    "border-rose-400/70 text-rose-500"
+                                                )}
+                                            >
+                                                <Store />
+                                            </TimelineIcon>
+                                        </TimelineHeader>
+
+                                        <TimelineBody className="pl-1 w-full relative">
+                                            <div
+                                                className={cn(
+                                                    "relative w-full overflow-hidden rounded-lg border p-3",
+                                                    "bg-card/70 hover:bg-accent/40",
+                                                    "transition-all duration-200",
+                                                    "border-rose-400/70"
+                                                )}
+                                            >
+                                                <div className="flex gap-3">
+                                                    <div className="w-0.5 rounded-full mt-3 mb-3 bg-rose-400" />
+
+                                                    <div className="flex-1 flex flex-col gap-0.5">
+                                                        <div className="flex justify-between items-start gap-2">
+                                                            <h3
+                                                                className="text-md leading-tight text-foreground overflow-hidden text-ellipsis whitespace-nowrap max-w-[183px]"
+                                                                title={stop.name}
+                                                            >
+                                                                {stop.name}
+                                                            </h3>
+                                                        </div>
+
+                                                        <Separator />
+
+                                                        <div className="grid gap-2 text-sm text-muted-foreground">
+                                                            <div className="flex items-center gap-1">
+                                                                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                                                <span className="text-xs font-semibold text-foreground">
+                                                                    {stop.rating || "N/A"}
+                                                                </span>
+                                                                <span className="text-xs">
+                                                                    ({stop.reviewCount || 0} reviews)
+                                                                </span>
+                                                            </div>
+
+                                                            <div className="flex items-start gap-1">
+                                                                <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
+                                                                <div
+                                                                    className="leading-tight text-foreground overflow-hidden text-ellipsis whitespace-nowrap max-w-[250px]"
+                                                                    title={formattedAddress}
+                                                                >
+                                                                    {formattedAddress}
+                                                                </div>
+                                                            </div>
+
+                                                            {stop.phone && (
+                                                                <div className="flex items-center gap-1">
+                                                                    <Phone className="h-4 w-4 shrink-0" />
+                                                                    <a
+                                                                        href={`tel:${stop.phone}`}
+                                                                        className="hover:text-primary hover:underline transition-colors"
+                                                                    >
+                                                                        {stop.phone}
+                                                                    </a>
+                                                                </div>
+                                                            )}
+
+                                                            <div className={cn(
+                                                                "absolute bottom-3 right-4 flex items-center justify-center h-6 w-6 rounded-full text-md font-medium border border-rose-400/70 bg-primary/10 text-primary"
+                                                            )}>
+                                                                {String.fromCharCode(65 + index)}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </TimelineBody>
+                                    </TimelineItem>
+                                )
+                            })}
+                        </Timeline>
+                    </ScrollArea>
+                </DialogContent>
+            </Dialog>
+        </>
     )
 }
 
