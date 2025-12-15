@@ -13,6 +13,7 @@ interface Group {
   id: number;
   name: string;
   createdAt: string;
+  secretCode: string;
 }
 
 interface GroupChatSheetProps {
@@ -33,7 +34,7 @@ export function GroupChatSheet({ group, open, onOpenChange }: GroupChatSheetProp
         </SheetHeader>
 
         <div className="flex-1 min-h-0 overflow-hidden relative">
-          {group && <WishSidebar groupId={group.id} />}
+          {group && <WishSidebar group={group}  />}
         </div>
       </SheetContent>
     </Sheet>

@@ -27,12 +27,12 @@ export function ShellHeader() {
         />
 
         {/* Route-specific header content */}
-        {isTouring ? (
-          <TouringHeaderActions />
-        ) : isChat ? (
+        {isChat ? (
           <ChatSurveyHeader />
         ) : isExplore ? (
           <ExploreHeaderActions />
+        ) : isGroup ?(
+          <></>
         ) : (
           <InputWithButton />
         )}

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ItineraryScrollArea } from "./itinerary-scroll-area";
 import { TouringMap } from "@/components/touring-map";

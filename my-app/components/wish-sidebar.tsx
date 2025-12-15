@@ -1,19 +1,54 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useGroupWishes } from "@/hooks/use-group-wishes"; // Make sure hook path is correct
+import { useGroupWishes } from "@/hooks/use-group-wishes"; 
 import { useUser } from "@/hooks/context/user-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Sparkles } from "lucide-react";
+import { Send, Copy, Check, Users } from "lucide-react"; // ✅ Added Icons
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner"; 
+import { useSupabase } from "@/hooks/context/supabase-context"; // ✅ Import Supabase
+import { toast } from "sonner"; // ✅ Import Toast
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"; // ✅ Optional: for better UX
 
-export function WishSidebar({ groupId }: { groupId: number }) {
+interface Group {
+  id: number;
+  name: string;
+  createdAt: string;
+  secretCode: string;
+}
+
+export function WishSidebar({ group }: { group: Group }) {
+  const supabase = useSupabase();
   const { user } = useUser();
-  const { wishes, loading, sendWish } = useGroupWishes(groupId);
+  const { wishes, loading, sendWish } = useGroupWishes(group.id);
+  
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // ✅ New State for Group Info
+  const [isCopied, setIsCopied] = useState(false);
+
+
+  // ✅ Handle Copy Logic
+  const handleCopyCode = async () => {
+    if (!group.secretCode) return; // ✅ Use prop directly
+    
+    try {
+      await navigator.clipboard.writeText(group.secretCode);
+      setIsCopied(true);
+      toast.success("Secret code copied!");
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      toast.error("Failed to copy code");
+    }
+  };
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -28,24 +63,53 @@ export function WishSidebar({ groupId }: { groupId: number }) {
   const handleSend = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!input.trim() || !user) return;
-    
-    // Optimistic UI update could go here, but Realtime is fast enough
-    await sendWish(input.trim(), user.id); // Context user might have different ID structure, check this
+    await sendWish(input.trim(), user.id); 
     setInput("");
   };
 
   return (
-    <div className="flex h-full flex-col w-full bg-background">
-      <div className="pl-5 -mt-1 pb-2 border-b bg-muted/20">
-        <h3 className="font-semibold flex items-center gap-2 text-md">
-          <Sparkles className="w-4 h-4 text-primary" />
-          Collaborative Wishlist
-        </h3>
-        <p className="text-[13px] text-muted-foreground mt-1">
-          Chat with your group to decide where to go!
+    <div className="flex h-full flex-col w-full bg-background rounded-full">
+      {/* HEADER SECTION */}
+      <div className="pl-5 pr-4 -mt-1.25 pb-3 pt-2 border-b bg-muted/20">
+        <div className="flex items-center justify-between">
+          
+          {/* Group Name Display */}
+          <h3 className="font-semibold flex items-center gap-2 text-md truncate max-w-[200px]">
+            <Users className="w-4 h-4 text-primary shrink-0" />
+            <span className="truncate">
+              {group ? group.name : "Loading..."}
+            </span>
+          </h3>
+
+          {group?.secretCode && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm" 
+                    className="h-8 px-2 gap-2 text-muted-foreground hover:text-foreground bg-muted"
+                    onClick={handleCopyCode}
+                  >
+                    {isCopied ? (
+                      <Check className="h-3.5 w-3.5 text-green-500" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" />
+                    )}
+                    <span className="text-xs font-medium">Secret Code</span>
+                  </Button>
+                </TooltipTrigger>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
+        
+        <p className="text-[12px] text-muted-foreground mt-0.5 truncate">
+            {group?.secretCode ? "Share code to invite friends" : "Chat with your group"}
         </p>
       </div>
 
+      {/* CHAT AREA */}
       <ScrollArea className="h-[calc(100dvh-300px)] flex-1 pl-5 pb-2 pt-3" ref={scrollRef}>
         {loading ? (
           <div className="flex justify-center py-10"><Spinner /></div>
@@ -54,31 +118,20 @@ export function WishSidebar({ groupId }: { groupId: number }) {
             No messages yet. Start the conversation!
           </div>
         ) : (
-          <div className="space-y-4">
-            {wishes.map((wish) => {
-              const isMe = user?.email === (wish as any).user_email;
-              // const isMe = user?.id === wish.user_id;
-
-              return (
-                <div
-                  key={wish.id}
-                  className={`flex flex-col ${
-                    // simple toggle for alignment visual
-                    "items-start"
-                  }`}
-                >
-                  <div className="flex items-baseline gap-2 mb-1">
-                    <span className="text-xs font-sm">{wish.sender_name}</span>
-                    <span className="text-[10px] text-muted-foreground">
-                      {new Date(wish.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                    </span>
-                  </div>
-                  <div className="bg-muted/40 border rounded-lg px-3 py-2 text-sm max-w-[90%] wrap-break-word">
-                    {wish.message}
-                  </div>
+          <div className="space-y-4 pr-4"> {/* Added pr-4 for scrollbar spacing */}
+            {wishes.map((wish) => (
+              <div key={wish.id} className="flex flex-col items-start">
+                <div className="flex items-baseline gap-2 mb-1">
+                  <span className="text-xs font-medium">{wish.sender_name}</span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {new Date(wish.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                  </span>
                 </div>
-              );
-            })}
+                <div className="bg-muted/40 border rounded-2xl rounded-tl-none px-3 py-2 text-sm max-w-[95%] break-words">
+                  {wish.message}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </ScrollArea>
@@ -90,7 +143,7 @@ export function WishSidebar({ groupId }: { groupId: number }) {
           onChange={(e) => setInput(e.target.value)}
           className="flex-1 rounded-full"
         />
-        <Button size="icon" type="submit" disabled={!input.trim()} className="rounded-full">
+        <Button size="icon" type="submit" disabled={!input.trim()} className="rounded-full shrink-0">
           <Send className="w-4 h-4" />
         </Button>
       </form>

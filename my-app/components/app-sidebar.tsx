@@ -56,6 +56,11 @@ const data = {
       icon: Home,
     },
     {
+      title: "My Space",
+      url: "/my-space",
+      icon: Brain,
+    },
+    {
       title: "Chat",
       url: "/chat",
       icon: BotMessageSquare,
@@ -65,11 +70,6 @@ const data = {
     //   url: "/touring",
     //   icon: Binoculars,
     // },
-    {
-      title: "My Space",
-      url: "/my-space",
-      icon: Brain,
-    },
     {
       title: "Groups",
       url: "/groups",
