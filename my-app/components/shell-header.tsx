@@ -6,9 +6,9 @@ import { usePathname } from "next/navigation";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { InputWithButton } from "@/components/input-with-button";
-import { TouringHeaderActions } from "@/components/touring-header-actions";
 import { ChatSurveyHeader } from "@/components/chat-survey-header";
 import { ExploreHeaderActions } from "@/components/explore-header-actions";
+import { ExploreProvider } from "@/hooks/context/explore-context";
 import { Button } from "./ui/button";
 import { Loader, Map } from "lucide-react";
 
@@ -19,7 +19,6 @@ import { toast } from "sonner";
 
 export function ShellHeader() {
   const pathname = usePathname();
-  const isTouring = pathname.startsWith("/touring");
   const isChat = pathname.startsWith("/chat");
   const isGroup = pathname.startsWith("/groups");
   const isExplore = pathname.startsWith("/explore");
@@ -89,7 +88,9 @@ export function ShellHeader() {
         {isChat ? (
           <ChatSurveyHeader />
         ) : isExplore ? (
-          <ExploreHeaderActions />
+          <ExploreProvider>
+            <ExploreHeaderActions />
+          </ExploreProvider>
         ) : isGroup ?(
           // <div className="flex text-lg font-medium">
           //   <Button
