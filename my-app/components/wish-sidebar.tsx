@@ -68,12 +68,12 @@ export function WishSidebar({ groupId }: { groupId: number }) {
                   }`}
                 >
                   <div className="flex items-baseline gap-2 mb-1">
-                    <span className="text-sm font-medium">{wish.sender_name}</span>
+                    <span className="text-xs font-sm">{wish.sender_name}</span>
                     <span className="text-[10px] text-muted-foreground">
                       {new Date(wish.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                     </span>
                   </div>
-                  <div className="bg-muted/40 border rounded-lg px-3 py-2 text-md max-w-[90%] wrap-break-word">
+                  <div className="bg-muted/40 border rounded-lg px-3 py-2 text-sm max-w-[90%] wrap-break-word">
                     {wish.message}
                   </div>
                 </div>
@@ -88,9 +88,9 @@ export function WishSidebar({ groupId }: { groupId: number }) {
           placeholder="I want to see..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          className="flex-1"
+          className="flex-1 rounded-full"
         />
-        <Button size="icon" type="submit" disabled={!input.trim()}>
+        <Button size="icon" type="submit" disabled={!input.trim()} className="rounded-full">
           <Send className="w-4 h-4" />
         </Button>
       </form>

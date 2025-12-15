@@ -1314,7 +1314,7 @@ export function ChatSurveyHeader() {
           variant="default"
           size="icon-sm"
           className="rounded-full cursor-pointer"
-          disabled={isLoading}
+          disabled={isLoading || query.trim() === ""}
         >
           <Send className="h-4 w-4" />
         </Button>
