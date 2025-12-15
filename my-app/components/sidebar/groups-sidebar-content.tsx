@@ -24,7 +24,7 @@ import {
 import { Label } from "@radix-ui/react-label";
 import { Input } from "../ui/input";
 import { DialogClose } from "@radix-ui/react-dialog";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Group {
   id: number;
@@ -35,10 +35,16 @@ interface Group {
 export function GroupsSidebarContent() {
   const supabase = useSupabase();
   const { user } = useUser();
-  const [groups, setGroups] = useState<Group[]>([]);
   const { setActive } = useChat();
+  
+  // State for "My Groups" (Sidebar list)
+  const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
+
+  // State for "All Groups" (Join Dialog list)
+  const [allGroups, setAllGroups] = useState<Group[]>([]);
+  const [loadingAllGroups, setLoadingAllGroups] = useState(false);
 
   // Sheet State
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -46,38 +52,12 @@ export function GroupsSidebarContent() {
   
   // Dialog State
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  // Form State
+  const [selectedJoinGroupId, setSelectedJoinGroupId] = useState("");
 
-  const [groupName, setGroupName] = useState("");
-
-  // const fetchGroups = useCallback(async () => {
-  //   if (!user?.email) return;
-  //   try {
-  //     setLoading(true);
-  //     const { data: authData } = await supabase.auth.getUser();
-  //     if (!authData.user) return;
-  //     const { data, error } = await supabase
-  //       .from("groups")
-  //       .select("*")
-  //       .eq("created_by", authData.user.id)
-  //       .order("created_at", { ascending: false });
-
-  //     if (error) throw error;
-
-  //     const transformedGroups = (data || []).map((group: any) => ({
-  //       id: group.id,
-  //       name: group.name || "Untitled Group",
-  //       createdAt: group.created_at,
-  //     }));
-  //     setGroups(transformedGroups);
-  //   } catch (error) {
-  //     console.error("Error fetching groups:", error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }, [user, supabase]);
-
+  // 1. Fetch "My Groups" for the sidebar
   const fetchGroups = useCallback(async () => {
-    // 1. Basic checks
     if (!user?.email) return;
 
     try {
@@ -85,17 +65,14 @@ export function GroupsSidebarContent() {
       const { data: authData } = await supabase.auth.getUser();
       if (!authData.user) return;
 
-      // 2. ✅ NEW: Call the Database Function (RPC) instead of a simple select
-      // This gets groups you own AND groups you are a member of.
       const { data, error } = await supabase
         .rpc("get_user_groups", {
           current_user_id: authData.user.id,
         })
-        .order("created_at", { ascending: false }); // We can still sort the results!
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
 
-      // 3. Transform and set state (same as before)
       const transformedGroups = (data || []).map((group: any) => ({
         id: group.id,
         name: group.name || "Untitled Group",
@@ -113,6 +90,38 @@ export function GroupsSidebarContent() {
   useEffect(() => {
     fetchGroups();
   }, [fetchGroups]);
+
+  // 2. Fetch "All Groups" for the Join Dialog
+  const fetchAllGroups = useCallback(async () => {
+    try {
+      setLoadingAllGroups(true);
+      const { data, error } = await supabase
+        .from("groups")
+        .select("id, name, created_at")
+        .order("name", { ascending: true }); // Sort alphabetically
+
+      if (error) throw error;
+
+      const transformed = (data || []).map((g: any) => ({
+        id: g.id,
+        name: g.name,
+        createdAt: g.created_at,
+      }));
+      setAllGroups(transformed);
+    } catch (error) {
+      console.error("Error fetching all groups", error);
+    } finally {
+      setLoadingAllGroups(false);
+    }
+  }, [supabase]);
+
+  // 3. Trigger fetch when Dialog opens
+  useEffect(() => {
+    if (isDialogOpen) {
+      fetchAllGroups();
+    }
+  }, [isDialogOpen, fetchAllGroups]);
+
 
   const handleNewGroup = async () => {
     if (!user?.email) return;
@@ -132,7 +141,6 @@ export function GroupsSidebarContent() {
         const newGroup = { id: data.id, name: data.name, createdAt: data.created_at };
         setGroups((prev) => [newGroup, ...prev]);
         
-        // Auto-open the new group
         setSelectedGroup(newGroup);
         setIsSheetOpen(true);
         toast.success("Group created");
@@ -142,10 +150,6 @@ export function GroupsSidebarContent() {
     } finally {
       setIsCreatingGroup(false);
     }
-  };
-
-  const handleJoinGroup = async () => {
-    setIsDialogOpen(true);
   };
 
   const handleSelectGroup = (group: Group) => {
@@ -166,8 +170,7 @@ export function GroupsSidebarContent() {
               <span>My Groups</span>
             </div>
 
-            <Dialog>
-              {/* 1. Trigger sits outside the form */}
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button
                   size="sm"
@@ -179,34 +182,39 @@ export function GroupsSidebarContent() {
                 </Button>
               </DialogTrigger>
 
-              {/* 2. Content holds the form */}
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                   <DialogTitle>Join a Group</DialogTitle>
                   <DialogDescription>
-                    Enter the details below to find and join an existing group.
+                    Select an existing group from the list or enter a code.
                   </DialogDescription>
                 </DialogHeader>
 
-                {/* 3. Form handles the data submission */}
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    // handleJoinGroup(e); // Call your actual join logic here
+                    console.log("Joining group ID:", selectedJoinGroupId);
                   }}
                   className="grid gap-4 py-4"
                 >
                   <div className="grid gap-2 w-full">
-                    <Label htmlFor="group-select">Group Name</Label>
-                    <Select value={groupName} onValueChange={setGroupName}>
-                      <SelectTrigger id="group-select">
-                        <SelectValue placeholder="Select a group..." />
+                    <Label htmlFor="group-select">Group Name</Label>                
+                    <Select 
+                      value={selectedJoinGroupId} 
+                      onValueChange={setSelectedJoinGroupId}
+                    >
+                      <SelectTrigger id="group-select" className="cursor-pointer">
+                        <SelectValue defaultValue="Your Group Name" placeholder={loadingAllGroups ? "Loading groups..." : "Select a group..."} />
                       </SelectTrigger>
-                      <SelectContent>
-                        {/* Replace with your dynamic groups list */}
-                        <SelectItem value="trip-vegas">Trip to Vegas</SelectItem>
-                        <SelectItem value="nyc-weekend">NYC Weekend</SelectItem>
-                        <SelectItem value="hiking-club">Hiking Club</SelectItem>
+                      <SelectContent className="max-h-[200px]"> 
+                        {allGroups.map((group) => (
+                          <SelectItem key={group.id} value={String(group.id)} className="cursor-pointer">
+                            {group.name}
+                          </SelectItem>
+                        ))}
+                        {allGroups.length === 0 && !loadingAllGroups && (
+                           <div className="p-2 text-xs text-muted-foreground text-center">No groups found</div>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>

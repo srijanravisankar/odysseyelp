@@ -36,30 +36,27 @@ export function WishSidebar({ groupId }: { groupId: number }) {
 
   return (
     <div className="flex h-full flex-col w-full bg-background">
-      <div className="p-4 border-b bg-muted/20">
-        <h3 className="font-semibold flex items-center gap-2 text-sm">
+      <div className="pl-5 -mt-1 pb-2 border-b bg-muted/20">
+        <h3 className="font-semibold flex items-center gap-2 text-md">
           <Sparkles className="w-4 h-4 text-primary" />
           Collaborative Wishlist
         </h3>
-        <p className="text-[10px] text-muted-foreground mt-1">
+        <p className="text-[13px] text-muted-foreground mt-1">
           Chat with your group to decide where to go!
         </p>
       </div>
 
-      <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+      <ScrollArea className="h-[calc(100dvh-300px)] flex-1 pl-5 pb-2 pt-3" ref={scrollRef}>
         {loading ? (
           <div className="flex justify-center py-10"><Spinner /></div>
         ) : wishes.length === 0 ? (
-          <div className="text-center text-sm text-muted-foreground py-10 opacity-60">
+          <div className="text-center text-md text-muted-foreground py-10 opacity-60">
             No messages yet. Start the conversation!
           </div>
         ) : (
           <div className="space-y-4">
             {wishes.map((wish) => {
-              // Check your user context structure. 
-              // Often user.id is inside user object, or user IS the object.
-              const isMe = user?.email === (wish as any).user_email; // Adjust based on your Auth setup
-              // Better check:
+              const isMe = user?.email === (wish as any).user_email;
               // const isMe = user?.id === wish.user_id;
 
               return (
@@ -71,12 +68,12 @@ export function WishSidebar({ groupId }: { groupId: number }) {
                   }`}
                 >
                   <div className="flex items-baseline gap-2 mb-1">
-                    <span className="text-xs font-medium">{wish.sender_name}</span>
+                    <span className="text-sm font-medium">{wish.sender_name}</span>
                     <span className="text-[10px] text-muted-foreground">
                       {new Date(wish.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                     </span>
                   </div>
-                  <div className="bg-muted/40 border rounded-lg px-3 py-2 text-sm max-w-[90%] break-words">
+                  <div className="bg-muted/40 border rounded-lg px-3 py-2 text-md max-w-[90%] wrap-break-word">
                     {wish.message}
                   </div>
                 </div>
