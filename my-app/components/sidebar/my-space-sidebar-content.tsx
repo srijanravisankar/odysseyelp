@@ -3,7 +3,7 @@
 import React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import {Heart, MapPinCheckInside, Earth, LayoutGrid} from "lucide-react"
+import {Heart, Earth, LayoutGrid} from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const items = [
@@ -17,19 +17,13 @@ const items = [
         href: "/my-space/favorites",
         icon: Heart,
         label: "Favorites",
-        description: "Your favorite places you visited.",
+        description: "Your favorite itineraries.",
     },
     {
         href: "/my-space/published",
         icon: Earth,
         label: "Published",
-        description: "Places you published for others to see.",
-    },
-    {
-        href: "/my-space/visited",
-        icon: MapPinCheckInside,
-        label: "Visited",
-        description: "Places you visited so far.",
+        description: "Itineraries you published for others to see.",
     },
 ]
 

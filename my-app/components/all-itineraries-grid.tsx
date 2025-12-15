@@ -26,7 +26,13 @@ import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { toast } from "sonner"
 
-export function AllItinerariesGrid() {
+type FilterType = "all" | "favorites" | "published"
+
+type AllItinerariesGridProps = {
+    filter?: FilterType
+}
+
+export function AllItinerariesGrid({ filter = "all" }: AllItinerariesGridProps) {
     const supabase = useSupabase()
     const { user } = useUser()
     const [itineraries, setItineraries] = useState<Itinerary[]>([])
@@ -55,11 +61,19 @@ export function AllItinerariesGrid() {
                     return
                 }
 
-                const { data, error: queryError } = await supabase
+                let query = supabase
                     .from("itineraries")
                     .select("*")
                     .eq("user_id", authData.user.id)
-                    .order("created_at", { ascending: false })
+
+                // Apply filter based on type
+                if (filter === "favorites") {
+                    query = query.eq("favorites", true)
+                } else if (filter === "published") {
+                    query = query.eq("published", true)
+                }
+
+                const { data, error: queryError } = await query.order("created_at", { ascending: false })
 
                 if (queryError) {
                     setError(queryError.message)
@@ -77,7 +91,7 @@ export function AllItinerariesGrid() {
         }
 
         fetchAllItineraries()
-    }, [user?.email, supabase])
+    }, [user?.email, supabase, filter])
 
     // Handle publish/unpublish with tags
     const handleTogglePublish = async (itineraryId: number, currentlyPublished: boolean, tags?: string[]) => {
@@ -111,17 +125,22 @@ export function AllItinerariesGrid() {
             }
 
             // Update local state
-            setItineraries(prev =>
-                prev.map(itinerary =>
-                    itinerary.id === itineraryId
-                        ? {
-                            ...itinerary,
-                            published: newPublishedState,
-                            tags: newPublishedState ? (tags || []) : []
-                          }
-                        : itinerary
+            if (filter === "published" && !newPublishedState) {
+                // Remove from list if we're in published view and unpublishing
+                setItineraries(prev => prev.filter(itinerary => itinerary.id !== itineraryId))
+            } else {
+                setItineraries(prev =>
+                    prev.map(itinerary =>
+                        itinerary.id === itineraryId
+                            ? {
+                                ...itinerary,
+                                published: newPublishedState,
+                                tags: newPublishedState ? (tags || []) : []
+                              }
+                            : itinerary
+                    )
                 )
-            )
+            }
 
             toast.success(newPublishedState ? "Itinerary published!" : "Itinerary unpublished")
         } catch (err: any) {
@@ -147,13 +166,18 @@ export function AllItinerariesGrid() {
             }
 
             // Update local state
-            setItineraries(prev =>
-                prev.map(itinerary =>
-                    itinerary.id === itineraryId
-                        ? { ...itinerary, favorites: newFavoritedState }
-                        : itinerary
+            if (filter === "favorites" && !newFavoritedState) {
+                // Remove from list if we're in favorites view and unfavoriting
+                setItineraries(prev => prev.filter(itinerary => itinerary.id !== itineraryId))
+            } else {
+                setItineraries(prev =>
+                    prev.map(itinerary =>
+                        itinerary.id === itineraryId
+                            ? { ...itinerary, favorites: newFavoritedState }
+                            : itinerary
+                    )
                 )
-            )
+            }
 
             toast.success(newFavoritedState ? "Added to favorites!" : "Removed from favorites")
         } catch (err: any) {
@@ -225,11 +249,26 @@ export function AllItinerariesGrid() {
     }
 
     if (itineraries.length === 0) {
+        const emptyMessages = {
+            all: {
+                title: "No itineraries yet",
+                description: "Create your first itinerary in the Chat page!"
+            },
+            favorites: {
+                title: "No favorite itineraries",
+                description: "Click the heart icon on any itinerary to add it to your favorites."
+            },
+            published: {
+                title: "No published itineraries",
+                description: "Click the globe icon on any itinerary to publish it for others to see."
+            }
+        }
+
         return (
             <div className="flex flex-col items-center justify-center h-64 w-full gap-2">
-                <p className="text-muted-foreground">No itineraries yet</p>
+                <p className="text-muted-foreground">{emptyMessages[filter].title}</p>
                 <p className="text-sm text-muted-foreground">
-                    Create your first itinerary in the Chat page!
+                    {emptyMessages[filter].description}
                 </p>
             </div>
         )
