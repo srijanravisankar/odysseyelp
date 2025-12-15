@@ -265,7 +265,6 @@ export function GroupsSidebarContent() {
 
                   <div className="grid gap-2">
                     <Label htmlFor="group-code">Secret Code</Label>
-                    {/* ✅ Connected Input to State */}
                     <Input 
                       id="group-code" 
                       value={secretCodeInput}
@@ -276,10 +275,10 @@ export function GroupsSidebarContent() {
                   </div>
 
                   <DialogFooter>
-                    <DialogClose asChild>
+                    <DialogClose asChild className="cursor-pointer">
                       <Button variant="outline" type="button">Cancel</Button>
                     </DialogClose>
-                    <Button type="submit" disabled={isJoining}>
+                    <Button type="submit" disabled={isJoining} className="cursor-pointer">
                       {isJoining ? "Joining..." : "Join Group"}
                     </Button>
                   </DialogFooter>

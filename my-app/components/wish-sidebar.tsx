@@ -16,6 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useItinerary } from "@/hooks/context/itinerary-context";
 
 interface Group {
   id: number;
@@ -28,17 +29,17 @@ export function WishSidebar({ group }: { group: Group }) {
   const supabase = useSupabase();
   const { user } = useUser();
   const { wishes, loading, sendWish } = useGroupWishes(group.id);
+  const [isPlanning, setIsPlanning] = useState(false);
   
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // ✅ New State for Group Info
+  // New State for Group Info
   const [isCopied, setIsCopied] = useState(false);
 
-
-  // ✅ Handle Copy Logic
+  // Handle Copy Logic
   const handleCopyCode = async () => {
-    if (!group.secretCode) return; // ✅ Use prop directly
+    if (!group.secretCode) return;
     
     try {
       await navigator.clipboard.writeText(group.secretCode);

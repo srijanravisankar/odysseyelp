@@ -9,7 +9,7 @@ export interface Wish {
   message: string;
   user_id: string;
   created_at: string;
-  sender_name?: string; // Optional: loaded from profile
+  sender_name?: string;
 }
 
 export function useGroupWishes(groupId: number) {

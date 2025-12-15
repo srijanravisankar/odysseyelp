@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useChat } from "@/hooks/context/session-context";
 import { useUser } from "@/hooks/context/user-context";
 import { useSupabase } from "./supabase-context";
+import { useGroup } from "./group-context";
 
 export interface Itinerary {
   id: number;
@@ -32,7 +33,7 @@ type ItineraryContextType = {
 
   removeStop: (stopId: string) => void;
 
-  // 🔑 NEW: Fetched itineraries from Supabase
+  // Fetched itineraries from Supabase
   itineraries: Itinerary[];
   loadingItineraries: boolean;
   itinerariesError: string | null;
@@ -46,6 +47,7 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
   const supabase = useSupabase();
   const { active } = useChat();
   const { user } = useUser();
+  const { activeGroup } = useGroup();
 
   const [itineraryData, setItineraryData] = useState<any>(null);
   const [selectedStopIds, setSelectedStopIds] = useState<string[]>([]);
@@ -54,7 +56,7 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
   );
   const [routeGeoJSON, setRouteGeoJSON] = useState<any>(null);
 
-  // 🔑 NEW: Itineraries fetched from database
+  // Itineraries fetched from database
   const [itineraries, setItineraries] = useState<Itinerary[]>([]);
   const [loadingItineraries, setLoadingItineraries] = useState(false);
   const [itinerariesError, setItinerariesError] = useState<string | null>(null);
@@ -74,13 +76,82 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
     setSelectedStopIds((prev) => prev.filter((id) => id !== stopId));
   };
 
-  // 🔑 NEW: Fetch itineraries whenever active session or user changes
+  useEffect(() => {
+    const fetchItineraries = async () => {
+      // ✅ Change from user?.email to user?.id for more reliable dependency
+      console.log("DEBUG: fetchItineraries effect triggered", {
+        active,
+        userId: user?.id,
+        userEmail: user?.email,
+      });
+
+      if (!active || !user?.id) {
+        console.log("Skipping fetch: missing active or user");
+        setItineraries([]);
+        setItineraryData(null);
+        setLoadingItineraries(false);
+        return;
+      }
+
+      setLoadingItineraries(true);
+      setItinerariesError(null);
+
+      try {
+        const { data: authData } = await supabase.auth.getUser();
+        if (!authData.user) {
+          setItinerariesError("User not authenticated");
+          console.error("No auth user found");
+          return;
+        }
+
+        console.log("Fetching itineraries for:", {
+          userId: authData.user.id,
+          sessionId: active,
+        });
+
+        const { data, error: queryError } = await supabase
+          .from("itineraries")
+          .select("*")
+          .eq("user_id", authData.user.id)
+          .eq("session_id", active)
+          .order("created_at", { ascending: true });
+
+        if (queryError) {
+          setItinerariesError(queryError.message);
+          console.error("Error fetching itineraries:", queryError);
+          return;
+        }
+
+        console.log("Itineraries fetched:", data);
+
+        const fetchedItineraries = data || [];
+        setItineraries(fetchedItineraries);
+
+        if (fetchedItineraries.length > 0) {
+          console.log("Setting itineraryData to first itinerary:", fetchedItineraries[0]);
+          setItineraryData(fetchedItineraries[0]);
+        } else {
+          console.log("No itineraries found for this session");
+          setItineraryData(null);
+        }
+      } catch (err: any) {
+        setItinerariesError(err.message || "Failed to fetch itineraries");
+        console.error("Fetch itineraries error:", err);
+      } finally {
+        setLoadingItineraries(false);
+      }
+    };
+
+    fetchItineraries();
+    // ✅ Changed dependency from user?.email to user?.id
+  }, [active, user?.id, supabase]);
+
   // useEffect(() => {
   //   const fetchItineraries = async () => {
-  //     if (!active || !user?.email) {
+  //     // ✅ Allow fetch if User exists AND (Active Session OR Active Group) exists
+  //     if (!user?.id || (!active && !activeGroup)) {
   //       setItineraries([]);
   //       setItineraryData(null);
-  //       // ensure loading flag is false when there's no active session/user
   //       setLoadingItineraries(false);
   //       return;
   //     }
@@ -89,33 +160,35 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
   //     setItinerariesError(null);
 
   //     try {
-  //       const { data: authData } = await supabase.auth.getUser();
-  //       if (!authData.user) {
-  //         setItinerariesError("User not authenticated");
-  //         return;
-  //       }
-
-  //       const { data, error: queryError } = await supabase
+  //       let query = supabase
   //         .from("itineraries")
   //         .select("*")
-  //         .eq("user_id", authData.user.id)
-  //         .eq("session_id", active)
-  //         .order("created_at", { ascending: true });
+  //         .order("created_at", { ascending: false }); // Generally newest first is better
 
-  //       if (queryError) {
-  //         setItinerariesError(queryError.message);
-  //         console.error("Error fetching itineraries:", queryError);
-  //         return;
+  //       // ✅ LOGIC BRANCH: Fetch by Group OR by Session
+  //       if (activeGroup) {
+  //           // If a group is selected, strictly show group itineraries
+  //           query = query.eq("group_id", activeGroup.id);
+  //       } else if (active) {
+  //           // Otherwise show session itineraries (personal chat)
+  //           query = query.eq("session_id", active).eq("user_id", user.id);
   //       }
+
+  //       const { data, error } = await query;
+
+  //       if (error) throw error;
 
   //       const fetchedItineraries = data || [];
   //       setItineraries(fetchedItineraries);
 
-  //       // 🔑 IMPORTANT: Set the first itinerary as itineraryData
   //       if (fetchedItineraries.length > 0) {
-  //         setItineraryData(fetchedItineraries[0]);
+  //           // Determine if current data is still valid
+  //           const currentExists = itineraryData && fetchedItineraries.find(i => i.id === itineraryData.id);
+  //           if (!itineraryData || !currentExists) {
+  //               setItineraryData(fetchedItineraries[0]);
+  //           }
   //       } else {
-  //         setItineraryData(null);
+  //           setItineraryData(null);
   //       }
   //     } catch (err: any) {
   //       setItinerariesError(err.message || "Failed to fetch itineraries");
@@ -126,79 +199,9 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
   //   };
 
   //   fetchItineraries();
-  // }, [active, user?.email, supabase]);
-
-  // In itinerary-context.tsx
-
-useEffect(() => {
-  const fetchItineraries = async () => {
-    // ✅ Change from user?.email to user?.id for more reliable dependency
-    console.log("DEBUG: fetchItineraries effect triggered", {
-      active,
-      userId: user?.id,
-      userEmail: user?.email,
-    });
-
-    if (!active || !user?.id) {
-      console.log("Skipping fetch: missing active or user");
-      setItineraries([]);
-      setItineraryData(null);
-      setLoadingItineraries(false);
-      return;
-    }
-
-    setLoadingItineraries(true);
-    setItinerariesError(null);
-
-    try {
-      const { data: authData } = await supabase.auth.getUser();
-      if (!authData.user) {
-        setItinerariesError("User not authenticated");
-        console.error("No auth user found");
-        return;
-      }
-
-      console.log("Fetching itineraries for:", {
-        userId: authData.user.id,
-        sessionId: active,
-      });
-
-      const { data, error: queryError } = await supabase
-        .from("itineraries")
-        .select("*")
-        .eq("user_id", authData.user.id)
-        .eq("session_id", active)
-        .order("created_at", { ascending: true });
-
-      if (queryError) {
-        setItinerariesError(queryError.message);
-        console.error("Error fetching itineraries:", queryError);
-        return;
-      }
-
-      console.log("Itineraries fetched:", data);
-
-      const fetchedItineraries = data || [];
-      setItineraries(fetchedItineraries);
-
-      if (fetchedItineraries.length > 0) {
-        console.log("Setting itineraryData to first itinerary:", fetchedItineraries[0]);
-        setItineraryData(fetchedItineraries[0]);
-      } else {
-        console.log("No itineraries found for this session");
-        setItineraryData(null);
-      }
-    } catch (err: any) {
-      setItinerariesError(err.message || "Failed to fetch itineraries");
-      console.error("Fetch itineraries error:", err);
-    } finally {
-      setLoadingItineraries(false);
-    }
-  };
-
-  fetchItineraries();
-  // ✅ Changed dependency from user?.email to user?.id
-}, [active, user?.id, supabase]);
+    
+  //   // ✅ Dependency Array: Re-run if Group, Session, or User changes
+  // }, [active, activeGroup, user?.id, supabase]);
 
   return (
     <ItineraryContext.Provider
