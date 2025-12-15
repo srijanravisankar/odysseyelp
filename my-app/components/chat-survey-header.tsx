@@ -538,7 +538,7 @@ export function ChatSurveyHeader() {
         console.log(query);
         
         try {
-          const result = await saveItinerary(data.itinerary, query);
+          const result = await saveItinerary(data.itinerary, query, true);
           if (result && result.sessionId) {
             setActive(result.sessionId);
             console.log("✅ Session set to:", result.sessionId);

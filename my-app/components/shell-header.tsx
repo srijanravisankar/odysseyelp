@@ -16,6 +16,8 @@ import { useGroup } from "@/hooks/context/group-context";
 import { useGroupWishes } from "@/hooks/use-group-wishes";
 import { useUser } from "@/hooks/context/user-context";
 import { toast } from "sonner";
+import { useItinerary } from "@/hooks/context/itinerary-context";
+import { useSaveItinerary } from "@/hooks/use-save-itinerary";
 
 export function ShellHeader() {
   const pathname = usePathname();
@@ -32,48 +34,117 @@ export function ShellHeader() {
   const { wishes } = useGroupWishes(activeGroup?.id ?? 0);
   const [isPlanning, setIsPlanning] = useState(false);
   const { user } = useUser();
+  const { itineraryData, setItineraryData } = useItinerary();
+  const { save: saveItinerary } = useSaveItinerary();
+
+  // const handlePlanFromGroup = async () => {
+  //   if (!activeGroup) return;
+  //   if (wishes.length === 0) {
+  //     toast.error("No wishes found. Chat in the group first!");
+  //     return;
+  //   }
+
+  //   setIsPlanning(true);
+  //   try {
+  //     // Construct the prompt
+      // const wishListText = wishes
+      //   .map((w) => `- ${w.message} (requested by ${w.sender_name})`)
+      //   .join("\n");
+
+  //     const fullPrompt = `Plan a trip for a group named "${activeGroup.name}" based on these requests:\n${wishListText}`;
+
+  //     // Call your API
+  //     const response = await fetch("/api/chat", { 
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         prompt: fullPrompt,
+  //         groupId: activeGroup.id,
+  //         userId: user?.id,
+  //       }),
+  //     });
+
+  //     if (!response.ok) throw new Error("Failed to generate itinerary");
+
+  //     const data = await response.json();
+      
+  //     toast.success("Itinerary generated successfully!");
+  //     // The ItineraryContext (if properly set up) will auto-detect the new entry in DB
+      
+  //   } catch (error) {
+  //     console.error(error);
+  //     toast.error("Failed to plan trip. Please try again.");
+  //   } finally {
+  //     setIsPlanning(false);
+  //   }
+  // };
 
   const handlePlanFromGroup = async () => {
-    if (!activeGroup) return;
-    if (wishes.length === 0) {
-      toast.error("No wishes found. Chat in the group first!");
-      return;
-    }
+      // e.preventDefault();
+  
+      // if (!active) {
+      //   console.log("Enter a session")
+      //   return;
+      // }
+  
+      if (!activeGroup) return;
+      if (wishes.length === 0) {
+        toast.error("No wishes found. Chat in the group first!");
+        return;
+      }
 
-    setIsPlanning(true);
-    try {
-      // Construct the prompt
       const wishListText = wishes
         .map((w) => `- ${w.message} (requested by ${w.sender_name})`)
         .join("\n");
 
       const fullPrompt = `Plan a trip for a group named "${activeGroup.name}" based on these requests:\n${wishListText}`;
 
-      // Call your API
-      const response = await fetch("/api/chat", { 
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompt: fullPrompt,
-          groupId: activeGroup.id,
-          userId: user?.id,
-        }),
-      });
+      console.log("Wishes:", fullPrompt);
+  
+      setIsPlanning(true);
+  
+      try {
+        const res = await fetch("/api/chat", { 
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: fullPrompt,      
+          }),
+        });
+  
+        const data = await res.json();
+  
+        if (!res.ok) {
+          console.error("Error from API:", data);
+          return;
+        }
+  
+        console.log("Composed prompt:", data.composedPrompt);
+        console.log("Yelp AI response:", data.yelp);
+        console.log("Itinerary:", data.itinerary);
+  
+        if (data.itinerary) {
+          console.log("Setting global itinerary data...");
+          setItineraryData(data.itinerary);
+          
+          console.log("Saving itinerary data to database...");
+          console.log(data.itinerary);
 
-      if (!response.ok) throw new Error("Failed to generate itinerary");
-
-      const data = await response.json();
-      
-      toast.success("Itinerary generated successfully!");
-      // The ItineraryContext (if properly set up) will auto-detect the new entry in DB
-      
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to plan trip. Please try again.");
-    } finally {
-      setIsPlanning(false);
+          try {
+            const result = await saveItinerary(data.itinerary, `${activeGroup.name}'s query`, false);
+            console.log("Database save successful", result);
+          } catch (dbErr) {
+            console.error("Database save failed:", dbErr);
+          } finally {
+            setIsPlanning(false);
+          }
+        }
+      } catch (err) {
+        console.error("Network error", err);
+      } finally {
+        setIsPlanning(false);
+      }
     }
-  };
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2">
