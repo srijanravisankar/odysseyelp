@@ -5,17 +5,17 @@ import { useGroupWishes } from "@/hooks/use-group-wishes";
 import { useUser } from "@/hooks/context/user-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Copy, Check, Users } from "lucide-react"; // ✅ Added Icons
+import { Send, Copy, Check, Users } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner"; 
-import { useSupabase } from "@/hooks/context/supabase-context"; // ✅ Import Supabase
-import { toast } from "sonner"; // ✅ Import Toast
+import { useSupabase } from "@/hooks/context/supabase-context"; 
+import { toast } from "sonner";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"; // ✅ Optional: for better UX
+} from "@/components/ui/tooltip";
 
 interface Group {
   id: number;
@@ -70,47 +70,22 @@ export function WishSidebar({ group }: { group: Group }) {
   return (
     <div className="flex h-full flex-col w-full bg-background rounded-full">
       {/* HEADER SECTION */}
-      <div className="pl-5 pr-4 -mt-1.25 pb-3 pt-2 border-b bg-muted/20">
+      {/* <div className="pl-5 pr-4 -mt-1.25 pb-3 pt-2 border-b bg-muted/20">
         <div className="flex items-center justify-between">
-          
-          {/* Group Name Display */}
-          <h3 className="font-semibold flex items-center gap-2 text-md truncate max-w-[200px]">
+                    <h3 className="font-semibold flex items-center gap-2 text-md truncate max-w-[200px]">
             <Users className="w-4 h-4 text-primary shrink-0" />
             <span className="truncate">
               {group ? group.name : "Loading..."}
             </span>
           </h3>
-
-          {group?.secretCode && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm" 
-                    className="h-8 px-2 gap-2 text-muted-foreground hover:text-foreground bg-muted"
-                    onClick={handleCopyCode}
-                  >
-                    {isCopied ? (
-                      <Check className="h-3.5 w-3.5 text-green-500" />
-                    ) : (
-                      <Copy className="h-3.5 w-3.5" />
-                    )}
-                    <span className="text-xs font-medium">Secret Code</span>
-                  </Button>
-                </TooltipTrigger>
-              </Tooltip>
-            </TooltipProvider>
-          )}
         </div>
-        
         <p className="text-[12px] text-muted-foreground mt-0.5 truncate">
             {group?.secretCode ? "Share code to invite friends" : "Chat with your group"}
         </p>
-      </div>
+      </div> */}
 
       {/* CHAT AREA */}
-      <ScrollArea className="h-[calc(100dvh-300px)] flex-1 pl-5 pb-2 pt-3" ref={scrollRef}>
+      <ScrollArea className="h-[calc(100dvh-300px)] flex-1 pl-5 pb-2 pt-0" ref={scrollRef}>
         {loading ? (
           <div className="flex justify-center py-10"><Spinner /></div>
         ) : wishes.length === 0 ? (
@@ -118,7 +93,7 @@ export function WishSidebar({ group }: { group: Group }) {
             No messages yet. Start the conversation!
           </div>
         ) : (
-          <div className="space-y-4 pr-4"> {/* Added pr-4 for scrollbar spacing */}
+          <div className="space-y-4 pr-4">
             {wishes.map((wish) => (
               <div key={wish.id} className="flex flex-col items-start">
                 <div className="flex items-baseline gap-2 mb-1">

@@ -9,6 +9,10 @@ import { InputWithButton } from "@/components/input-with-button";
 import { TouringHeaderActions } from "@/components/touring-header-actions";
 import { ChatSurveyHeader } from "@/components/chat-survey-header";
 import { ExploreHeaderActions } from "@/components/explore-header-actions";
+import { Button } from "./ui/button";
+import { Map } from "lucide-react";
+
+import { useGroup } from "@/hooks/context/group-context";
 
 export function ShellHeader() {
   const pathname = usePathname();
@@ -16,6 +20,13 @@ export function ShellHeader() {
   const isChat = pathname.startsWith("/chat");
   const isGroup = pathname.startsWith("/groups");
   const isExplore = pathname.startsWith("/explore");
+
+  const { 
+      activeGroup, 
+      setActiveGroup, 
+      isGroupSheetOpen, 
+      setIsGroupSheetOpen 
+    } = useGroup();
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2">
@@ -32,7 +43,20 @@ export function ShellHeader() {
         ) : isExplore ? (
           <ExploreHeaderActions />
         ) : isGroup ?(
-          <></>
+          <div className="flex text-lg font-medium">
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={!activeGroup}
+              className="ml-auto h-7 gap-2 text-xs cursor-pointer"
+            >
+              <Map className="h-3.5 w-3.5" />
+              {activeGroup ? <>
+                <span className="-mr-1">Plan from</span>
+                <span className="font-bold">{activeGroup.name}</span>
+              </> : "No Group Selected"}
+            </Button>
+          </div>
         ) : (
           <InputWithButton />
         )}

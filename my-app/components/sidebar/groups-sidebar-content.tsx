@@ -26,6 +26,8 @@ import { Input } from "../ui/input";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+import { useGroup } from "@/hooks/context/group-context";
+
 interface Group {
   id: number;
   name: string;
@@ -50,6 +52,13 @@ export function GroupsSidebarContent() {
   // Sheet State
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
+
+  const { 
+    activeGroup, 
+    setActiveGroup, 
+    isGroupSheetOpen, 
+    setIsGroupSheetOpen 
+  } = useGroup();
   
   // Dialog & Form State
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -197,6 +206,9 @@ export function GroupsSidebarContent() {
     setActive(group.id);
     setSelectedGroup(group);
     setIsSheetOpen(true);
+
+    setActiveGroup(group);     
+    setIsGroupSheetOpen(true);
   };
 
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString();
@@ -216,7 +228,7 @@ export function GroupsSidebarContent() {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="ml-8 h-7 gap-2 text-xs"
+                  className="ml-8 h-7 gap-2 text-xs cursor-pointer"
                 >
                   <Merge className="h-3.5 w-3.5" />
                   Join
@@ -299,7 +311,7 @@ export function GroupsSidebarContent() {
                   onClick={() => handleSelectGroup(group)}
                   className={cn(
                     "flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-left text-md transition",
-                    selectedGroup?.id === group.id && isSheetOpen
+                    activeGroup?.id === group.id
                       ? "bg-primary/10 text-primary"
                       : "hover:bg-muted/70"
                   )}
@@ -308,7 +320,7 @@ export function GroupsSidebarContent() {
                     <Boxes className="h-3.5 w-3.5 opacity-80" />
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col">
-                    <span className="truncate">{group.name}</span>
+                    <span className="leading-tight line-clamp-2 wrap-break-word">{group.name}</span>
                     <span className="text-[10px] text-muted-foreground">
                       {formatDate(group.createdAt)}
                     </span>
@@ -320,7 +332,7 @@ export function GroupsSidebarContent() {
         </div>
       </SidebarContent>
 
-      <GroupChatSheet 
+      <GroupChatSheet
         group={selectedGroup} 
         open={isSheetOpen} 
         onOpenChange={setIsSheetOpen} 
