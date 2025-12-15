@@ -5,13 +5,22 @@ import { useSearchParams } from "next/navigation"
 
 type SortOption = "newest" | "oldest" | "most-stops"
 
+export type FilterOptions = {
+    tags: string[]
+    cities: string[]
+    priceRanges: string[]
+    categories: string[]
+    stopCounts: string[]
+    dateRange: string | null
+}
+
 type ExploreContextType = {
     searchQuery: string
     setSearchQuery: (query: string) => void
     sortBy: SortOption
     setSortBy: (sort: SortOption) => void
-    filterTags: string[]
-    setFilterTags: (tags: string[]) => void
+    filters: FilterOptions
+    setFilters: (filters: FilterOptions) => void
     debouncedSearch: string
 }
 
@@ -22,9 +31,22 @@ export function ExploreProvider({ children }: { children: React.ReactNode }) {
 
     const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "")
     const [sortBy, setSortBy] = useState<SortOption>((searchParams.get("sort") as SortOption) || "newest")
-    const [filterTags, setFilterTags] = useState<string[]>(() => {
+    const [filters, setFilters] = useState<FilterOptions>(() => {
         const tagsParam = searchParams.get("tags")
-        return tagsParam ? tagsParam.split(",") : []
+        const citiesParam = searchParams.get("cities")
+        const pricesParam = searchParams.get("prices")
+        const categoriesParam = searchParams.get("categories")
+        const stopsParam = searchParams.get("stops")
+        const dateParam = searchParams.get("date")
+
+        return {
+            tags: tagsParam ? tagsParam.split(",") : [],
+            cities: citiesParam ? citiesParam.split(",") : [],
+            priceRanges: pricesParam ? pricesParam.split(",") : [],
+            categories: categoriesParam ? categoriesParam.split(",") : [],
+            stopCounts: stopsParam ? stopsParam.split(",") : [],
+            dateRange: dateParam || null,
+        }
     })
     const [debouncedSearch, setDebouncedSearch] = useState(searchQuery)
 
@@ -43,8 +65,8 @@ export function ExploreProvider({ children }: { children: React.ReactNode }) {
                 setSearchQuery,
                 sortBy,
                 setSortBy,
-                filterTags,
-                setFilterTags,
+                filters,
+                setFilters,
                 debouncedSearch,
             }}
         >
@@ -60,4 +82,3 @@ export function useExplore() {
     }
     return context
 }
-

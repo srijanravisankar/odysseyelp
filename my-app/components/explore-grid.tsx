@@ -23,6 +23,7 @@ import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { FilterOptions } from "@/hooks/context/explore-context"
 
 interface PublishedItinerary {
     id: number
@@ -43,13 +44,20 @@ type SortOption = "newest" | "oldest" | "most-stops"
 type ExploreGridProps = {
     searchQuery?: string
     sortBy?: SortOption
-    filterTags?: string[]
+    filters?: FilterOptions
 }
 
 export function ExploreGrid({
     searchQuery = "",
     sortBy = "newest",
-    filterTags = []
+    filters = {
+        tags: [],
+        cities: [],
+        priceRanges: [],
+        categories: [],
+        stopCounts: [],
+        dateRange: null,
+    }
 }: ExploreGridProps) {
     const supabase = useSupabase()
     const [itineraries, setItineraries] = useState<PublishedItinerary[]>([])
@@ -106,7 +114,7 @@ export function ExploreGrid({
         fetchPublishedItineraries()
     }, [supabase])
 
-    // Fuzzy search and filter logic
+    // Enhanced filtering logic with all filter types
     const filteredAndSortedItineraries = useMemo(() => {
         let result = [...itineraries]
 
@@ -124,13 +132,51 @@ export function ExploreGrid({
         }
 
         // Apply tag filter
-        if (filterTags.length > 0) {
+        if (filters.tags.length > 0) {
             result = result.filter((itinerary) => {
-                return filterTags.every(filterTag =>
+                return filters.tags.every(filterTag =>
                     itinerary.tags?.some(tag =>
                         tag.toLowerCase() === filterTag.toLowerCase()
                     )
                 )
+            })
+        }
+
+        // Apply category filter
+        if (filters.categories.length > 0) {
+            result = result.filter((itinerary) => {
+                const stops = itinerary.stops?.stops || []
+                return stops.some((stop: any) =>
+                    filters.categories.some(filterCat =>
+                        stop.category?.toLowerCase().includes(filterCat.toLowerCase())
+                    )
+                )
+            })
+        }
+
+        // Apply price range filter
+        if (filters.priceRanges.length > 0) {
+            result = result.filter((itinerary) => {
+                const stops = itinerary.stops?.stops || []
+                return stops.some((stop: any) =>
+                    stop.price && filters.priceRanges.includes(stop.price)
+                )
+            })
+        }
+
+
+        // Apply date range filter
+        if (filters.dateRange) {
+            const now = new Date()
+            result = result.filter((itinerary) => {
+                const createdDate = new Date(itinerary.created_at)
+                const diffMs = now.getTime() - createdDate.getTime()
+                const diffDays = Math.floor(diffMs / 86400000)
+
+                if (filters.dateRange === 'today') return diffDays === 0
+                if (filters.dateRange === 'week') return diffDays <= 7
+                if (filters.dateRange === 'month') return diffDays <= 30
+                return true
             })
         }
 
@@ -156,7 +202,7 @@ export function ExploreGrid({
         }
 
         return result
-    }, [itineraries, searchQuery, sortBy, filterTags])
+    }, [itineraries, searchQuery, sortBy, filters])
 
     const formatDate = (dateString: string): string => {
         const date = new Date(dateString)
@@ -223,10 +269,10 @@ export function ExploreGrid({
     }
 
     if (filteredAndSortedItineraries.length === 0) {
-        const message = searchQuery || filterTags.length > 0
+        const message = searchQuery || filters.tags.length > 0 || filters.priceRanges.length > 0 || filters.categories.length > 0 || filters.dateRange
             ? "No itineraries match your search"
             : "No published itineraries yet"
-        const description = searchQuery || filterTags.length > 0
+        const description = searchQuery || filters.tags.length > 0 || filters.priceRanges.length > 0 || filters.categories.length > 0 || filters.dateRange
             ? "Try adjusting your search or filters"
             : "Be the first to share your itinerary with the community!"
 

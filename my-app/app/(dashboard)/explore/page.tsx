@@ -4,22 +4,27 @@ import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { ExploreProvider, useExplore } from "@/hooks/context/explore-context"
 import { ExploreGrid } from "@/components/explore-grid"
-import { ExploreFilterBar } from "@/components/explore-filter-bar"
+import { ExploreFilterBarEnhanced } from "@/components/explore-filter-bar-enhanced"
 
 function ExploreContent() {
     const router = useRouter()
-    const { searchQuery, sortBy, filterTags, setFilterTags, debouncedSearch } = useExplore()
+    const { searchQuery, sortBy, filters, setFilters, debouncedSearch } = useExplore()
 
     // Update URL params when state changes
     useEffect(() => {
         const params = new URLSearchParams()
         if (searchQuery) params.set("search", searchQuery)
         if (sortBy !== "newest") params.set("sort", sortBy)
-        if (filterTags.length > 0) params.set("tags", filterTags.join(","))
+        if (filters.tags.length > 0) params.set("tags", filters.tags.join(","))
+        if (filters.cities.length > 0) params.set("cities", filters.cities.join(","))
+        if (filters.priceRanges.length > 0) params.set("prices", filters.priceRanges.join(","))
+        if (filters.categories.length > 0) params.set("categories", filters.categories.join(","))
+        if (filters.stopCounts.length > 0) params.set("stops", filters.stopCounts.join(","))
+        if (filters.dateRange) params.set("date", filters.dateRange)
 
         const newUrl = params.toString() ? `/explore?${params.toString()}` : "/explore"
         router.replace(newUrl, { scroll: false })
-    }, [searchQuery, sortBy, filterTags, router])
+    }, [searchQuery, sortBy, filters, router])
 
     return (
         <div className="flex flex-1 flex-col gap-4">
@@ -32,17 +37,17 @@ function ExploreContent() {
                 </div>
             </div>
 
-            {/* Filter Bar */}
-            <ExploreFilterBar
-                selectedTags={filterTags}
-                onTagsChange={setFilterTags}
+            {/* Enhanced Filter Bar */}
+            <ExploreFilterBarEnhanced
+                filters={filters}
+                onFiltersChange={setFilters}
             />
 
             {/* Itineraries Grid */}
             <ExploreGrid
                 searchQuery={debouncedSearch}
                 sortBy={sortBy}
-                filterTags={filterTags}
+                filters={filters}
             />
         </div>
     )
@@ -55,4 +60,3 @@ export default function ExplorePage() {
         </ExploreProvider>
     )
 }
-
