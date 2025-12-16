@@ -8,7 +8,7 @@ const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY!,
 })
 
-const model = "gemma-3-27b-it"
+const model = "gemini-2.5-flash-lite"
 
 export async function POST(req: NextRequest) {
     try {
@@ -23,6 +23,15 @@ export async function POST(req: NextRequest) {
             )
         }
 
+        const userLocation = body?.userLocation as { lat: number; lng: number } | undefined
+
+        const today = new Date().toLocaleDateString("en-US", {
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric'
+        });
+
         // 1) Compose Yelp-specific prompt from query (+ optional survey) via Gemini
         const composedRes = await ai.models.generateContent({
             model: model,
@@ -31,7 +40,7 @@ export async function POST(req: NextRequest) {
                     role: "user",
                     parts: [
                         {
-                            text: buildGeminiPrompt({ query, survey }),
+                            text: buildGeminiPrompt({ query, survey, today }),
                         },
                     ],
                 },
@@ -56,6 +65,9 @@ export async function POST(req: NextRequest) {
             })
         }
 
+        const latitude = userLocation?.lat || 43.6532;
+        const longitude = userLocation?.lng || -79.3832;
+
         // 2) Call Yelp AI API with composed prompt
         const yelpRes = await fetch("https://api.yelp.com/ai/chat/v2", {
             method: "POST",
@@ -68,8 +80,8 @@ export async function POST(req: NextRequest) {
                 user_context: {
                     locale: "en_CA",
                     // TODO: later derive from survey.location if available
-                    latitude: 43.6532,
-                    longitude: -79.3832,
+                    latitude: latitude,
+                    longitude: longitude,
                 },
             }),
         })
@@ -91,6 +103,7 @@ export async function POST(req: NextRequest) {
             survey,
             composedPrompt,
             yelpData,
+            today,
         })
 
         const itineraryRes = await ai.models.generateContent({
@@ -165,17 +178,25 @@ function extractJsonObject(text: string): string {
 // Helper 1: query + optional survey → Yelp-friendly prompt
 // ---------------------------------------------------------------------------
 function buildGeminiPrompt({
-                               query,
-                               survey,
+                                query,
+                                survey,
+                                today,
                            }: {
     query: string
     survey?: SurveyContext
+    today: string
 }) {
     const relevanceInstructions = `
     FIRST, analyze if the user's request is asking for recommendations, places, businesses, itineraries, or travel planning.
     - If the user is just saying "hello", "how are you", talking about code, or asking general knowledge questions unrelated to places/travel: RETURN ONLY THE STRING "SKIP_YELP".
     - If the user IS asking for places/travel (e.g. "coffee near me", "plan a trip", "restaurants"): Proceed to generate the Yelp query.
     `
+    const dateInstructions = `
+    Context: Today is ${today}.
+    - If the user says "this weekend" or "next Friday", calculate the specific date based on ${today}.
+    - If no date is mentioned, assume the trip is for ${today}.
+    `
+
     if (survey) {
         // Build context from the simplified survey structure
         let context = '';
@@ -222,6 +243,8 @@ You are a prompt engineer helping to talk to the Yelp AI API.
 
 ${relevanceInstructions}
 
+${dateInstructions}
+
 The user provided this context:
 ${context}
 
@@ -249,6 +272,8 @@ IMPORTANT:
 You are a prompt engineer helping to talk to the Yelp AI API.
 
 ${relevanceInstructions}
+
+${dateInstructions}
 
 The user did NOT provide any structured survey, only this free-text message:
 "${query}"
@@ -346,14 +371,19 @@ function buildItineraryPrompt({
   survey,
   composedPrompt,
   yelpData,
+  today,
 }: {
   query: string
   survey?: any // formatted to your SurveyContext type
   composedPrompt: string
   yelpData: unknown
+  today: string
 }) {
   return `
 You are helping generate a structured itinerary object for a UI.
+
+Today's Date:
+${today}
 
 The user originally typed this message:
 "${query}"
@@ -416,16 +446,32 @@ Rules:
 5. **Contextual Info:** title/summary must reflect the user's specific intent (e.g., "Quiet Anniversary Dinner").
 
 **CRITICAL SCHEDULING RULES:**
-- **Trip Date:** Determine the start date from the survey's dateRange or assume today's date. Format as YYYY-MM-DD.
-- **Time Boundaries:** Check the 'query' and 'survey' for start/end times (e.g., "morning coffee" implies 8-10 AM, "late night" implies 10 PM+). If unspecified, assume a standard day (10:00 AM to 10:00 PM).
-- **Sequence:** Stops must be ordered chronologically by date, then by time within each date.
-- **No Overlaps:** The 'schedule.start' of a stop must be AFTER the 'schedule.end' of the previous stop (or after travel buffer on next day).
-- **Realistic Durations:** Assign logical durations based on category:
-  - Coffee/Bakery: 30-45 mins
-  - Lunch/Dinner: 60-90 mins
-  - Museum/Activity: 90-120 mins
-  - Park/Walk: 45-60 mins
-- **Travel Buffers:** Leave a 15-30 minute gap between the 'end' of one stop and the 'start' of the next to account for travel time.
+
+1. **DATES & DURATION:**
+   - **Start Date Priority:** Determine the start date in this order:
+     1. Survey "dateRange" (if provided).
+     2. Explicit User Request (e.g., "Dec 25th" -> Use 2025-12-25).
+     3. Relative User Request (e.g., "This weekend" -> Calculate based on Today: ${today}).
+     4. **Default:** If NO date is mentioned, strictly use Today: **${today}**.
+   - **Multi-Day Strategy:** If the user requests multiple days (e.g., "3 day trip"):
+     - You MUST generate stops across multiple distinct dates.
+     - Day 1 = Start Date, Day 2 = Start Date + 1, etc.
+     - Evenly distribute stops (e.g., 3-4 stops per day) rather than cramming everything into Day 1.
+2. **TIME BOUNDARIES:**
+   - **Contextual Inference:** Respect cues like "morning coffee" (start ~8 AM) or "late night bars" (end ~1 AM).
+   - **Default Hours:** If no specific time preference is found, assume a standard day of **10:00 AM to 8:00 PM**.
+3. **PACING & CONTENT:**
+   - **Maximize Places:** Fill the itinerary with valid businesses from the Yelp data, up to a **maximum of 10 stops** total.
+   - **Sequence:** Stops must be ordered strictly chronologically by date and time.
+4. **REALISTIC DURATIONS (Apply these strictly):**
+   - **Coffee/Bakery:** 30-45 mins
+   - **Lunch/Dinner:** 60-90 mins
+   - **Museum/Activity:** 90-120 mins
+   - **Park/Walk:** 45-60 mins
+   - **Bar/Drinks:** 60-90 mins
+5. **LOGISTICS & BUFFERS:**
+   - **No Overlaps:** The "start" of a stop must be strictly AFTER the "end" of the previous stop.
+   - **Travel Buffers:** You MUST insert a **15-30 minute gap** between the end of one stop and the start of the next to account for travel time.
 
 IMPORTANT:
 - Respond with ONLY the valid JSON object.

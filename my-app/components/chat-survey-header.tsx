@@ -43,6 +43,7 @@ import { Progress } from "@/components/ui/progress";
 import { useItinerary } from "@/hooks/context/itinerary-context";
 import { useSaveItinerary } from "@/hooks/use-save-itinerary";
 import { useChat } from "@/hooks/context/session-context";
+import { toast } from "sonner";
 
 // ---------------- Date-range picker (uses shadcn Calendar) -------------------
 
@@ -411,6 +412,7 @@ export function ChatSurveyHeader() {
 
       if (data.message && data.message === "RETURN") {
         console.log("Received RETURN message from API, not building itinerary.");
+        toast.error("Invalid query. Failed to plan trip.");
         return
       }
 

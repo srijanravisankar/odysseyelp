@@ -5,6 +5,7 @@ import ShellLayout from "@/components/shell-layout"
 import { ThemeProvider } from "@/components/theme-provider"
 import { UserProvider } from "@/hooks/context/user-context"
 import { SupabaseProvider } from "@/hooks/context/supabase-context"
+import { Toaster } from "sonner"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,6 +39,7 @@ export default function RootLayout({
           >
             <UserProvider>
               {children}
+              <Toaster />
             </UserProvider>
           </ThemeProvider>
         </SupabaseProvider>

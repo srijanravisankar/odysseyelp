@@ -18,6 +18,7 @@ import { useUser } from "@/hooks/context/user-context";
 import { toast } from "sonner";
 import { useItinerary } from "@/hooks/context/itinerary-context";
 import { useSaveItinerary } from "@/hooks/use-save-itinerary";
+import { createClient } from "@/lib/supabase/client";
 
 export function ShellHeader() {
   const pathname = usePathname();
@@ -37,78 +38,71 @@ export function ShellHeader() {
   const { itineraryData, setItineraryData, refetchItineraries } = useItinerary();
   const { save: saveItinerary } = useSaveItinerary();
 
-  // const handlePlanFromGroup = async () => {
-  //   if (!activeGroup) return;
-  //   if (wishes.length === 0) {
-  //     toast.error("No wishes found. Chat in the group first!");
-  //     return;
-  //   }
+  const supabase = createClient();
 
-  //   setIsPlanning(true);
-  //   try {
-  //     // Construct the prompt
-      // const wishListText = wishes
-      //   .map((w) => `- ${w.message} (requested by ${w.sender_name})`)
-      //   .join("\n");
-
-  //     const fullPrompt = `Plan a trip for a group named "${activeGroup.name}" based on these requests:\n${wishListText}`;
-
-  //     // Call your API
-  //     const response = await fetch("/api/chat", { 
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         prompt: fullPrompt,
-  //         groupId: activeGroup.id,
-  //         userId: user?.id,
-  //       }),
-  //     });
-
-  //     if (!response.ok) throw new Error("Failed to generate itinerary");
-
-  //     const data = await response.json();
-      
-  //     toast.success("Itinerary generated successfully!");
-  //     // The ItineraryContext (if properly set up) will auto-detect the new entry in DB
-      
-  //   } catch (error) {
-  //     console.error(error);
-  //     toast.error("Failed to plan trip. Please try again.");
-  //   } finally {
-  //     setIsPlanning(false);
-  //   }
-  // };
-
-  const handlePlanFromGroup = async () => {
-      // e.preventDefault();
-  
-      // if (!active) {
-      //   console.log("Enter a session")
-      //   return;
-      // }
-  
-      if (!activeGroup) return;
-      if (wishes.length === 0) {
-        toast.error("No wishes found. Chat in the group first!");
+  const getUserLocation = (): Promise<{ lat: number; lng: number } | null> => {
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) {
+        resolve(null);
         return;
       }
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.warn("Location access denied or failed:", error);
+          resolve(null); // Fallback to null if denied
+        }
+      );
+    });
+  };
 
-      const wishListText = wishes
-        .map((w) => `- ${w.message} (requested by ${w.sender_name})`)
-        .join("\n");
+  const handlePlanFromGroup = async () => {
+      if (!activeGroup) return;
 
-      const fullPrompt = `Plan a trip for a group named "${activeGroup.name}" based on these requests:\n${wishListText}`;
-
-      console.log("Wishes:", fullPrompt);
-  
       setIsPlanning(true);
   
       try {
+        const userLocation = await getUserLocation();
+        console.log("User Location:", userLocation);
+        return;
+
+        // ✅ 3. FETCH FRESH DATA (Fixes the race condition)
+        // Instead of relying on the hook's state (which might lag), fetch the DB directly.
+        const { data: latestWishes, error } = await supabase
+          .from("group_wishes")
+          .select(`
+            message,
+            users:user_id ( name ) 
+          `)
+          .eq("group_id", activeGroup.id)
+          .order("created_at", { ascending: true });
+
+        if (error || !latestWishes || latestWishes.length === 0) {
+          toast.error("No wishes found. Chat in the group first!");
+          setIsPlanning(false);
+          return;
+        }
+
+        // ✅ 4. Use the fresh data to build the prompt
+        const wishListText = latestWishes
+          .map((w: any) => `- ${w.message} (requested by ${w.users?.name || "Unknown"})`)
+          .join("\n");
+
+        const fullPrompt = `Plan a trip for a group named "${activeGroup.name}" based on these requests:\n${wishListText}`;
+
+        console.log("Sending Fresh Wishes:", fullPrompt);
+  
         const res = await fetch("/api/chat", { 
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            query: fullPrompt,      
+            query: fullPrompt,   
+            userLocation: userLocation,   
           }),
         });
   
@@ -116,32 +110,31 @@ export function ShellHeader() {
   
         if (!res.ok) {
           console.error("Error from API:", data);
+          toast.error("Failed to plan trip. Try again.");
           return;
         }
-  
-        console.log("Composed prompt:", data.composedPrompt);
-        console.log("Yelp AI response:", data.yelp);
-        console.log("Itinerary:", data.itinerary);
+
+        if (data.message && data.message === "RETURN") {
+          console.log("Received RETURN message from API, not building itinerary.");
+          toast.error("Invalid query. Failed to plan trip.");
+          return
+        }
   
         if (data.itinerary) {
           console.log("Setting global itinerary data...");
           setItineraryData(data.itinerary);
           
-          console.log("Saving itinerary data to database...");
-          console.log(data.itinerary);
-
           try {
             const result = await saveItinerary(data.itinerary, `${activeGroup.name}'s query`, false);
+            setActiveGroup(activeGroup);
             await refetchItineraries();
-            console.log("Database save successful", result);
           } catch (dbErr) {
             console.error("Database save failed:", dbErr);
-          } finally {
-            setIsPlanning(false);
-          }
+          } 
         }
       } catch (err) {
         console.error("Network error", err);
+        toast.error("Network error. Please try again.");
       } finally {
         setIsPlanning(false);
       }
