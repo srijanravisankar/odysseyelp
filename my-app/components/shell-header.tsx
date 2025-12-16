@@ -69,9 +69,8 @@ export function ShellHeader() {
       try {
         const userLocation = await getUserLocation();
         console.log("User Location:", userLocation);
-        return;
 
-        // ✅ 3. FETCH FRESH DATA (Fixes the race condition)
+        // 3. FETCH FRESH DATA (Fixes the race condition)
         // Instead of relying on the hook's state (which might lag), fetch the DB directly.
         const { data: latestWishes, error } = await supabase
           .from("group_wishes")

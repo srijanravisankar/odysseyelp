@@ -10,144 +10,286 @@ const ai = new GoogleGenAI({
 
 const model = "gemini-2.5-flash-lite"
 
-export async function POST(req: NextRequest) {
-    try {
-        const body = await req.json()
-        const query = body?.query as string | undefined
-        const survey = body?.survey as SurveyContext | undefined
+// export async function POST(req: NextRequest) {
+//     try {
+//         const body = await req.json()
+//         const query = body?.query as string | undefined
+//         const survey = body?.survey as SurveyContext | undefined
 
-        if (!query) {
-            return NextResponse.json(
-                { error: "Missing query" },
-                { status: 400 },
-            )
-        }
+//         if (!query) {
+//             return NextResponse.json(
+//                 { error: "Missing query" },
+//                 { status: 400 },
+//             )
+//         }
 
-        const userLocation = body?.userLocation as { lat: number; lng: number } | undefined
+//         const userLocation = body?.userLocation as { lat: number; lng: number } | undefined
 
-        const today = new Date().toLocaleDateString("en-US", {
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric'
-        });
+//         const today = new Date().toLocaleDateString("en-US", {
+//             weekday: 'long', 
+//             year: 'numeric', 
+//             month: 'long', 
+//             day: 'numeric'
+//         });
 
-        // 1) Compose Yelp-specific prompt from query (+ optional survey) via Gemini
-        const composedRes = await ai.models.generateContent({
-            model: model,
-            contents: [
-                {
-                    role: "user",
-                    parts: [
-                        {
-                            text: buildGeminiPrompt({ query, survey, today }),
-                        },
-                    ],
-                },
-            ],
-        })
+//         // 1) Compose Yelp-specific prompt from query (+ optional survey) via Gemini
+//         const composedRes = await ai.models.generateContent({
+//             model: model,
+//             contents: [
+//                 {
+//                     role: "user",
+//                     parts: [
+//                         {
+//                             text: buildGeminiPrompt({ query, survey, today }),
+//                         },
+//                     ],
+//                 },
+//             ],
+//         })
 
-        const composedPrompt = (composedRes.text ?? "").trim()
-        if (!composedPrompt) {
-            return NextResponse.json(
-                { error: "Gemini returned empty composed prompt" },
-                { status: 500 },
-            )
-        }
+//         const composedPrompt = (composedRes.text ?? "").trim()
+//         if (!composedPrompt) {
+//             return NextResponse.json(
+//                 { error: "Gemini returned empty composed prompt" },
+//                 { status: 500 },
+//             )
+//         }
 
-        if (composedPrompt === "SKIP_YELP" || composedPrompt === '"SKIP_YELP"') {
-            console.log("Skipping Yelp API call: Irrelevant query");
-            return NextResponse.json({
-                composedPrompt: null,
-                yelp: null,
-                itinerary: null,
-                message: "RETURN"
-            })
-        }
+//         if (composedPrompt === "SKIP_YELP" || composedPrompt === '"SKIP_YELP"') {
+//             console.log("Skipping Yelp API call: Irrelevant query");
+//             return NextResponse.json({
+//                 composedPrompt: null,
+//                 yelp: null,
+//                 itinerary: null,
+//                 message: "RETURN"
+//             })
+//         }
 
-        const latitude = userLocation?.lat || 43.6532;
-        const longitude = userLocation?.lng || -79.3832;
+//         const latitude = userLocation?.lat || 43.6532;
+//         const longitude = userLocation?.lng || -79.3832;
 
-        // 2) Call Yelp AI API with composed prompt
-        const yelpRes = await fetch("https://api.yelp.com/ai/chat/v2", {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${process.env.YELP_API_KEY}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                query: composedPrompt,
-                user_context: {
-                    locale: "en_CA",
-                    // TODO: later derive from survey.location if available
-                    latitude: latitude,
-                    longitude: longitude,
-                },
-            }),
-        })
+//         // 2) Call Yelp AI API with composed prompt
+//         const yelpRes = await fetch("https://api.yelp.com/ai/chat/v2", {
+//             method: "POST",
+//             headers: {
+//                 Authorization: `Bearer ${process.env.YELP_API_KEY}`,
+//                 "Content-Type": "application/json",
+//             },
+//             body: JSON.stringify({
+//                 query: composedPrompt,
+//                 user_context: {
+//                     locale: "en_CA",
+//                     // TODO: later derive from survey.location if available
+//                     latitude: latitude,
+//                     longitude: longitude,
+//                 },
+//             }),
+//         })
 
-        if (!yelpRes.ok) {
-            const text = await yelpRes.text()
-            console.error("Yelp error", text)
-            return NextResponse.json(
-                { error: "Yelp AI API error", details: text },
-                { status: 500 },
-            )
-        }
+//         if (!yelpRes.ok) {
+//             const text = await yelpRes.text()
+//             console.error("Yelp error", text)
+//             return NextResponse.json(
+//                 { error: "Yelp AI API error", details: text },
+//                 { status: 500 },
+//             )
+//         }
 
-        const yelpData: unknown = await yelpRes.json()
+//         const yelpData: unknown = await yelpRes.json()
 
-        // 3) Ask Gemini to turn Yelp JSON into a clean ItineraryPlan
-        const itineraryPrompt = buildItineraryPrompt({
-            query,
-            survey,
-            composedPrompt,
-            yelpData,
-            today,
-        })
+//         // 3) Ask Gemini to turn Yelp JSON into a clean ItineraryPlan
+//         const itineraryPrompt = buildItineraryPrompt({
+//             query,
+//             survey,
+//             composedPrompt,
+//             yelpData,
+//             today,
+//         })
 
-        const itineraryRes = await ai.models.generateContent({
-            model: model,
-            contents: [
-                {
-                    role: "user",
-                    parts: [{ text: itineraryPrompt }],
-                },
-            ],
-        })
+//         const itineraryRes = await ai.models.generateContent({
+//             model: model,
+//             contents: [
+//                 {
+//                     role: "user",
+//                     parts: [{ text: itineraryPrompt }],
+//                 },
+//             ],
+//         })
 
-        const rawItineraryText = (itineraryRes.text ?? "").trim()
+//         const rawItineraryText = (itineraryRes.text ?? "").trim()
 
-        let itinerary: ItineraryPlan | null = null
-        try {
-            const jsonString = extractJsonObject(rawItineraryText)
-            itinerary = JSON.parse(jsonString) as ItineraryPlan
-        } catch (e) {
-            console.error(
-                "Failed to parse itinerary JSON from Gemini",
-                e,
-                rawItineraryText,
-            )
-        }
+//         let itinerary: ItineraryPlan | null = null
+//         try {
+//             const jsonString = extractJsonObject(rawItineraryText)
+//             itinerary = JSON.parse(jsonString) as ItineraryPlan
+//         } catch (e) {
+//             console.error(
+//                 "Failed to parse itinerary JSON from Gemini",
+//                 e,
+//                 rawItineraryText,
+//             )
+//         }
 
-        // 4) Return everything to the frontend
-        return NextResponse.json({
-            composedPrompt,
-            yelp: yelpData,
-            itinerary,
-        })
-    } catch (err) {
-        console.error(err)
-        return NextResponse.json(
-            { error: "Server error", details: String(err) },
-            { status: 500 },
-        )
-    }
-}
+//         // 4) Return everything to the frontend
+//         return NextResponse.json({
+//             composedPrompt,
+//             yelp: yelpData,
+//             itinerary,
+//         })
+//     } catch (err) {
+//         console.error(err)
+//         return NextResponse.json(
+//             { error: "Server error", details: String(err) },
+//             { status: 500 },
+//         )
+//     }
+// }
 
 // ---------------------------------------------------------------------------
 // Helper: strip ``` fences / extra text and extract the JSON object
 // ---------------------------------------------------------------------------
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const query = body?.query as string | undefined;
+    const survey = body?.survey as SurveyContext | undefined;
+    
+    // ✅ 1. Receive the browser coordinates (passed from shell-header)
+    const userLocation = body?.userLocation as { lat: number; lng: number } | undefined;
+
+    if (!query) {
+      return NextResponse.json({ error: "Missing query" }, { status: 400 });
+    }
+
+    // ✅ 2. Get Today's Date (for relative dates like "this weekend")
+    const today = new Date().toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    // -------------------------------------------------------------------------
+    // STEP 1: Smart Prompt Engineering & Location Extraction
+    // -------------------------------------------------------------------------
+    const composedRes = await ai.models.generateContent({
+      model: model,
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: buildGeminiPrompt({ query, survey, today }) }],
+        },
+      ],
+    });
+
+    const rawResponse = (composedRes.text ?? "").trim();
+    
+    // ✅ 3. Parse Gemini's JSON response
+    // We expect: { "yelpQuery": "...", "location": "..." }
+    let parsedPrompt: { yelpQuery: string; location: string | null } | null = null;
+    
+    try {
+        const cleanedJson = extractJsonObject(rawResponse);
+        parsedPrompt = JSON.parse(cleanedJson);
+    } catch (e) {
+        console.error("Failed to parse prompt JSON", rawResponse);
+        // Fallback if Gemini fails to return JSON
+        parsedPrompt = { yelpQuery: rawResponse, location: null };
+    }
+
+    if (!parsedPrompt?.yelpQuery || parsedPrompt.yelpQuery === "SKIP_YELP") {
+       return NextResponse.json({ message: "RETURN" });
+    }
+
+    // -------------------------------------------------------------------------
+    // STEP 2: Determine Yelp Context (The Fix)
+    // -------------------------------------------------------------------------
+    let yelpLocationObj: any = {};
+
+    // PRIORITY 1: Explicit location found in query (e.g. "Paris")
+    if (parsedPrompt.location && parsedPrompt.location !== "CURRENT_LOCATION") {
+        console.log("📍 Using extracted location:", parsedPrompt.location);
+        yelpLocationObj = { location: parsedPrompt.location };
+    } 
+    // PRIORITY 2: Explicit location from Survey
+    else if (survey?.location?.area) {
+        console.log("📍 Using survey location:", survey.location.area);
+        yelpLocationObj = { location: survey.location.area };
+    } 
+    // PRIORITY 3: User's GPS Location (if query implies "near me")
+    else if (userLocation) {
+        console.log("📍 Using GPS coordinates");
+        yelpLocationObj = { latitude: userLocation.lat, longitude: userLocation.lng };
+    } 
+    // PRIORITY 4: Default Fallback (Toronto)
+    else {
+        console.log("📍 Using default fallback");
+        yelpLocationObj = { location: "Toronto, ON" };
+    }
+
+    // -------------------------------------------------------------------------
+    // STEP 3: Call Yelp AI API
+    // -------------------------------------------------------------------------
+    const yelpRes = await fetch("https://api.yelp.com/ai/chat/v2", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.YELP_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: parsedPrompt.yelpQuery,
+        user_context: {
+          locale: "en_CA",
+          ...yelpLocationObj, // Spread the decided location logic here
+        },
+      }),
+    });
+
+    if (!yelpRes.ok) {
+      const text = await yelpRes.text();
+      return NextResponse.json({ error: "Yelp error", details: text }, { status: 500 });
+    }
+
+    const yelpData: unknown = await yelpRes.json();
+
+    // -------------------------------------------------------------------------
+    // STEP 4: Generate Itinerary Plan
+    // -------------------------------------------------------------------------
+    const itineraryPrompt = buildItineraryPrompt({
+      query,
+      survey,
+      composedPrompt: parsedPrompt.yelpQuery,
+      yelpData,
+      today,
+    });
+
+    const itineraryRes = await ai.models.generateContent({
+      model: model,
+      contents: [{ role: "user", parts: [{ text: itineraryPrompt }] }],
+    });
+
+    const rawItineraryText = (itineraryRes.text ?? "").trim();
+    let itinerary: ItineraryPlan | null = null;
+    try {
+      const jsonString = extractJsonObject(rawItineraryText);
+      itinerary = JSON.parse(jsonString) as ItineraryPlan;
+    } catch (e) {
+      console.error("Failed to parse itinerary JSON", e);
+    }
+
+    return NextResponse.json({ 
+        composedPrompt: parsedPrompt.yelpQuery, 
+        yelp: yelpData, 
+        itinerary 
+    });
+
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}
+
 function extractJsonObject(text: string): string {
     let cleaned = text.trim()
 
@@ -260,9 +402,25 @@ Make sure your query:
 - Uses natural, conversational language like a human would ask
 - Is specific and actionable for Yelp to find relevant businesses
 
+**Your Task:**
+1. **Extract the Location:**
+   - Did the user mention a specific city, neighborhood, or place? (e.g. "Sushi in Tokyo", "Trip to Paris").
+   - If YES -> Extract that location string.
+   - If NO (e.g. "Coffee near me", "Plan a date night") -> Return "CURRENT_LOCATION".
+2. **Draft the Yelp Query:**
+   - Write a specific search query for Yelp (e.g., "Best sushi restaurants", "Romantic dinner spots").
+   - Your query must ask the Yelp to create 8-10 recommendations.
+   - **CRITICAL:** Do NOT include the location name in this query string (Yelp handles that separately).
+
+**Output Format:**
+{
+  "yelpQuery": "string or SKIP_YELP",
+  "location": "string or CURRENT_LOCATION"
+}
+
 IMPORTANT:
-- Reply with ONLY the final query string and nothing else.
-- Do not add explanations, markdown, or JSON.
+- You must respond with ONLY a valid JSON object.
+- Do NOT use markdown formatting (no \`\`\`json).
 - Keep it concise but include all relevant details.
 `
     }
@@ -281,10 +439,27 @@ The user did NOT provide any structured survey, only this free-text message:
 Rewrite this message as a single, clear query string that will be sent directly
 to the Yelp AI API (https://api.yelp.com/ai/chat/v2).
 
+**Your Task:**
+1. **Extract the Location:**
+   - Did the user mention a specific city, neighborhood, or place? (e.g. "Sushi in Tokyo", "Trip to Paris").
+   - If YES -> Extract that location string.
+   - If NO (e.g. "Coffee near me", "Plan a date night") -> Return "CURRENT_LOCATION".
+2. **Draft the Yelp Query:**
+   - Write a specific search query for Yelp (e.g., "Best sushi restaurants", "Romantic dinner spots").
+   - Your query must ask the Yelp to create 8-10 recommendations.
+   - **CRITICAL:** Do NOT include the location name in this query string (Yelp handles that separately).
+
+**Output Format:**
+You must respond with ONLY a valid JSON object:
+{
+  "yelpQuery": "string or SKIP_YELP",
+  "location": "string or CURRENT_LOCATION"
+}
+
 IMPORTANT:
-- Reply with ONLY the final query string and nothing else.
-- Do not add explanations, markdown, or JSON.
-- Do not add any chats in group messages that is irrelevant to Yelp.
+- You must respond with ONLY a valid JSON object.
+- Do NOT use markdown formatting (no \`\`\`json).
+- Keep it concise but include all relevant details.
 `
 }
 
@@ -423,6 +598,7 @@ type ItineraryStop = {
 type ItineraryPlan = {
   title: string
   summary: string
+  location: string | null
   date: string | null
   center: { lat: number; lng: number }
   stops: ItineraryStop[]
@@ -444,6 +620,7 @@ Rules:
    - "default" (Everything else)
 4. **Map Center:** center.lat/lng must be the average of all stops.
 5. **Contextual Info:** title/summary must reflect the user's specific intent (e.g., "Quiet Anniversary Dinner").
+6. **Location Name:** Extract the primary city or area name from the stops and populate the 'location' field (e.g., "Seattle, WA" or "Downtown Toronto").
 
 **CRITICAL SCHEDULING RULES:**
 

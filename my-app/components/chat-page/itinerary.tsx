@@ -6,7 +6,7 @@ import { ItineraryScrollArea } from "./itinerary-scroll-area";
 import { TouringMap } from "@/components/touring-map";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Button } from "../ui/button";
-import { CircleCheckBig, SquarePen, Map, CalendarDays, Heart, Earth } from "lucide-react";
+import { CircleCheckBig, SquarePen, Map, CalendarDays, Heart, Earth, MapPin } from "lucide-react";
 import {
   PlannerCalendar,
   type CalendarEvent,
@@ -75,13 +75,39 @@ export function Itinerary() {
   // if (itineraries.length === 0) return <div>No itineraries found</div>
   // else return <pre>{JSON.stringify(itineraries[0].stops, null, 2)}</pre>
 
+  const locationName = itineraryData?.stops?.location;
+
   // console.log("ItineraryData in Itinerary component:", itineraryData);
   return (
     <Card className="flex flex-row p-0 bg-muted/50 h-full overflow-hidden">
       <CardContent className="flex flex-col flex-1 min-h-0 pr-2 pl-2 pt-2 pb-2 overflow-y-auto w-50">
         {itineraries.length === 0 ? <EmptyItinerariesPage /> : <ItineraryScrollArea />}
-        {/* <ItineraryScrollArea /> */}
-        <div className="w-full flex justify-end shrink-0 pt-1">
+
+        <div className="w-full flex justify-between items-center shrink-0 pt-2 px-1">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+             {locationName ? (
+               <>
+                <Button className="flex items-center gap-2 rounded-full text-xs h-6 w-auto" variant="outline" size="sm">
+                  <span className="relative flex h-2.5 w-2.5 shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                  </span>
+                  <span>{locationName}</span>
+                </Button>
+               </>
+             ) : (
+              <>
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2.5 w-2.5 shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                  </span>
+                  <span>Location not detected</span>
+                </div>
+              </>
+             )}
+          </div>
+
           <div className={cn("flex items-center gap-1", itineraries.length === 0 ? "invisible" : "")}>
             {/* Like */}
             <Button

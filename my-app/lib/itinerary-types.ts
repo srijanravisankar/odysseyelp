@@ -21,6 +21,7 @@ export type ItineraryStop = {
 export type ItineraryPlan = {
     title: string
     summary: string
+    location: string | null
     date: string | null
     center: {
         lat: number
