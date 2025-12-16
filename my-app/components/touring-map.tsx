@@ -11,6 +11,11 @@ type TouringMapProps = {
   initialLng?: number;
   initialLat?: number;
   initialZoom?: number;
+  // Optional: Pass specific itinerary data (for thumbnails)
+  itineraryDataProp?: any;
+  selectedStopIdsProp?: string[];
+  // If true, show static preview (show all stops with markers)
+  isPreview?: boolean;
 };
 
 // Map styles
@@ -21,6 +26,9 @@ export function TouringMap({
   initialLng = -79.3832, // Toronto-ish
   initialLat = 43.6532,
   initialZoom = 12,
+  itineraryDataProp,
+  selectedStopIdsProp,
+  isPreview = false,
 }: TouringMapProps) {
   const outerRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -29,7 +37,11 @@ export function TouringMap({
   // Keep track of markers we've added so we can clear them
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
-  const { itineraryData, selectedStopIds, appTheme } = useItinerary();
+  // Use context values OR props (props take priority for thumbnails)
+  const context = useItinerary();
+  const itineraryData = itineraryDataProp || context.itineraryData;
+  const selectedStopIds = selectedStopIdsProp || (isPreview ? [] : context.selectedStopIds);
+  const appTheme = context.appTheme;
 
   const [viewMode, setViewMode] = useState<"2d" | "3d">("3d");
   const [projection, setProjection] = useState<"globe" | "mercator">("globe");
@@ -283,7 +295,7 @@ export function TouringMap({
     mapRef.current.setCenter([lng, lat]);
   }, [itineraryData?.stops?.center?.lat, itineraryData?.stops?.center?.lng]);
 
-  // 5. Update Markers - Only show selected stops
+  // 5. Update Markers - Show selected stops OR all stops in preview mode
   useEffect(() => {
     if (!mapRef.current) return;
     if (!itineraryData?.stops?.stops) return;
@@ -294,16 +306,14 @@ export function TouringMap({
     markersRef.current.forEach((marker) => marker.remove());
     markersRef.current = [];
 
-    // Only show selected stops
-    if (selectedStopIds.length === 0) return;
-
     const bounds = new mapboxgl.LngLatBounds();
 
     itineraryData.stops.stops.forEach((stop: any, index: number) => {
       const stopId = stop.id ?? String(index);
 
-      // Only show if selected
-      if (!selectedStopIds.includes(stopId)) return;
+      // In preview mode, show ALL stops. Otherwise, only show selected
+      const shouldShow = isPreview || selectedStopIds.includes(stopId);
+      if (!shouldShow) return;
 
       const lat = stop.coordinates?.lat;
       const lng = stop.coordinates?.lng;
@@ -312,7 +322,8 @@ export function TouringMap({
 
       // Create alphabetic label (A, B, C, etc.)
       const letter = String.fromCharCode(65 + index);
-      const isSelected = true; // Always green since we only show selected
+      // In preview mode, all markers are red. Otherwise, selected are green
+      const isSelected = !isPreview && selectedStopIds.includes(stopId);
 
       // Create custom marker element
       const markerElement = createMarkerElement(letter, isSelected);
@@ -325,15 +336,15 @@ export function TouringMap({
       bounds.extend([lng, lat]);
     });
 
-    // Fit bounds to show all selected markers
+    // Fit bounds to show all markers
     if (!bounds.isEmpty()) {
       map.fitBounds(bounds, {
-        padding: 80,
+        padding: isPreview ? 40 : 80, // Smaller padding for thumbnails
         duration: 800,
-        maxZoom: 14,
+        maxZoom: isPreview ? 13 : 14, // Slightly more zoomed out for thumbnails
       });
     }
-  }, [itineraryData?.stops?.stops, selectedStopIds]);
+  }, [itineraryData?.stops?.stops, selectedStopIds, isPreview]);
 
   // --- handlers ---
 
