@@ -192,6 +192,7 @@ export function GroupsSidebarContent() {
         const newGroup = { id: data.id, name: data.name, createdAt: data.created_at, secretCode: data.secret_code };
         setGroups((prev) => [newGroup, ...prev]);
         setSelectedGroup(newGroup);
+        setActiveGroup(newGroup);
         setIsSheetOpen(true);
         toast.success("Group created");
       }

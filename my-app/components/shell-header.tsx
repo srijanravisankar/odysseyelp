@@ -34,7 +34,7 @@ export function ShellHeader() {
   const { wishes } = useGroupWishes(activeGroup?.id ?? 0);
   const [isPlanning, setIsPlanning] = useState(false);
   const { user } = useUser();
-  const { itineraryData, setItineraryData } = useItinerary();
+  const { itineraryData, setItineraryData, refetchItineraries } = useItinerary();
   const { save: saveItinerary } = useSaveItinerary();
 
   // const handlePlanFromGroup = async () => {
@@ -132,6 +132,7 @@ export function ShellHeader() {
 
           try {
             const result = await saveItinerary(data.itinerary, `${activeGroup.name}'s query`, false);
+            await refetchItineraries();
             console.log("Database save successful", result);
           } catch (dbErr) {
             console.error("Database save failed:", dbErr);
@@ -162,7 +163,7 @@ export function ShellHeader() {
           <ExploreProvider>
             <ExploreHeaderActions />
           </ExploreProvider>
-        ) : isGroup ?(
+        ) : isGroup ? (
           // <div className="flex text-lg font-medium">
           //   <Button
           //     size="sm"

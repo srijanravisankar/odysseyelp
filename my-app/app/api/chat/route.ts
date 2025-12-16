@@ -8,7 +8,7 @@ const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY!,
 })
 
-const model = "gemma-3-27b-it"
+const model = "gemini-2.5-flash"
 
 export async function POST(req: NextRequest) {
     try {
@@ -199,6 +199,7 @@ to the Yelp AI API (https://api.yelp.com/ai/chat/v2).
 IMPORTANT:
 - Reply with ONLY the final query string and nothing else.
 - Do not add explanations, markdown, or JSON.
+- Do not add any chats in group messages that is irrelevant to Yelp.
 `
 }
 

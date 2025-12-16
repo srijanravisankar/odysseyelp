@@ -119,7 +119,7 @@ export function WishSidebar({ group }: { group: Group }) {
           onChange={(e) => setInput(e.target.value)}
           className="flex-1 rounded-full"
         />
-        <Button size="icon" type="submit" disabled={!input.trim()} className="rounded-full shrink-0">
+        <Button size="icon" type="submit" disabled={!input.trim()} className="rounded-full shrink-0 cursor-pointer">
           <Send className="w-4 h-4" />
         </Button>
       </form>

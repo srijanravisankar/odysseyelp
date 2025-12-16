@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useChat } from "@/hooks/context/session-context";
 import { useUser } from "@/hooks/context/user-context";
 import { useSupabase } from "./supabase-context";
@@ -38,6 +38,8 @@ type ItineraryContextType = {
   itineraries: Itinerary[];
   loadingItineraries: boolean;
   itinerariesError: string | null;
+
+  refetchItineraries: () => Promise<void>;
 };
 
 const ItineraryContext = createContext<ItineraryContextType | undefined>(
@@ -63,6 +65,8 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
   const [itineraries, setItineraries] = useState<Itinerary[]>([]);
   const [loadingItineraries, setLoadingItineraries] = useState(false);
   const [itinerariesError, setItinerariesError] = useState<string | null>(null);
+
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
 
   const removeStop = (stopId: string) => {
     if (!itineraryData?.stops) return;
@@ -148,6 +152,11 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
   //   fetchItineraries();
   //   // ✅ Changed dependency from user?.email to user?.id
   // }, [active, user?.id, supabase]);
+
+  const refetchItineraries = useCallback(async () => {
+    console.log("Manual refetch triggered");
+    setRefetchTrigger((prev) => prev + 1);
+  }, []);
   
   useEffect(() => {
     const fetchItineraries = async () => {
@@ -234,7 +243,7 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
 
     fetchItineraries();
     // ✅ Changed dependency from user?.email to user?.id
-  }, [active, activeGroup, user?.id, supabase]);
+  }, [active, activeGroup, user?.id, supabase, refetchTrigger, pathname]);
 
   return (
     <ItineraryContext.Provider
@@ -251,6 +260,7 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
         itineraries,
         loadingItineraries,
         itinerariesError,
+        refetchItineraries,
       }}
     >
       {children}
