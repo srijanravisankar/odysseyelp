@@ -300,6 +300,7 @@ export function ExploreGrid({
                             meta={`${stopsCount} stop${stopsCount !== 1 ? 's' : ''} · ${formatDate(itinerary.created_at)}`}
                             isLiked={false}
                             isPublished={true}
+                            hideActions={true}
                             onClick={() => {
                                 setSelectedItinerary(itinerary)
                                 setDialogOpen(true)

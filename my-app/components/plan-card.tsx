@@ -38,6 +38,8 @@ type PlanCardProps = {
   thumbnail?: React.ReactNode
   /** Optional className override */
   className?: string
+  /** Hide action buttons (heart and globe icons) */
+  hideActions?: boolean
 }
 
 export function PlanCard({
@@ -51,6 +53,7 @@ export function PlanCard({
   onTogglePublish,
   thumbnail,
   className,
+  hideActions = false,
 }: PlanCardProps) {
   const [publishDialogOpen, setPublishDialogOpen] = useState(false)
   const [tagsDialogOpen, setTagsDialogOpen] = useState(false)
@@ -117,50 +120,52 @@ export function PlanCard({
             </div>
 
             {/* Right side: actions */}
-            <div className="flex items-center gap-1">
-              {/* Like */}
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                className={cn(
-                  "h-7 w-7 p-0 transition",
-                  isLiked
-                    ? "text-red-500 hover:text-red-500 hover:bg-red-500/10"
-                    : "hover:text-red-500"
-                )}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onToggleLike?.()
-                }}
-              >
-                <Heart
+            {!hideActions && (
+              <div className="flex items-center gap-1">
+                {/* Like */}
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
                   className={cn(
-                    "h-4 w-4",
-                    isLiked ? "fill-red-500" : "fill-none"
+                    "h-7 w-7 p-0 transition",
+                    isLiked
+                      ? "text-red-500 hover:text-red-500 hover:bg-red-500/10"
+                      : "hover:text-red-500"
                   )}
-                />
-              </Button>
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onToggleLike?.()
+                  }}
+                >
+                  <Heart
+                    className={cn(
+                      "h-4 w-4",
+                      isLiked ? "fill-red-500" : "fill-none"
+                    )}
+                  />
+                </Button>
 
-              {/* Publish */}
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                className={cn(
-                  "h-7 w-7 p-0 transition",
-                  isPublished
-                    ? "text-emerald-500 hover:text-emerald-500 hover:bg-emerald-500/10"
-                    : "hover:text-emerald-500"
-                )}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setPublishDialogOpen(true)
-                }}
-              >
-                <Earth className="h-4 w-4" />
-              </Button>
-            </div>
+                {/* Publish */}
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  className={cn(
+                    "h-7 w-7 p-0 transition",
+                    isPublished
+                      ? "text-emerald-500 hover:text-emerald-500 hover:bg-emerald-500/10"
+                      : "hover:text-emerald-500"
+                  )}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setPublishDialogOpen(true)
+                  }}
+                >
+                  <Earth className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
