@@ -42,7 +42,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { useThemePalette, type ThemePalette } from "@/components/theme-provider";
 
 // ----------------------
@@ -188,50 +187,60 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                     </SidebarMenuItem>
                   );
                 })}
-              </SidebarMenu>
-              <div className="flex flex-col gap-2 px-2 pt-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="w-full"
-                  onClick={() => {
-                    const newTheme =
-                      resolvedTheme === "dark" ? "light" : "dark";
-                    setTheme(newTheme);
-                    setAppTheme(newTheme);
-                  }}
-                  aria-label="Toggle light or dark mode"
-                >
-                  <Sun className="hidden dark:block size-4" />
-                  <Moon className="dark:hidden size-4" />
-                </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="w-full"
-                      aria-label="Select color theme"
-                    >
-                      <Palette className="size-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="center" className="w-44">
-                    {themePaletteOptions.map((option) => (
-                      <DropdownMenuItem
-                        key={option.value}
-                        onClick={() => handlePaletteChange(option.value)}
-                        className="flex items-center justify-between"
+
+                {/* Theme toggle button */}
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    tooltip={{
+                      children: resolvedTheme === "dark" ? "Light Mode" : "Dark Mode",
+                      hidden: false,
+                    }}
+                    onClick={() => {
+                      const newTheme =
+                        resolvedTheme === "dark" ? "light" : "dark";
+                      setTheme(newTheme);
+                      setAppTheme(newTheme);
+                    }}
+                    className="px-2.5 md:px-2"
+                  >
+                    <Sun className="hidden dark:block" />
+                    <Moon className="dark:hidden" />
+                    <span>{resolvedTheme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                {/* Palette picker button */}
+                <SidebarMenuItem>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <SidebarMenuButton
+                        tooltip={{
+                          children: "Theme Palette",
+                          hidden: false,
+                        }}
+                        className="px-2.5 md:px-2"
                       >
-                        <span>{option.label}</span>
-                        {palette === option.value && (
-                          <span className="text-xs text-muted-foreground">Active</span>
-                        )}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+                        <Palette />
+                        <span>Theme Palette</span>
+                      </SidebarMenuButton>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="center" className="w-44">
+                      {themePaletteOptions.map((option) => (
+                        <DropdownMenuItem
+                          key={option.value}
+                          onClick={() => handlePaletteChange(option.value)}
+                          className="flex items-center justify-between"
+                        >
+                          <span>{option.label}</span>
+                          {palette === option.value && (
+                            <span className="text-xs text-muted-foreground">Active</span>
+                          )}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </SidebarMenuItem>
+              </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
