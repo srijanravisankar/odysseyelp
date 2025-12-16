@@ -200,7 +200,7 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
         let query = supabase
           .from("itineraries")
           .select("*")
-          .order("created_at", { ascending: false }); // Newest first
+          .order("created_at", { ascending: true }); // Newest first
         
         const isGroupPage = pathname?.startsWith("/groups");
 
