@@ -4,9 +4,9 @@ import * as React from "react"
 import { ThemeProvider as NextThemesProvider } from "next-themes"
 
 const THEME_STORAGE_KEY = "oy-theme-palette"
-const VALID_PALETTES: ThemePalette[] = ["default", "caffeine"]
+const VALID_PALETTES: ThemePalette[] = ["default", "caffeine", "amethyst", "cyberpunk", "nature", "quantum-rose"]
 
-export type ThemePalette = "default" | "caffeine"
+export type ThemePalette = "default" | "caffeine" | "amethyst" | "cyberpunk" | "nature" | "quantum-rose"
 
 type ThemePaletteContextValue = {
   palette: ThemePalette

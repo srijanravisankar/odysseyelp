@@ -86,6 +86,9 @@ const themePaletteOptions: { label: string; value: ThemePalette }[] = [
   { label: "Default", value: "default" },
   { label: "Caffeine", value: "caffeine" },
   { label: "Amethyst Haze", value: "amethyst" },
+  { label: "Cyberpunk", value: "cyberpunk" },
+  { label: "Nature", value: "nature" },
+  { label: "Quantum Rose", value: "quantum-rose" },
 ];
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
