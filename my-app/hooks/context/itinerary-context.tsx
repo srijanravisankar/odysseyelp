@@ -83,6 +83,12 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
     setSelectedStopIds((prev) => prev.filter((id) => id !== stopId));
   };
 
+  // Clear selectedStopIds when itineraryData changes (switching between itineraries)
+  useEffect(() => {
+    console.log("Itinerary changed, clearing selectedStopIds");
+    setSelectedStopIds([]);
+  }, [itineraryData?.id]);
+
   // useEffect(() => {
   //   const fetchItineraries = async () => {
   //     // ✅ Change from user?.email to user?.id for more reliable dependency
