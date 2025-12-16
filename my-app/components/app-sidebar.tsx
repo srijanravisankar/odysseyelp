@@ -85,6 +85,7 @@ const data = {
 const themePaletteOptions: { label: string; value: ThemePalette }[] = [
   { label: "Default", value: "default" },
   { label: "Caffeine", value: "caffeine" },
+  { label: "Amethyst Haze", value: "amethyst" },
 ];
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
