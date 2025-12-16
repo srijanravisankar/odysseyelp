@@ -370,7 +370,7 @@ export function ExploreGrid({
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 overflow-hidden">
+                    <div className="flex-1 overflow-hidden relative">
                         {activeTab === "stops" ? (
                             <ScrollArea className="h-full">
                                 <div className="p-6">
