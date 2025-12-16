@@ -166,12 +166,16 @@ export function TouringMap({
     });
   }, [appTheme, projection]);
 
-  // 6. Draw Route Between All Stops
+  // 6. Draw Route Between Selected Stops Only
   useEffect(() => {
     if (!mapRef.current) return;
-    if (!itineraryData?.stops?.stops || itineraryData.stops.stops.length < 2) {
-      // Remove route if less than 2 stops
-      const map = mapRef.current;
+    if (!itineraryData?.stops?.stops) return;
+
+    const map = mapRef.current;
+
+    // Need at least 2 selected stops to show a route
+    if (selectedStopIds.length < 2) {
+      // Remove route if less than 2 selected stops
       if (map.getLayer("route-layer")) {
         map.removeLayer("route-layer");
       }
@@ -181,11 +185,21 @@ export function TouringMap({
       return;
     }
 
-    const map = mapRef.current;
     const stops = itineraryData.stops.stops;
 
-    // Build coordinate string for Mapbox Directions API
-    const coordinates = stops
+    // Get only the selected stops in their original order
+    const selectedStops = stops
+      .map((stop: any, index: number) => ({
+        ...stop,
+        originalIndex: index,
+        stopId: stop.id ?? String(index),
+      }))
+      .filter((stop: any) => selectedStopIds.includes(stop.stopId));
+
+    if (selectedStops.length < 2) return;
+
+    // Build coordinate string for selected stops only
+    const coordinates = selectedStops
       .filter((stop: any) => stop.coordinates?.lat && stop.coordinates?.lng)
       .map((stop: any) => `${stop.coordinates.lng},${stop.coordinates.lat}`)
       .join(";");
@@ -242,7 +256,7 @@ export function TouringMap({
     } else {
       map.once("style.load", fetchRoute);
     }
-  }, [itineraryData?.stops?.stops]);
+  }, [itineraryData?.stops?.stops, selectedStopIds]);
 
   // 3. Handle Resizing (Fix for Sidebar toggle)
   useEffect(() => {
@@ -269,7 +283,7 @@ export function TouringMap({
     mapRef.current.setCenter([lng, lat]);
   }, [itineraryData?.stops?.center?.lat, itineraryData?.stops?.center?.lng]);
 
-  // 5. Update Markers - Show all stops with alphabetic labels
+  // 5. Update Markers - Only show selected stops
   useEffect(() => {
     if (!mapRef.current) return;
     if (!itineraryData?.stops?.stops) return;
@@ -280,10 +294,17 @@ export function TouringMap({
     markersRef.current.forEach((marker) => marker.remove());
     markersRef.current = [];
 
+    // Only show selected stops
+    if (selectedStopIds.length === 0) return;
+
     const bounds = new mapboxgl.LngLatBounds();
 
     itineraryData.stops.stops.forEach((stop: any, index: number) => {
       const stopId = stop.id ?? String(index);
+
+      // Only show if selected
+      if (!selectedStopIds.includes(stopId)) return;
+
       const lat = stop.coordinates?.lat;
       const lng = stop.coordinates?.lng;
 
@@ -291,7 +312,7 @@ export function TouringMap({
 
       // Create alphabetic label (A, B, C, etc.)
       const letter = String.fromCharCode(65 + index);
-      const isSelected = selectedStopIds.includes(stopId);
+      const isSelected = true; // Always green since we only show selected
 
       // Create custom marker element
       const markerElement = createMarkerElement(letter, isSelected);
@@ -304,7 +325,7 @@ export function TouringMap({
       bounds.extend([lng, lat]);
     });
 
-    // Fit bounds to show all markers
+    // Fit bounds to show all selected markers
     if (!bounds.isEmpty()) {
       map.fitBounds(bounds, {
         padding: 80,
