@@ -162,27 +162,68 @@ function buildGeminiPrompt({
     survey?: SurveyContext
 }) {
     if (survey) {
+        // Build context from the simplified survey structure
+        let context = '';
+
+        if (survey.location?.area) {
+            context += `Location: ${survey.location.area}. `;
+        }
+
+        if (survey.location?.dateRange?.start && survey.location?.dateRange?.end) {
+            context += `Travel dates: ${survey.location.dateRange.start} to ${survey.location.dateRange.end}. `;
+        }
+
+        if (survey.trip?.type) {
+            const tripTypeMap: Record<string, string> = {
+                solo: 'solo traveler',
+                date: 'romantic date',
+                friends: 'group of friends',
+                family: 'family trip',
+                work: 'business trip'
+            };
+            context += `Trip type: ${tripTypeMap[survey.trip.type] || survey.trip.type}. `;
+        }
+
+        if (survey.trip?.people) {
+            context += `Party size: ${survey.trip.people} ${survey.trip.people === 1 ? 'person' : 'people'}. `;
+        }
+
+        if (survey.budget?.priceLevel) {
+            const budgetMap: Record<string, string> = {
+                '$': 'budget-friendly (under $10 per person)',
+                '$$': 'moderate ($11-30 per person)',
+                '$$$': 'upscale ($31-60 per person)',
+                '$$$$': 'fine dining ($61+ per person)'
+            };
+            context += `Budget: ${budgetMap[survey.budget.priceLevel] || survey.budget.priceLevel}. `;
+        }
+
+        if (survey.food?.dietary && survey.food.dietary.length > 0) {
+            context += `Dietary requirements: ${survey.food.dietary.join(', ')}. `;
+        }
+
         return `
 You are a prompt engineer helping to talk to the Yelp AI API.
 
-The user filled this trip survey (JSON):
-${JSON.stringify(survey, null, 2)}
+The user provided this context:
+${context}
 
 The user then typed this message:
 "${query}"
 
-Using the survey and message, craft a single, clear query string that will be sent
+Using the context and message, craft a single, clear query string that will be sent
 to the Yelp AI API (https://api.yelp.com/ai/chat/v2).
 
 Make sure your query:
-- Specifies location (city/area) from the survey if present
-- Includes dietary restrictions and preferences
-- Includes vibe, budget, and time of day if present
-- Uses natural language like a human user.
+- Incorporates the location, dates, trip type, party size, budget, and dietary requirements from the context
+- Maintains the user's original intent from their message
+- Uses natural, conversational language like a human would ask
+- Is specific and actionable for Yelp to find relevant businesses
 
 IMPORTANT:
 - Reply with ONLY the final query string and nothing else.
 - Do not add explanations, markdown, or JSON.
+- Keep it concise but include all relevant details.
 `
     }
 
