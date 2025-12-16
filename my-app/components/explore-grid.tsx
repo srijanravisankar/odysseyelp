@@ -308,6 +308,8 @@ export function ExploreGrid({
                                     initialLng={center.lng}
                                     initialLat={center.lat}
                                     initialZoom={12}
+                                    itineraryDataProp={itinerary}
+                                    isPreview={true}
                                 />
                             }
                         />
@@ -472,6 +474,8 @@ export function ExploreGrid({
                                     initialLng={selectedItinerary?.stops?.center?.lng || -79.3832}
                                     initialLat={selectedItinerary?.stops?.center?.lat || 43.6532}
                                     initialZoom={12}
+                                    itineraryDataProp={selectedItinerary}
+                                    isPreview={true}
                                 />
                             </div>
                         )}
