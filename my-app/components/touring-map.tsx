@@ -26,15 +26,34 @@ export function TouringMap({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
-  // Keep track of markers we’ve added so we can clear them
+  // Keep track of markers we've added so we can clear them
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
-  // 🔑 Access routeGeoJSON from context
-  const { itineraryData, selectedStopIds, appTheme, routeGeoJSON } =
-    useItinerary();
+  const { itineraryData, selectedStopIds, appTheme } = useItinerary();
 
   const [viewMode, setViewMode] = useState<"2d" | "3d">("3d");
   const [projection, setProjection] = useState<"globe" | "mercator">("globe");
+
+  // Helper function to create custom marker element with letter
+  const createMarkerElement = (letter: string, isSelected: boolean) => {
+    const el = document.createElement("div");
+    el.className = "custom-marker";
+    el.style.width = "32px";
+    el.style.height = "32px";
+    el.style.borderRadius = "50%";
+    el.style.backgroundColor = isSelected ? "#22c55e" : "#ef4444";
+    el.style.border = "2px solid white";
+    el.style.display = "flex";
+    el.style.alignItems = "center";
+    el.style.justifyContent = "center";
+    el.style.fontWeight = "bold";
+    el.style.fontSize = "14px";
+    el.style.color = "white";
+    el.style.cursor = "pointer";
+    el.style.boxShadow = "0 2px 4px rgba(0,0,0,0.3)";
+    el.textContent = letter;
+    return el;
+  };
 
   // Helper to add 3D buildings (reused for init and theme switch)
   const add3DBuildings = (
@@ -144,81 +163,86 @@ export function TouringMap({
     map.once("style.load", () => {
       add3DBuildings(map, appTheme);
       map.setProjection(projection);
-
-      // 🔑 Re-add the route layer if it exists (since setStyle clears layers)
-      // We trigger this by just setting the routeGeoJSON again or relying on React to re-run the effect below?
-      // Actually, relying on the separate useEffect below is safer, but we need to make sure it fires.
-      // The easiest hack is to force the route effect to run, but standard React deps handle this
-      // ONLY IF the component re-renders or deps change.
-      // Ideally, we re-add the route inside THIS callback too, OR we simply let the
-      // user click "Find Route" again.
-      // A better UX: check if we have routeGeoJSON and add it back right here:
-      if (routeGeoJSON) {
-        addRouteLayer(map, routeGeoJSON);
-      }
     });
-  }, [appTheme]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [appTheme, projection]);
 
-  // Helper to add route layer
-  const addRouteLayer = (map: mapboxgl.Map, geojson: any) => {
-    const sourceId = "optimized-route-source";
-    const layerId = "optimized-route-layer";
-
-    if (map.getSource(sourceId)) {
-      // Update data if source exists
-      (map.getSource(sourceId) as mapboxgl.GeoJSONSource).setData(geojson);
-    } else {
-      map.addSource(sourceId, {
-        type: "geojson",
-        data: {
-          type: "Feature",
-          properties: {},
-          geometry: geojson,
-        },
-      });
-    }
-
-    if (!map.getLayer(layerId)) {
-      map.addLayer({
-        id: layerId,
-        type: "line",
-        source: sourceId,
-        layout: {
-          "line-join": "round",
-          "line-cap": "round",
-        },
-        paint: {
-          "line-color": "#3b82f6", // Blue color
-          "line-width": 5,
-          "line-opacity": 0.8,
-        },
-      });
-    }
-  };
-
-  // 🔑 6. Draw Route Line (New Effect)
+  // 6. Draw Route Between All Stops
   useEffect(() => {
-    if (!mapRef.current || !routeGeoJSON) return;
+    if (!mapRef.current) return;
+    if (!itineraryData?.stops?.stops || itineraryData.stops.stops.length < 2) {
+      // Remove route if less than 2 stops
+      const map = mapRef.current;
+      if (map.getLayer("route-layer")) {
+        map.removeLayer("route-layer");
+      }
+      if (map.getSource("route-source")) {
+        map.removeSource("route-source");
+      }
+      return;
+    }
+
     const map = mapRef.current;
+    const stops = itineraryData.stops.stops;
 
-    // Wait for style to load if it's not ready
-    if (!map.isStyleLoaded()) {
-      map.once("style.load", () => addRouteLayer(map, routeGeoJSON));
+    // Build coordinate string for Mapbox Directions API
+    const coordinates = stops
+      .filter((stop: any) => stop.coordinates?.lat && stop.coordinates?.lng)
+      .map((stop: any) => `${stop.coordinates.lng},${stop.coordinates.lat}`)
+      .join(";");
+
+    if (!coordinates) return;
+
+    // Fetch route from Mapbox Directions API
+    const fetchRoute = async () => {
+      try {
+        const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+        const response = await fetch(
+          `https://api.mapbox.com/directions/v5/mapbox/walking/${coordinates}?geometries=geojson&access_token=${token}`
+        );
+        const data = await response.json();
+
+        if (data.routes && data.routes[0]) {
+          const routeGeoJSON = data.routes[0].geometry;
+
+          // Add or update route layer
+          if (map.getSource("route-source")) {
+            (map.getSource("route-source") as mapboxgl.GeoJSONSource).setData(routeGeoJSON);
+          } else {
+            map.addSource("route-source", {
+              type: "geojson",
+              data: routeGeoJSON,
+            });
+          }
+
+          if (!map.getLayer("route-layer")) {
+            map.addLayer({
+              id: "route-layer",
+              type: "line",
+              source: "route-source",
+              layout: {
+                "line-join": "round",
+                "line-cap": "round",
+              },
+              paint: {
+                "line-color": "#3b82f6",
+                "line-width": 4,
+                "line-opacity": 0.75,
+              },
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching route:", error);
+      }
+    };
+
+    // Wait for map to be ready
+    if (map.isStyleLoaded()) {
+      fetchRoute();
     } else {
-      addRouteLayer(map, routeGeoJSON);
+      map.once("style.load", fetchRoute);
     }
-
-    // Optional: Fit bounds to the route
-    // Note: GeoJSON coordinates are usually nested arrays.
-    // Calculating bounds for a LineString is easy:
-    if (routeGeoJSON.coordinates) {
-      const bounds = new mapboxgl.LngLatBounds();
-      routeGeoJSON.coordinates.forEach((coord: number[]) => {
-        bounds.extend(coord as [number, number]);
-      });
-      map.fitBounds(bounds, { padding: 50 });
-    }
-  }, [routeGeoJSON]);
+  }, [itineraryData?.stops?.stops]);
 
   // 3. Handle Resizing (Fix for Sidebar toggle)
   useEffect(() => {
@@ -245,10 +269,10 @@ export function TouringMap({
     mapRef.current.setCenter([lng, lat]);
   }, [itineraryData?.stops?.center?.lat, itineraryData?.stops?.center?.lng]);
 
-  // 5. Update Markers
+  // 5. Update Markers - Show all stops with alphabetic labels
   useEffect(() => {
     if (!mapRef.current) return;
-    if (!itineraryData?.stops) return;
+    if (!itineraryData?.stops?.stops) return;
 
     const map = mapRef.current;
 
@@ -256,23 +280,23 @@ export function TouringMap({
     markersRef.current.forEach((marker) => marker.remove());
     markersRef.current = [];
 
-    // Only show markers for selected stops
-    if (selectedStopIds.length === 0) {
-      return;
-    }
-
     const bounds = new mapboxgl.LngLatBounds();
 
     itineraryData.stops.stops.forEach((stop: any, index: number) => {
       const stopId = stop.id ?? String(index);
-      if (!selectedStopIds.includes(stopId)) return;
-
       const lat = stop.coordinates?.lat;
       const lng = stop.coordinates?.lng;
 
       if (typeof lat !== "number" || typeof lng !== "number") return;
 
-      const marker = new mapboxgl.Marker({ color: "#22c55e" })
+      // Create alphabetic label (A, B, C, etc.)
+      const letter = String.fromCharCode(65 + index);
+      const isSelected = selectedStopIds.includes(stopId);
+
+      // Create custom marker element
+      const markerElement = createMarkerElement(letter, isSelected);
+
+      const marker = new mapboxgl.Marker({ element: markerElement })
         .setLngLat([lng, lat])
         .addTo(map);
 
@@ -280,15 +304,15 @@ export function TouringMap({
       bounds.extend([lng, lat]);
     });
 
-    // Zoom/fit to the selected markers (Only if no route is present to avoid conflict)
-    if (!bounds.isEmpty() && !routeGeoJSON) {
+    // Fit bounds to show all markers
+    if (!bounds.isEmpty()) {
       map.fitBounds(bounds, {
         padding: 80,
         duration: 800,
         maxZoom: 14,
       });
     }
-  }, [itineraryData, selectedStopIds, routeGeoJSON]);
+  }, [itineraryData?.stops?.stops, selectedStopIds]);
 
   // --- handlers ---
 

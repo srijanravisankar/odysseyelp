@@ -29,8 +29,6 @@ type ItineraryContextType = {
   setAppTheme: React.Dispatch<
     React.SetStateAction<"light" | "dark" | "system">
   >;
-  routeGeoJSON: any;
-  setRouteGeoJSON: (json: any) => void;
 
   removeStop: (stopId: string) => void;
 
@@ -59,7 +57,6 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
   const [appTheme, setAppTheme] = useState<"light" | "dark" | "system">(
     "system"
   );
-  const [routeGeoJSON, setRouteGeoJSON] = useState<any>(null);
 
   // Itineraries fetched from database
   const [itineraries, setItineraries] = useState<Itinerary[]>([]);
@@ -257,8 +254,6 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
         setSelectedStopIds,
         appTheme,
         setAppTheme,
-        routeGeoJSON,
-        setRouteGeoJSON,
         removeStop,
         itineraries,
         loadingItineraries,
