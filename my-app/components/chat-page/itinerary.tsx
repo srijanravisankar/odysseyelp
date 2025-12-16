@@ -6,7 +6,7 @@ import { ItineraryScrollArea } from "./itinerary-scroll-area";
 import { TouringMap } from "@/components/touring-map";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Button } from "../ui/button";
-import { CircleCheckBig, SquarePen, Map, CalendarDays } from "lucide-react";
+import { CircleCheckBig, SquarePen, Map, CalendarDays, Heart, Earth } from "lucide-react";
 import {
   PlannerCalendar,
   type CalendarEvent,
@@ -18,6 +18,8 @@ import { EmptyItinerariesPage } from "./empty-itineraries-page";
 import { mapItineraryToCalendarEvents } from "@/lib/schedule-parser";
 import { useUser } from "@/hooks/context/user-context";
 import { useChat } from "@/hooks/context/session-context";
+import { cn } from "@/lib/utils";
+import { it } from "node:test";
 
 export function Itinerary() {
   const { itineraryData, setItineraryData, itineraries, loadingItineraries, itinerariesError } = useItinerary();
@@ -80,25 +82,50 @@ export function Itinerary() {
         {itineraries.length === 0 ? <EmptyItinerariesPage /> : <ItineraryScrollArea />}
         {/* <ItineraryScrollArea /> */}
         <div className="w-full flex justify-end shrink-0 pt-1">
-          <ButtonGroup>
-
+          <div className={cn("flex items-center gap-1", itineraries.length === 0 ? "invisible" : "")}>
+            {/* Like */}
             <Button
+              type="button"
+              size="icon"
               variant="ghost"
-              className="hover:bg-gray-300 cursor-pointer"
-              onClick={handleItineraryAdd}
+              className={cn(
+                "h-7 w-7 p-0 transition",
+                // isLiked
+                //   ? "text-red-500 hover:text-red-500 hover:bg-red-500/10"
+                //   : "hover:text-red-500"
+              )}
+              onClick={(e) => {
+                e.stopPropagation()
+                // onToggleLike?.()
+              }}
             >
-              <CircleCheckBig className="text-green-600 h-3 w-3" />
-              Add to My Space
+              <Heart
+                className={cn(
+                  "h-4 w-4",
+                  // isLiked ? "fill-red-500" : "fill-none"
+                )}
+              />
             </Button>
 
+            {/* Publish */}
             <Button
+              type="button"
+              size="icon"
               variant="ghost"
-              className="hover:bg-gray-300 cursor-pointer"
+              className={cn(
+                "h-7 w-7 p-0 transition",
+                // isPublished
+                //   ? "text-emerald-500 hover:text-emerald-500 hover:bg-emerald-500/10"
+                //   : "hover:text-emerald-500"
+              )}
+              onClick={(e) => {
+                e.stopPropagation()
+                // setPublishDialogOpen(true)
+              }}
             >
-              <SquarePen className="text-yellow-600 h-3 w-3" />
-              Modify
+              <Earth className="h-4 w-4" />
             </Button>
-          </ButtonGroup>
+          </div>
         </div>
       </CardContent>
 

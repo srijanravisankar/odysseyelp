@@ -179,15 +179,15 @@ export function JourneyTimeline() {
         // shared colors for card + icon + status bar
         const borderColorClass = isCompleted
           ? "border-emerald-500/70"
-          : "border-rose-400/70";
+          : "";
 
         const statusBarColorClass = isCompleted
           ? "bg-emerald-500"
-          : "bg-rose-400";
+          : "bg-accent-foreground";
 
         const iconColorClass = isCompleted
           ? "text-emerald-600"
-          : "text-rose-500";
+          : "";
 
         const iconKey = stop.icon?.toLowerCase() || "default";
         const IconComponent = ICON_MAP[iconKey] || Store;
@@ -236,11 +236,11 @@ export function JourneyTimeline() {
             {/* LEFT: icon + connecting line, aligned with card */}
             <TimelineHeader className="flex flex-col items-center">
               {index !== itineraryData.stops.stops.length - 1 && (
-                <TimelineSeparator className="bg-gray-300 w-px flex-1 mt-1" />
+                <TimelineSeparator className="bg-muted border-accent-foreground border-[0.5px] w-px flex-1 mt-1" />
               )}
               <TimelineIcon
                 className={cn(
-                  "mt-4 h-9 w-9 [&_svg]:h-5 [&_svg]:w-5 bg-muted flex items-center justify-center border",
+                  "mt-4 h-9 w-9 [&_svg]:h-5 [&_svg]:w-5 bg-muted flex items-center justify-center border-[1.5px] border-accent-foreground",
                   borderColorClass,
                   iconColorClass
                 )}
@@ -253,7 +253,7 @@ export function JourneyTimeline() {
             <TimelineBody className="group pl-1 w-full relative">
               <div
                 className={cn(
-                  "relative w-full overflow-hidden rounded-lg border p-3",
+                  "relative w-full overflow-hidden rounded-lg p-3 border-[1.5px] border-accent-foreground",
                   "bg-card/70 hover:bg-accent/40",
                   "transition-all duration-200",
                   borderColorClass // card border matches icon border
@@ -263,7 +263,7 @@ export function JourneyTimeline() {
                   {/* thin status bar on the left of the content */}
                   <div
                     className={cn(
-                      "w-0.5 rounded-full mt-3 mb-3 transition-colors",
+                      "w-0 border-[0.5px] rounded-full mt-3 mb-3 transition-colors",
                       statusBarColorClass
                     )}
                   />
@@ -289,7 +289,7 @@ export function JourneyTimeline() {
                         <Button
                           variant="ghost"
                           size="icon-sm"
-                          className="h-6 w-6"
+                          className="h-6 w-6 cursor-pointer"
                           aria-label="Mark stop as done"
                           onClick={() =>
                             setSelectedStopIds((prev) =>
@@ -310,32 +310,35 @@ export function JourneyTimeline() {
                         </Button>
 
                         {/* Edit */}
-                        <Button
+                        {/* <Button
                           variant="ghost"
                           size="icon-sm"
                           className="h-6 w-6"
                         >
                           <SquarePen className="h-3 w-3 text-yellow-600" />
-                        </Button>
+                        </Button> */}
 
                         {/* Delete */}
-                        <DeletePlaceDialog
+                        {/* <DeletePlaceDialog
                           stopId={stopId}
                           placeName={stop.name || "this place"}
-                        />
+                        /> */}
 
                         {/* External link */}
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          className="h-6 w-6"
-                        >
-                          <ExternalLink className="h-3 w-3" />
-                        </Button>
+                        <a href={stop.url || undefined} target="_blank" rel="noreferrer">
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className="h-6 w-6 cursor-pointer"
+                            aria-label="View more details"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                          </Button>
+                        </a>
                       </div>
                     </div>
 
-                    <Separator />
+                    {/* <Separator /> */}
 
                     {/* DETAILS: rating, address, phone */}
                     <div className="grid gap-2 text-sm text-muted-foreground">
@@ -374,7 +377,7 @@ export function JourneyTimeline() {
                       )}
 
                       {/* Index Letter Badge */}
-                      <div className={cn("absolute bottom-3 right-4 flex items-center justify-center h-6 w-6 rounded-full text-md font-medium border border-primary bg-primary/10 text-primary", borderColorClass)}>
+                      <div className={cn("absolute bottom-3 right-3 flex items-center justify-center h-7 pb-0.5 w-7 rounded-full text-md font-normal border-[1.5px] border-primary bg-primary/10 text-primary", borderColorClass)}>
                         {String.fromCharCode(65 + index)}
                       </div>
                     </div>
