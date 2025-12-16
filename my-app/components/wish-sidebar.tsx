@@ -64,7 +64,7 @@ export function WishSidebar({ group }: { group: Group }) {
   const handleSend = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!input.trim() || !user) return;
-    await sendWish(input.trim(), user.id); 
+    await sendWish(input.trim(), user.id, user.name || "Me"); 
     setInput("");
   };
 

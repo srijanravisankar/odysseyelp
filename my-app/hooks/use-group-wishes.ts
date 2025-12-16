@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
@@ -10,12 +10,16 @@ export interface Wish {
   user_id: string;
   created_at: string;
   sender_name?: string;
+  isOptimistic?: boolean; // Flag to identify temporary messages
 }
 
 export function useGroupWishes(groupId: number) {
   const supabase = createClient();
   const [wishes, setWishes] = useState<Wish[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Keep track of processed IDs to prevent duplicates
+  const processedIds = useRef(new Set<number>());
 
   // 1. Fetch initial history
   useEffect(() => {
@@ -36,11 +40,13 @@ export function useGroupWishes(groupId: number) {
         console.error("Error fetching wishes:", error);
         toast.error("Failed to load wishes");
       } else {
-        // Map the joined user data to a flat structure if needed
-        const formatted = data.map((item: any) => ({
-          ...item,
-          sender_name: item.users?.name || "Unknown",
-        }));
+        const formatted = data.map((item: any) => {
+          processedIds.current.add(item.id); // Mark existing IDs as seen
+          return {
+            ...item,
+            sender_name: item.users?.name || "Unknown",
+          };
+        });
         setWishes(formatted);
       }
       setLoading(false);
@@ -64,10 +70,13 @@ export function useGroupWishes(groupId: number) {
           filter: `group_id=eq.${groupId}`,
         },
         async (payload) => {
-          // When a new wish arrives, we only get the raw row (no user name).
-          // We need to fetch the user name quickly to display it.
           const newWish = payload.new as Wish;
-          
+
+          // Deduplication: If we already have this ID (from fetch), ignore it
+          if (processedIds.current.has(newWish.id)) return;
+          processedIds.current.add(newWish.id);
+
+          // Fetch sender name
           const { data: userData } = await supabase
             .from("users")
             .select("name")
@@ -79,8 +88,14 @@ export function useGroupWishes(groupId: number) {
             sender_name: userData?.name || "Someone",
           };
 
-          // Update state instantly
-          setWishes((prev) => [...prev, wishWithUser]);
+          setWishes((prev) => {
+            // Remove any optimistic message that matches this one (by user and text)
+            // This prevents "double messages" appearing for a split second
+            const filtered = prev.filter(
+              (w) => !(w.isOptimistic && w.message === wishWithUser.message && w.user_id === wishWithUser.user_id)
+            );
+            return [...filtered, wishWithUser];
+          });
         }
       )
       .subscribe();
@@ -90,8 +105,22 @@ export function useGroupWishes(groupId: number) {
     };
   }, [groupId, supabase]);
 
-  // 3. Helper to send a message
-  const sendWish = async (message: string, userId: string) => {
+  // 3. Helper to send a message (Optimistic Update)
+  const sendWish = async (message: string, userId: string, userName: string) => {    
+    // Create temporary optimistic wish
+    const optimisticWish: Wish = {
+      id: Date.now(), // Temp ID
+      message,
+      user_id: userId,
+      created_at: new Date().toISOString(),
+      sender_name: userName, // Or pass the real name if you update the function signature
+      isOptimistic: true,
+    };
+
+    // 2. Update UI Immediately
+    setWishes((prev) => [...prev, optimisticWish]);
+
+    // 3. Send to DB
     const { error } = await supabase.from("group_wishes").insert({
       group_id: groupId,
       user_id: userId,
@@ -101,9 +130,11 @@ export function useGroupWishes(groupId: number) {
     if (error) {
       console.error("Error sending wish:", error);
       toast.error("Failed to send wish");
+      // Rollback on error
+      setWishes((prev) => prev.filter((w) => w.id !== optimisticWish.id));
       throw error;
     }
-    // No need to update state manually; the subscription above will catch the INSERT event
+    // Success! The subscription will eventually replace this optimistic wish with the real one.
   };
 
   return { wishes, loading, sendWish };
