@@ -196,7 +196,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     tooltip={{
-                      children: resolvedTheme === "dark" ? "Light Mode" : "Dark Mode",
+                      children: "Toggle Theme",
                       hidden: false,
                     }}
                     onClick={() => {
@@ -209,7 +209,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                   >
                     <Sun className="hidden dark:block" />
                     <Moon className="dark:hidden" />
-                    <span>{resolvedTheme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+                    <span>Toggle Theme</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
