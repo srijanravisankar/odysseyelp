@@ -18,7 +18,7 @@ export default function Page() {
             :
                 <>
                     <Itinerary />
-                    <ChatPagePagination />
+                    {/* <ChatPagePagination /> */}
                 </>
             }
         </div>

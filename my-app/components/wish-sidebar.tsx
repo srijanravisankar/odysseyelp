@@ -103,7 +103,7 @@ export function WishSidebar({ group }: { group: Group }) {
                     {new Date(wish.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                   </span>
                 </div>
-                <div className="bg-muted/40 border rounded-2xl rounded-tl-none px-3 py-2 text-sm max-w-[95%] break-words">
+                <div className="bg-muted/40 border rounded-2xl rounded-tl-none px-3 py-2 text-sm max-w-[95%] wrap-break-word">
                   {wish.message}
                 </div>
               </div>
