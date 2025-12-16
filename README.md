@@ -1,12 +1,11 @@
-# Ranger Yelp
+# The Odyssey Yelp
 
-`Ranger Yelp` helps people discover and plan visits to real locations in any city.
-
+`The Odyssey Yelp` helps people discover and plan visits to real locations in any city.
 
 ## Layout Planning:
 
 ### Chat Layout:
-![Chat Layout](ranger-yelp-layout-planning.jpg)
+![Chat Layout](the-odyssey-yelp-layout-planning.jpg)
 
 ## Touring Page:
 ![touring_page](yelp-hackathon-touring-page.jpg)
@@ -18,7 +17,7 @@
 <img width="1190" height="748" alt="image" src="https://github.com/user-attachments/assets/4c7b11fb-b00d-4ec3-9253-bd8283ded600" />
 
 ### Database Design:
-<img width="1462" height="796" alt="supabase-schema-ranger-yelp" src="https://github.com/user-attachments/assets/4acd9d01-711e-4537-a9a7-a80fd5568685" />
+<img width="1462" height="796" alt="supabase-schema-the-odyssey-yelp" src="https://github.com/user-attachments/assets/4acd9d01-711e-4537-a9a7-a80fd5568685" />
 
 ### Database Schema:
 ```SQL

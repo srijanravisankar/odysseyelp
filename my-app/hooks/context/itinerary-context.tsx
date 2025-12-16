@@ -40,6 +40,9 @@ type ItineraryContextType = {
   refetchItineraries: () => Promise<void>;
   isBuildingItinerary: boolean;
   setIsBuildingItinerary: React.Dispatch<React.SetStateAction<boolean>>;
+
+  routeGeoJSON: any;
+  setRouteGeoJSON: (json: any) => void;
 };
 
 const ItineraryContext = createContext<ItineraryContextType | undefined>(
@@ -59,6 +62,8 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
   const [appTheme, setAppTheme] = useState<"light" | "dark" | "system">(
     "system"
   );
+
+  const [routeGeoJSON, setRouteGeoJSON] = useState<any>(null);
 
   // Itineraries fetched from database
   const [itineraries, setItineraries] = useState<Itinerary[]>([]);
@@ -270,6 +275,8 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
         refetchItineraries,
         isBuildingItinerary,
         setIsBuildingItinerary,
+        routeGeoJSON,
+        setRouteGeoJSON,
       }}
     >
       {children}

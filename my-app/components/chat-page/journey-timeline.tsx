@@ -19,15 +19,13 @@ import {
   Ticket,
   ShoppingBag,
   Palette,
-  Briefcase,
-  SquarePen,
-  Trash2,
-  ExternalLink,
-  Badge,
   Store,
   Star,
   Phone,
   CheckCheck,
+  SquarePen,
+  Trash2,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -42,108 +40,121 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { DeletePlaceDialog } from "@/components/chat-page/delete-place-dialog";
 
-const journeyTimeline = [
-  {
-    id: "1",
-    title: "Birthday bar-hopping",
-    address: "Downtown",
-    isActive: false,
-    icon: <Beer className="h-3 w-3" />,
-    ratings: 4.5, // New: Example rating
-    hours: "5 p.m.–2 a.m.", // New: Example hours
-    phone: "416-555-1201", // New: Example phone number
-  },
-  {
-    id: "2",
-    title: "Cozy cafe date + walk",
-    address: "Queen St W",
-    isActive: false,
-    icon: <Coffee className="h-3 w-3" />,
-    ratings: 4.8, // New
-    hours: "9 a.m.–6 p.m.", // New
-    phone: "416-555-1202", // New
-  },
-  {
-    id: "3",
-    title: "Kensington Market food crawl",
-    address: "Kensington",
-    isActive: false,
-    icon: <Utensils className="h-3 w-3" />,
-    ratings: 4.4, // New
-    hours: "11 a.m.–8 p.m.", // New
-    phone: "416-555-1203", // New
-  },
-  {
-    id: "4",
-    title: "High Park cherry blossoms",
-    address: "High Park",
-    isActive: false,
-    icon: <Footprints className="h-3 w-3" />,
-    ratings: 4.7, // New
-    hours: "Open 24 hours", // New
-    phone: "416-555-1204", // New
-  },
-  {
-    id: "5",
-    title: "Late night jazz & drinks",
-    address: "Reservoir Lounge",
-    isActive: false,
-    icon: <Music className="h-3 w-3" />,
-    ratings: 4.3, // New
-    hours: "8 p.m.–1 a.m.", // New
-    phone: "416-555-1205", // New
-  },
-  {
-    id: "6",
-    title: "Weekend getaway planning",
-    address: "Niagara Falls",
-    isActive: false,
-    icon: <MapPin className="h-3 w-3" />,
-    ratings: 4.6, // New
-    hours: "9 a.m.–5 p.m.", // New
-    phone: "905-555-1206", // New
-  },
-  {
-    id: "7",
-    title: "Last-minute concert tickets",
-    address: "Massey Hall",
-    isActive: false,
-    icon: <Ticket className="h-3 w-3" />,
-    ratings: 4.9, // New
-    hours: "Box office varies", // New
-    phone: "416-555-1207", // New
-  },
-  {
-    id: "8",
-    title: "Holiday gift shopping route",
-    address: "Eaton Centre",
-    isActive: false,
-    icon: <ShoppingBag className="h-3 w-3" />,
-    ratings: 4.2, // New
-    hours: "10 a.m.–9 p.m.", // New
-    phone: "416-555-1208", // New
-  },
-  {
-    id: "9",
-    title: "Gallery hop and street art",
-    address: "West Queen West",
-    isActive: false,
-    icon: <Palette className="h-3 w-3" />,
-    ratings: 4.7, // New
-    hours: "11 a.m.–6 p.m.", // New
-    phone: "416-555-1209", // New
-  },
-  {
-    id: "10",
-    title: "Client dinner presentation Client dinner presentation",
-    address: "Financial District",
-    isActive: false,
-    icon: <Briefcase className="h-3 w-3" />,
-    ratings: 4.3, // New
-    hours: "11 a.m.–12 a.m.", // New
-    phone: "416-555-1210", // New
-  },
-];
+// const journeyTimeline = [
+//   {
+//     id: "1",
+//     title: "Birthday bar-hopping",
+//     address: "Downtown",
+//     isActive: false,
+//     icon: <Beer className="h-3 w-3" />,
+//     ratings: 4.5, // New: Example rating
+//     hours: "5 p.m.–2 a.m.", // New: Example hours
+//     phone: "416-555-1201", // New: Example phone number
+//   },
+//   {
+//     id: "2",
+//     title: "Cozy cafe date + walk",
+//     address: "Queen St W",
+//     isActive: false,
+//     icon: <Coffee className="h-3 w-3" />,
+//     ratings: 4.8, // New
+//     hours: "9 a.m.–6 p.m.", // New
+//     phone: "416-555-1202", // New
+//   },
+//   {
+//     id: "3",
+//     title: "Kensington Market food crawl",
+//     address: "Kensington",
+//     isActive: false,
+//     icon: <Utensils className="h-3 w-3" />,
+//     ratings: 4.4, // New
+//     hours: "11 a.m.–8 p.m.", // New
+//     phone: "416-555-1203", // New
+//   },
+//   {
+//     id: "4",
+//     title: "High Park cherry blossoms",
+//     address: "High Park",
+//     isActive: false,
+//     icon: <Footprints className="h-3 w-3" />,
+//     ratings: 4.7, // New
+//     hours: "Open 24 hours", // New
+//     phone: "416-555-1204", // New
+//   },
+//   {
+//     id: "5",
+//     title: "Late night jazz & drinks",
+//     address: "Reservoir Lounge",
+//     isActive: false,
+//     icon: <Music className="h-3 w-3" />,
+//     ratings: 4.3, // New
+//     hours: "8 p.m.–1 a.m.", // New
+//     phone: "416-555-1205", // New
+//   },
+//   {
+//     id: "6",
+//     title: "Weekend getaway planning",
+//     address: "Niagara Falls",
+//     isActive: false,
+//     icon: <MapPin className="h-3 w-3" />,
+//     ratings: 4.6, // New
+//     hours: "9 a.m.–5 p.m.", // New
+//     phone: "905-555-1206", // New
+//   },
+//   {
+//     id: "7",
+//     title: "Last-minute concert tickets",
+//     address: "Massey Hall",
+//     isActive: false,
+//     icon: <Ticket className="h-3 w-3" />,
+//     ratings: 4.9, // New
+//     hours: "Box office varies", // New
+//     phone: "416-555-1207", // New
+//   },
+//   {
+//     id: "8",
+//     title: "Holiday gift shopping route",
+//     address: "Eaton Centre",
+//     isActive: false,
+//     icon: <ShoppingBag className="h-3 w-3" />,
+//     ratings: 4.2, // New
+//     hours: "10 a.m.–9 p.m.", // New
+//     phone: "416-555-1208", // New
+//   },
+//   {
+//     id: "9",
+//     title: "Gallery hop and street art",
+//     address: "West Queen West",
+//     isActive: false,
+//     icon: <Palette className="h-3 w-3" />,
+//     ratings: 4.7, // New
+//     hours: "11 a.m.–6 p.m.", // New
+//     phone: "416-555-1209", // New
+//   },
+//   {
+//     id: "10",
+//     title: "Client dinner presentation Client dinner presentation",
+//     address: "Financial District",
+//     isActive: false,
+//     icon: <Briefcase className="h-3 w-3" />,
+//     ratings: 4.3, // New
+//     hours: "11 a.m.–12 a.m.", // New
+//     phone: "416-555-1210", // New
+//   },
+// ];
+
+const ICON_MAP: Record<string, React.ElementType> = {
+  coffee: Coffee,
+  food: Utensils,
+  bar: Beer,
+  walk: Footprints,
+  music: Music,
+  art: Palette,
+  shopping: ShoppingBag,
+  landmark: MapPin,
+  ticket: Ticket,
+  default: Store,
+};
 
 export function JourneyTimeline() {
   // const { itineraryData } = useItinerary();
@@ -177,6 +188,9 @@ export function JourneyTimeline() {
         const iconColorClass = isCompleted
           ? "text-emerald-600"
           : "text-rose-500";
+
+        const iconKey = stop.icon?.toLowerCase() || "default";
+        const IconComponent = ICON_MAP[iconKey] || Store;
 
         // SAMPLE CONFIGURATIONS BELOW
 
@@ -231,7 +245,7 @@ export function JourneyTimeline() {
                   iconColorClass
                 )}
               >
-                <Store />
+                <IconComponent className="h-5 w-5" />
               </TimelineIcon>
             </TimelineHeader>
 

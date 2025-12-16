@@ -122,7 +122,7 @@ export function SignupForm({
               <div className="flex flex-col items-center gap-2 text-center">
                 <h1 className="text-2xl font-bold">Create your account</h1>
                 <p className="text-balance text-sm text-muted-foreground">
-                  Enter your details below to create your <b>Ranger Yelp</b> account
+                  Enter your details below to create your <b>The Odyssey Yelp</b> account
                 </p>
               </div>
 

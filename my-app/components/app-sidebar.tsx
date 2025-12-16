@@ -146,11 +146,11 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuItem>
               <SidebarMenuButton size="lg" asChild className="md:h-8 md:p-0">
                 <a href="/">
-                  <div title="Ranger Yelp!" className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                  <div title="The Odyssey Yelp" className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                     <Compass className="size-5" />
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">Ranger Yelp</span>
+                    <span className="truncate font-medium">The Odyssey Yelp</span>
                     <span className="truncate text-xs">Your Travel Companion</span>
                   </div>
                 </a>

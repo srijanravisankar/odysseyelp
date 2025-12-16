@@ -15,6 +15,7 @@ export type ItineraryStop = {
         lng: number
     }
     category: string | null
+    icon: "coffee" | "food" | "bar" | "walk" | "music" | "art" | "shopping" | "landmark" | "ticket" | "default"
 }
 
 export type ItineraryPlan = {

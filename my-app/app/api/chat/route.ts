@@ -8,7 +8,7 @@ const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY!,
 })
 
-const model = "gemini-2.5-flash"
+const model = "gemma-3-27b-it"
 
 export async function POST(req: NextRequest) {
     try {
@@ -44,6 +44,16 @@ export async function POST(req: NextRequest) {
                 { error: "Gemini returned empty composed prompt" },
                 { status: 500 },
             )
+        }
+
+        if (composedPrompt === "SKIP_YELP" || composedPrompt === '"SKIP_YELP"') {
+            console.log("Skipping Yelp API call: Irrelevant query");
+            return NextResponse.json({
+                composedPrompt: null,
+                yelp: null,
+                itinerary: null,
+                message: "RETURN"
+            })
         }
 
         // 2) Call Yelp AI API with composed prompt
@@ -161,6 +171,11 @@ function buildGeminiPrompt({
     query: string
     survey?: SurveyContext
 }) {
+    const relevanceInstructions = `
+    FIRST, analyze if the user's request is asking for recommendations, places, businesses, itineraries, or travel planning.
+    - If the user is just saying "hello", "how are you", talking about code, or asking general knowledge questions unrelated to places/travel: RETURN ONLY THE STRING "SKIP_YELP".
+    - If the user IS asking for places/travel (e.g. "coffee near me", "plan a trip", "restaurants"): Proceed to generate the Yelp query.
+    `
     if (survey) {
         // Build context from the simplified survey structure
         let context = '';
@@ -205,6 +220,8 @@ function buildGeminiPrompt({
         return `
 You are a prompt engineer helping to talk to the Yelp AI API.
 
+${relevanceInstructions}
+
 The user provided this context:
 ${context}
 
@@ -230,6 +247,8 @@ IMPORTANT:
     // No survey: just rely on the free-text query
     return `
 You are a prompt engineer helping to talk to the Yelp AI API.
+
+${relevanceInstructions}
 
 The user did NOT provide any structured survey, only this free-text message:
 "${query}"
@@ -362,6 +381,7 @@ type ItineraryStop = {
   phone: string | null
   coordinates: { lat: number; lng: number }
   category: string | null
+  icon: "coffee" | "food" | "bar" | "walk" | "music" | "art" | "shopping" | "landmark" | "ticket" | "default"
   schedule: {
     date: string; // Format: "YYYY-MM-DD" (e.g. "2025-12-15")
     start: string; // Format: "HH:MM AM/PM" (e.g. "10:00 AM")
@@ -381,8 +401,19 @@ type ItineraryPlan = {
 Rules:
 1. **Use Yelp Data:** Fill metadata (rating, coordinates, etc.) exactly from the Yelp response.
 2. **IDs:** Use unique strings "stop-1", "stop-2", etc.
-3. **Map Center:** center.lat/lng must be the average of all stops.
-4. **Contextual Info:** title/summary must reflect the user's specific intent (e.g., "Quiet Anniversary Dinner").
+3. **Icon Selection:** Choose the icon string that best matches the stop's category.
+   - "coffee" (Cafes, Bakeries)
+   - "food" (Restaurants, Lunch, Dinner)
+   - "bar" (Bars, Pubs, Nightlife)
+   - "walk" (Parks, Hiking, Walking)
+   - "music" (Concerts, Jazz Clubs)
+   - "art" (Museums, Galleries)
+   - "shopping" (Malls, Boutiques)
+   - "landmark" (Sightseeing, Monuments)
+   - "ticket" (Events, Shows)
+   - "default" (Everything else)
+4. **Map Center:** center.lat/lng must be the average of all stops.
+5. **Contextual Info:** title/summary must reflect the user's specific intent (e.g., "Quiet Anniversary Dinner").
 
 **CRITICAL SCHEDULING RULES:**
 - **Trip Date:** Determine the start date from the survey's dateRange or assume today's date. Format as YYYY-MM-DD.

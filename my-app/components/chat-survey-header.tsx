@@ -202,7 +202,7 @@ export function ChatSurveyHeader() {
     const surveyContext = buildSurveyContext();
 
     try {
-      localStorage.setItem("ranger-yelp-survey", JSON.stringify(surveyContext));
+      localStorage.setItem("the-odyssey-yelp-survey", JSON.stringify(surveyContext));
       setSavedSurvey(surveyContext);
       console.log("Saved surveyContext", surveyContext);
     } catch (e) {
@@ -218,7 +218,7 @@ export function ChatSurveyHeader() {
     // Save current progress
     const surveyContext = buildSurveyContext();
     try {
-      localStorage.setItem("ranger-yelp-survey", JSON.stringify(surveyContext));
+      localStorage.setItem("the-odyssey-yelp-survey", JSON.stringify(surveyContext));
       setSavedSurvey(surveyContext);
     } catch (e) {
       console.error("Failed to save survey context", e);
@@ -407,6 +407,11 @@ export function ChatSurveyHeader() {
         console.error("Error from API:", data);
         // later: show toast
         return;
+      }
+
+      if (data.message && data.message === "RETURN") {
+        console.log("Received RETURN message from API, not building itinerary.");
+        return
       }
 
       console.log("Composed prompt:", data.composedPrompt);

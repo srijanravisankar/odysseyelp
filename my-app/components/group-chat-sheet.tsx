@@ -7,7 +7,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Boxes, Check, Copy } from "lucide-react";
+import { Boxes, Check, CheckCheck, Copy } from "lucide-react";
 import { WishSidebar } from "./wish-sidebar"; // Ensure this path is correct
 
 import {
@@ -66,7 +66,7 @@ export function GroupChatSheet({ group, open, onOpenChange }: GroupChatSheetProp
                       onClick={handleCopyCode}
                     >
                       {isCopied ? (
-                        <Check className="h-2 w-2" />
+                        <CheckCheck className="h-2 w-2" />
                       ) : (
                         <Copy className="h-2 w-2 text-2xl" />
                       )}
