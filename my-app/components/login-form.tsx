@@ -100,18 +100,21 @@ export function LoginForm({
           <form className="p-6 md:p-8" onSubmit={handleSubmit}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Welcome back</h1>
-                <p className="text-balance text-muted-foreground">
+                <h1 className="text-2xl font-bold">Welcome back!</h1>
+                {/* <p className="text-balance text-muted-foreground">
                   Login to your <b>The Odyssey Yelp</b> account
+                </p> */}
+                <p className="text-balance text-sm text-muted-foreground">
+                  Enter your details below to login your <b>Odyssey Yelp</b> account
                 </p>
               </div>
 
               <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <FieldLabel htmlFor="email">Username</FieldLabel>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="Enter your username"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -127,18 +130,19 @@ export function LoginForm({
               <Field>
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <button
+                  {/* <button
                     type="button"
                     onClick={handleForgotPassword}
                     className="ml-auto text-sm underline-offset-2 hover:underline"
                   >
                     Forgot your password?
-                  </button>
+                  </button> */}
                 </div>
                 <Input
                   id="password"
                   type="password"
                   value={password}
+                  placeholder="Enter your password"
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   disabled={loading}
@@ -151,16 +155,16 @@ export function LoginForm({
               </Field>
 
               <Field>
-                <Button type="submit" disabled={loading} className="w-full">
+                <Button type="submit" disabled={loading} className="w-full cursor-pointer">
                   {loading ? 'Logging in...' : 'Login'}
                 </Button>
               </Field>
 
-              <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
+              {/* <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Or continue with
-              </FieldSeparator>
+              </FieldSeparator> */}
 
-              <Field className="grid grid-cols-3 gap-4">
+              {/* <Field className="grid grid-cols-3 gap-4">
                 <Button variant="outline" type="button" disabled={loading}>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <path
@@ -188,11 +192,11 @@ export function LoginForm({
                   </svg>
                   <span className="sr-only">Login with Meta</span>
                 </Button>
-              </Field>
+              </Field> */}
 
               <FieldDescription className="text-center">
                 Don&apos;t have an account?{' '}
-                <a href="/signup" className="font-semibold hover:underline">
+                <a href="/signup" className="font-semibold hover:underline cursor-pointer">
                   Sign up
                 </a>
               </FieldDescription>

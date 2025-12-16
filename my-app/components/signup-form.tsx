@@ -120,9 +120,9 @@ export function SignupForm({
           <form className="p-6 md:p-8" onSubmit={handleSubmit}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-2xl font-bold">Create your account</h1>
+                <h1 className="text-2xl font-bold">Create your account!</h1>
                 <p className="text-balance text-sm text-muted-foreground">
-                  Enter your details below to create your <b>The Odyssey Yelp</b> account
+                  Enter your details below to create your <b>Odyssey Yelp</b> account
                 </p>
               </div>
 
@@ -138,11 +138,11 @@ export function SignupForm({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <FieldLabel htmlFor="email">Username <span className="text-muted-foreground font-light">(must be unique)</span></FieldLabel>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="Enter a username"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -163,6 +163,7 @@ export function SignupForm({
                       id="password"
                       type="password"
                       value={password}
+                      placeholder="Enter a password"
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       disabled={loading}
@@ -181,6 +182,7 @@ export function SignupForm({
                       id="confirm-password"
                       type="password"
                       value={confirmPassword}
+                      placeholder="Enter password again"
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
                       disabled={loading}
@@ -192,22 +194,22 @@ export function SignupForm({
                     )}
                   </Field>
                 </Field>
-                <FieldDescription>
+                {/* <FieldDescription>
                   Must be at least 8 characters long.
-                </FieldDescription>
+                </FieldDescription> */}
               </Field>
 
               <Field>
-                <Button type="submit" disabled={loading} className="w-full">
+                <Button type="submit" disabled={loading} className="w-full cursor-pointer">
                   {loading ? 'Creating Account...' : 'Create Account'}
                 </Button>
               </Field>
 
-              <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
+              {/* <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Or continue with
-              </FieldSeparator>
+              </FieldSeparator> */}
 
-              <Field className="grid grid-cols-3 gap-4">
+              {/* <Field className="grid grid-cols-3 gap-4">
                 <Button variant="outline" type="button" disabled={loading}>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <path
@@ -235,11 +237,11 @@ export function SignupForm({
                   </svg>
                   <span className="sr-only">Sign up with Meta</span>
                 </Button>
-              </Field>
+              </Field> */}
 
               <FieldDescription className="text-center">
                 Already have an account?{' '}
-                <a href="/login" className="font-semibold hover:underline">
+                <a href="/login" className="font-semibold hover:underline cursor-pointer">
                   Login
                 </a>
               </FieldDescription>
