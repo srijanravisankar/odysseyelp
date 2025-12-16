@@ -321,7 +321,9 @@ export function ExploreGrid({
                 setDialogOpen(open)
                 if (!open) setActiveTab("stops")
             }}>
-                <DialogContent className="max-w-[900px] w-[95vw] h-[85vh] p-0 flex flex-col overflow-hidden">
+                <DialogContent
+                  className="max-w-[1200px] w-[90vw] h-[85vh] p-0 flex flex-col overflow-hidden"
+                >
                     {/* Header */}
                     <div className="px-6 py-4 border-b shrink-0">
                         <div className="flex items-center gap-3">
@@ -409,9 +411,9 @@ export function ExploreGrid({
                                                             <div className="flex gap-3">
                                                                 <div className="w-0.5 rounded-full mt-3 mb-3 bg-rose-400" />
 
-                                                                <div className="flex-1 flex flex-col gap-0.5">
+                                                                <div className="flex-1 flex flex-col gap-0.5 min-w-0">
                                                                     <h3
-                                                                        className="text-md leading-tight text-foreground truncate max-w-[600px]"
+                                                                        className="text-md leading-tight text-foreground truncate"
                                                                         title={stop.name}
                                                                     >
                                                                         {stop.name}
@@ -433,7 +435,7 @@ export function ExploreGrid({
                                                                         <div className="flex items-start gap-1">
                                                                             <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
                                                                             <div
-                                                                                className="leading-tight text-foreground truncate max-w-[600px]"
+                                                                                className="leading-tight text-foreground truncate"
                                                                                 title={formattedAddress}
                                                                             >
                                                                                 {formattedAddress}
