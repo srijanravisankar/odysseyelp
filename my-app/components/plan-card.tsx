@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { Earth, Heart, Hash } from "lucide-react"
+import { Earth, Heart, Hash, MessageSquareText, ThumbsUp, ThumbsDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import {
@@ -40,6 +40,14 @@ type PlanCardProps = {
   className?: string
   /** Hide action buttons (heart and globe icons) */
   hideActions?: boolean
+  /** Show social media actions (comments, like, dislike) - for explore page */
+  showSocialActions?: boolean
+  /** Number of likes */
+  likeCount?: number
+  /** Number of dislikes */
+  dislikeCount?: number
+  /** Number of comments */
+  commentCount?: number
 }
 
 export function PlanCard({
@@ -54,6 +62,10 @@ export function PlanCard({
   thumbnail,
   className,
   hideActions = false,
+  showSocialActions = false,
+  likeCount = 0,
+  dislikeCount = 0,
+  commentCount = 0,
 }: PlanCardProps) {
   const [publishDialogOpen, setPublishDialogOpen] = useState(false)
   const [tagsDialogOpen, setTagsDialogOpen] = useState(false)
@@ -163,6 +175,56 @@ export function PlanCard({
                   }}
                 >
                   <Earth className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+
+            {/* Social Media Actions - for explore page */}
+            {showSocialActions && (
+              <div className="flex items-center gap-1">
+                {/* Like */}
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 px-2 gap-1.5 text-[11px]"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    // TODO: Implement like functionality
+                  }}
+                >
+                  <ThumbsUp className="h-3.5 w-3.5" />
+                  <span>{likeCount}</span>
+                </Button>
+
+                {/* Dislike */}
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 px-2 gap-1.5 text-[11px]"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    // TODO: Implement dislike functionality
+                  }}
+                >
+                  <ThumbsDown className="h-3.5 w-3.5" />
+                  <span>{dislikeCount}</span>
+                </Button>
+
+                {/* Comments */}
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 px-2 gap-1.5 text-[11px]"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    // TODO: Implement comments functionality
+                  }}
+                >
+                  <MessageSquareText className="h-3.5 w-3.5" />
+                  <span>{commentCount}</span>
                 </Button>
               </div>
             )}

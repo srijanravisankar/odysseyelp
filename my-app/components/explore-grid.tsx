@@ -66,7 +66,7 @@ export function ExploreGrid({
     const [error, setError] = useState<string | null>(null)
     const [dialogOpen, setDialogOpen] = useState(false)
     const [selectedItinerary, setSelectedItinerary] = useState<PublishedItinerary | null>(null)
-    const [activeTab, setActiveTab] = useState<"stops" | "map">("stops")
+    const [activeTab, setActiveTab] = useState<"stops" | "map" | "comments">("stops")
 
     useEffect(() => {
         const fetchPublishedItineraries = async () => {
@@ -301,6 +301,10 @@ export function ExploreGrid({
                             isLiked={false}
                             isPublished={true}
                             hideActions={true}
+                            showSocialActions={true}
+                            likeCount={0}
+                            dislikeCount={0}
+                            commentCount={0}
                             onClick={() => {
                                 setSelectedItinerary(itinerary)
                                 setDialogOpen(true)
@@ -369,6 +373,17 @@ export function ExploreGrid({
                                 )}
                             >
                                 Map
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("comments")}
+                                className={cn(
+                                    "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-4 py-1.5 text-sm font-medium transition-all",
+                                    activeTab === "comments"
+                                        ? "bg-background text-foreground shadow-sm"
+                                        : "hover:bg-background/50"
+                                )}
+                            >
+                                Comments
                             </button>
                         </div>
                     </div>
@@ -472,7 +487,7 @@ export function ExploreGrid({
                                     </Timeline>
                                 </div>
                             </ScrollArea>
-                        ) : (
+                        ) : activeTab === "map" ? (
                             <div className="w-full h-full">
                                 <TouringMap
                                     initialLng={selectedItinerary?.stops?.center?.lng || -79.3832}
@@ -482,6 +497,28 @@ export function ExploreGrid({
                                     isPreview={true}
                                 />
                             </div>
+                        ) : (
+                            <ScrollArea className="h-full">
+                                <div className="p-6">
+                                    <div className="space-y-4">
+                                        <h3 className="text-lg font-semibold">Comments</h3>
+                                        <p className="text-sm text-muted-foreground">
+                                            Comments functionality will be implemented here.
+                                        </p>
+                                        {/* TODO: Implement comments section with:
+                                            - Comment input textarea
+                                            - Submit button
+                                            - List of existing comments
+                                            - User avatars
+                                            - Timestamps
+                                            - Edit/Delete for own comments
+                                        */}
+                                        <div className="text-center py-12 text-muted-foreground">
+                                            No comments yet. Be the first to comment!
+                                        </div>
+                                    </div>
+                                </div>
+                            </ScrollArea>
                         )}
                     </div>
                 </DialogContent>
