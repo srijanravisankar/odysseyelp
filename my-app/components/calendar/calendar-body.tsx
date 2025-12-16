@@ -34,7 +34,7 @@ export function CalendarBody() {
 				animate="animate"
 				exit="exit"
 				variants={fadeIn}
-				transition={transition}
+				transition={{ type: "spring", stiffness: 100, damping: 10 }}
 			>
 				{view === "month" && (
 					<CalendarMonthView
@@ -67,7 +67,7 @@ export function CalendarBody() {
 						animate="animate"
 						exit="exit"
 						variants={fadeIn}
-						transition={transition}
+						transition={{ type: "spring", stiffness: 100, damping: 10 }}
 					>
 						<AgendaEvents />
 					</motion.div>
