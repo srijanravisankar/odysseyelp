@@ -77,6 +77,7 @@ export function ChatSidebarContent() {
   //   fetchSessions();
   // }, [user, active]);
 
+  // Initial fetch of all sessions
   useEffect(() => {
     const fetchSessions = async () => {
       if (!user?.email) return;
@@ -113,7 +114,47 @@ export function ChatSidebarContent() {
     };
 
     fetchSessions();
-  }, [user, active, supabase]); // ✅ Keep the same dependencies
+  }, [user?.email, supabase]);
+
+  // When active session changes, check if it's a new session not in our list
+  useEffect(() => {
+    if (!active) return;
+
+    // Check if this session is already in our list
+    const sessionExists = sessions.some(s => s.id === active);
+
+    if (!sessionExists && !loading) {
+      // This is a new session, fetch it and add to the top of the list
+      const fetchNewSession = async () => {
+        try {
+          const { data, error } = await supabase
+            .from("sessions")
+            .select("*")
+            .eq("id", active)
+            .single();
+
+          if (error) throw error;
+
+          if (data) {
+            const newSession = {
+              id: data.id,
+              title: data.title || "Untitled Chat",
+              subtitle: `Created just now`,
+              createdAt: data.created_at,
+              isActive: true,
+            };
+
+            // Add to top of list
+            setSessions(prev => [newSession, ...prev]);
+          }
+        } catch (error) {
+          console.error("Error fetching new session:", error);
+        }
+      };
+
+      fetchNewSession();
+    }
+  }, [active, sessions, loading, supabase]);
 
   const handleNewChat = async () => {
     if (!user?.email) {
@@ -231,51 +272,58 @@ export function ChatSidebarContent() {
               <span className="text-sm text-muted-foreground">No chats yet. Create one to get started!</span>
             </div>
           ) : (
-            sessions.map((item) => (
-              <div
-                key={item.id}
-                role="button"
-                tabIndex={0}
-                className={cn(
-                  "group flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-left text-md transition",
-                  item.id === active
-                    ? "bg-primary/10 text-primary"
-                    : "hover:bg-muted/70"
-                )}
-                onClick={() => handleGetChat(item.id)}
-              >
-                {/* Left icon */}
-                <div className="flex items-center justify-center pt-1">
-                  <Bot className="h-3.5 w-3.5 opacity-80" />
-                </div>
+            sessions.map((item) => {
+              const isActive = item.id === active;
+              const matchesCurrentItinerary =
+                isActive && itineraryData?.session_id === item.id;
+              const displayTitle = matchesCurrentItinerary
+                ? itineraryData?.title ?? item.title
+                : item.title;
 
-                {/* Title + subtitle */}
-                <div className="flex min-w-0 flex-1 flex-col">
-                  <span className="text-md leading-tight line-clamp-2 wrap-break-word">
-                    {itineraryData?.stops?.stops && itineraryData.stops.stops.length > 0 ? itineraryData.title : item.title}
-                  </span>
-
-                  <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                    <span className="truncate max-w-full">{item.subtitle}</span>
-                  </span>
-                </div>
-
-                {/* Ellipsis actions */}
-                {/* <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="ml-auto h-6 w-6 p-0 opacity-100 hover:opacity-100 cursor-pointer rounded-full bg-transparent hover:bg-muted/50 focus:bg-muted/50"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    console.log("More actions for", item.id);
-                  }}
+              return (
+                <div
+                  key={item.id}
+                  role="button"
+                  tabIndex={0}
+                  className={cn(
+                    "group flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-left text-md transition",
+                    isActive ? "bg-primary/10 text-primary" : "hover:bg-muted/70"
+                  )}
+                  onClick={() => handleGetChat(item.id)}
                 >
-                  <MoreVertical className="h-3.5 w-3.5" />
-                </Button> */}
-                {/* <DropdownMenuDialog /> */}
-              </div>
-            ))
+                  {/* Left icon */}
+                  <div className="flex items-center justify-center pt-1">
+                    <Bot className="h-3.5 w-3.5 opacity-80" />
+                  </div>
+
+                  {/* Title + subtitle */}
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <span className="text-md leading-tight line-clamp-2 wrap-break-word">
+                      {displayTitle}
+                    </span>
+
+                    <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                      <span className="truncate max-w-full">{item.subtitle}</span>
+                    </span>
+                  </div>
+
+                  {/* Ellipsis actions */}
+                  {/* <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="ml-auto h-6 w-6 p-0 opacity-100 hover:opacity-100 cursor-pointer rounded-full bg-transparent hover:bg-muted/50 focus:bg-muted/50"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      console.log("More actions for", item.id);
+                    }}
+                  >
+                    <MoreVertical className="h-3.5 w-3.5" />
+                  </Button> */}
+                  {/* <DropdownMenuDialog /> */}
+                </div>
+              );
+            })
           )}
         </div>
       </div>
