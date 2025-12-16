@@ -7,6 +7,7 @@ import {
   MessageCircle,
   Plus,
   MoreVertical,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
@@ -17,6 +18,16 @@ import { Spinner } from "../ui/spinner";
 import { DropdownMenuDialog } from "./chat-history-options";
 import { useItinerary } from "@/hooks/context/itinerary-context";
 import { useSupabase } from "@/hooks/context/supabase-context";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Session {
   id: number;
@@ -34,6 +45,8 @@ export function ChatSidebarContent() {
   const [loading, setLoading] = useState(true);
   const [isCreatingSession, setIsCreatingSession] = useState(false);
   const { itineraryData } = useItinerary();
+  const [sessionToDelete, setSessionToDelete] = useState<Session | null>(null);
+  const [isDeletingSession, setIsDeletingSession] = useState(false);
 
   // Fetch sessions on mount
   // useEffect(() => {
@@ -221,7 +234,33 @@ export function ChatSidebarContent() {
     setActive(id)
     console.log("Open chat", id)
   };
- 
+
+  const handleDeleteSession = async () => {
+    if (!sessionToDelete) return;
+
+    try {
+      setIsDeletingSession(true);
+      const { error } = await supabase
+        .from("sessions")
+        .delete()
+        .eq("id", sessionToDelete.id);
+
+      if (error) throw error;
+
+      setSessions((prev) => prev.filter((s) => s.id !== sessionToDelete.id));
+      if (active === sessionToDelete.id) {
+        setActive(null);
+      }
+      toast.success("Chat deleted");
+    } catch (error) {
+      console.error("Error deleting session:", error);
+      toast.error("Failed to delete chat");
+    } finally {
+      setIsDeletingSession(false);
+      setSessionToDelete(null);
+    }
+  };
+
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     const now = new Date();
@@ -308,18 +347,18 @@ export function ChatSidebarContent() {
                   </div>
 
                   {/* Ellipsis actions */}
-                  {/* <Button
+                  <Button
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="ml-auto h-6 w-6 p-0 opacity-100 hover:opacity-100 cursor-pointer rounded-full bg-transparent hover:bg-muted/50 focus:bg-muted/50"
+                    className="ml-auto h-6 w-6 p-0 opacity-70 hover:opacity-100"
                     onClick={(e) => {
                       e.stopPropagation();
-                      console.log("More actions for", item.id);
+                      setSessionToDelete(item);
                     }}
                   >
-                    <MoreVertical className="h-3.5 w-3.5" />
-                  </Button> */}
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
                   {/* <DropdownMenuDialog /> */}
                 </div>
               );
@@ -327,6 +366,28 @@ export function ChatSidebarContent() {
           )}
         </div>
       </div>
+
+      <AlertDialog open={!!sessionToDelete} onOpenChange={(open) => {
+        if (!open) setSessionToDelete(null);
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete chat?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. The chat “{sessionToDelete?.title}” and its itineraries will be removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingSession}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteSession}
+              disabled={isDeletingSession}
+            >
+              {isDeletingSession ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SidebarContent>
   );
 }

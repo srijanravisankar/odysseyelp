@@ -2,7 +2,7 @@
 
 import { SidebarContent } from "../ui/sidebar";
 import { Button } from "../ui/button";
-import { Boxes, Merge, Plus } from "lucide-react";
+import { Boxes, Merge, Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
@@ -27,6 +27,16 @@ import { DialogClose } from "@radix-ui/react-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 import { useGroup } from "@/hooks/context/group-context";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Group {
   id: number;
@@ -65,6 +75,8 @@ export function GroupsSidebarContent() {
   const [selectedJoinGroupId, setSelectedJoinGroupId] = useState("");
   const [secretCodeInput, setSecretCodeInput] = useState(""); // ✅ Added State
   const [isJoining, setIsJoining] = useState(false); // ✅ Added Loading State
+  const [groupToDelete, setGroupToDelete] = useState<Group | null>(null);
+  const [isDeletingGroup, setIsDeletingGroup] = useState(false);
 
   // 1. Fetch "My Groups"
   const fetchGroups = useCallback(async () => {
@@ -212,6 +224,33 @@ export function GroupsSidebarContent() {
     setIsGroupSheetOpen(true);
   };
 
+  const handleDeleteGroup = async () => {
+    if (!groupToDelete) return;
+
+    try {
+      setIsDeletingGroup(true);
+      const { error } = await supabase
+        .from("groups")
+        .delete()
+        .eq("id", groupToDelete.id);
+
+      if (error) throw error;
+
+      setGroups((prev) => prev.filter((group) => group.id !== groupToDelete.id));
+      if (activeGroup?.id === groupToDelete.id) {
+        setActiveGroup(null);
+        setIsGroupSheetOpen(false);
+      }
+      toast.success("Group deleted");
+    } catch (error) {
+      console.error("Error deleting group:", error);
+      toast.error("Failed to delete group");
+    } finally {
+      setIsDeletingGroup(false);
+      setGroupToDelete(null);
+    }
+  };
+
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString();
 
   return (
@@ -325,6 +364,18 @@ export function GroupsSidebarContent() {
                       {formatDate(group.createdAt)}
                     </span>
                   </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="ml-auto h-6 w-6 cursor-pointer p-0 opacity-70 hover:opacity-100"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setGroupToDelete(group);
+                    }}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
                 </div>
               ))
             )}
@@ -337,6 +388,29 @@ export function GroupsSidebarContent() {
         open={isSheetOpen} 
         onOpenChange={setIsSheetOpen} 
       />
+
+      <AlertDialog open={!!groupToDelete} onOpenChange={(open) => {
+        if (!open) setGroupToDelete(null);
+      }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete group?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. The group “{groupToDelete?.name}” and related itineraries will be removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingGroup}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteGroup}
+              disabled={isDeletingGroup}
+            >
+              {isDeletingGroup ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
+
