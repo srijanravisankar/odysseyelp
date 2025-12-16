@@ -2,14 +2,13 @@
 
 import * as React from "react";
 import {
-  Binoculars,
   BotMessageSquare,
   Brain,
-  Command,
   Compass,
   Globe,
   Home,
   Moon,
+  Palette,
   Sun,
   UsersRound,
 } from "lucide-react";
@@ -33,12 +32,18 @@ import { SidebarUserAccordion } from "@/components/user-accordion";
 import { NavUser } from "./nav-user";
 import { ExploreSidebarContent } from "./sidebar/explore-sidebar-content";
 import { ChatSidebarContent } from "./sidebar/chat-sidebar-content";
-import { TouringSidebarContent } from "./sidebar/touring-sidebar-content";
 import { MySpaceSidebarContent } from "@/components/sidebar/my-space-sidebar-content";
 import { HomeSidebarContent } from "./sidebar/home-sidebar-content";
 import { useItinerary } from "@/hooks/context/itinerary-context";
-import { Chat } from "@google/genai";
 import { GroupsSidebarContent } from "./sidebar/groups-sidebar-content";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { useThemePalette, type ThemePalette } from "@/components/theme-provider";
 
 // ----------------------
 // Sample data
@@ -65,11 +70,6 @@ const data = {
       url: "/chat",
       icon: BotMessageSquare,
     },
-    // {
-    //   title: "Touring",
-    //   url: "/touring",
-    //   icon: Binoculars,
-    // },
     {
       title: "Groups",
       url: "/groups",
@@ -80,37 +80,33 @@ const data = {
       url: "/explore",
       icon: Globe,
     },
-    {
-      title: "Theme",
-      url: "#", // special: toggles theme instead of navigating
-      icon: Moon,
-    },
   ],
 };
 
+const themePaletteOptions: { label: string; value: ThemePalette }[] = [
+  { label: "Default", value: "default" },
+  { label: "Caffeine", value: "caffeine" },
+];
+
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const { setOpen } = useSidebar();
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const pathname = usePathname();
 
   // Access context to update map theme
   const { setAppTheme } = useItinerary();
-
-  const [mounted, setMounted] = React.useState(false);
+  const { palette, setPalette } = useThemePalette();
 
   React.useEffect(() => {
-    setMounted(true);
-    // Sync initial theme to context on mount
-    if (resolvedTheme) {
-      setAppTheme(resolvedTheme as "light" | "dark");
-    }
+    if (!resolvedTheme) return;
+    setAppTheme(resolvedTheme as "light" | "dark");
   }, [resolvedTheme, setAppTheme]);
 
   // Active item is derived from current route
   const activeItem = React.useMemo(() => {
     return (
       data.navMain.find((item) => {
-        if (item.title === "Theme" || item.url === "#") return false;
+        if (item.url === "#") return false;
         if (item.url === "/") return pathname === "/";
         return pathname.startsWith(item.url);
       }) ?? data.navMain[0]
@@ -120,7 +116,6 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const sidebarContentMap: Record<string, React.ReactNode> = {
     Home: <HomeSidebarContent />,
     Chat: <ChatSidebarContent />,
-    // Touring: <TouringSidebarContent />,
     "My Space": <MySpaceSidebarContent />,
     Groups: <GroupsSidebarContent />,
     Explore: <ExploreSidebarContent />,
@@ -129,6 +124,10 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const currentSidebarContent = sidebarContentMap[activeItem?.title] || (
     <SidebarUserAccordion />
   );
+
+  const handlePaletteChange = (nextPalette: ThemePalette) => {
+    setPalette(nextPalette);
+  };
 
   return (
     <Sidebar
@@ -145,7 +144,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton size="lg" asChild className="md:h-8 md:p-0">
-                <a href="/">
+                <Link href="/">
                   <div title="The Odyssey Yelp" className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                     <Compass className="size-5" />
                   </div>
@@ -153,7 +152,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                     <span className="truncate font-medium">The Odyssey Yelp</span>
                     <span className="truncate text-xs">Your Travel Companion</span>
                   </div>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -164,59 +163,75 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
             <SidebarGroupContent className="px-1.5 md:px-0">
               <SidebarMenu>
                 {data.navMain.map((item) => {
-                  const isThemeItem = item.title === "Theme";
                   const Icon = item.icon;
 
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
                         tooltip={{
-                          children:
-                            isThemeItem && mounted
-                              ? resolvedTheme === "dark"
-                                ? "Dark Mode"
-                                : "Light Mode"
-                              : item.title,
+                          children: item.title,
                           hidden: false,
                         }}
                         onClick={() => {
-                          if (isThemeItem) {
-                            const newTheme =
-                              resolvedTheme === "dark" ? "light" : "dark";
-                            setTheme(newTheme);
-                            // Sync change to context immediately
-                            setAppTheme(newTheme);
-                            return;
-                          }
+                          if (item.url === "#") return;
                           setOpen(true);
                         }}
                         isActive={activeItem?.title === item.title}
                         className="px-2.5 md:px-2"
-                        asChild={!isThemeItem}
+                        asChild
                       >
-                        {isThemeItem ? (
-                          <>
-                            <Sun className="hidden dark:block cursor-pointer" />
-                            <Moon className="dark:hidden cursor-pointer" />
-                            <span>
-                              {mounted
-                                ? resolvedTheme === "dark"
-                                  ? "Dark Mode"
-                                  : "Light Mode"
-                                : "Theme"}
-                            </span>
-                          </>
-                        ) : (
-                          <Link href={item.url}>
-                            <Icon />
-                            <span>{item.title}</span>
-                          </Link>
-                        )}
+                        <Link href={item.url}>
+                          <Icon />
+                          <span>{item.title}</span>
+                        </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   );
                 })}
               </SidebarMenu>
+              <div className="flex flex-col gap-2 px-2 pt-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="w-full"
+                  onClick={() => {
+                    const newTheme =
+                      resolvedTheme === "dark" ? "light" : "dark";
+                    setTheme(newTheme);
+                    setAppTheme(newTheme);
+                  }}
+                  aria-label="Toggle light or dark mode"
+                >
+                  <Sun className="hidden dark:block size-4" />
+                  <Moon className="dark:hidden size-4" />
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="w-full"
+                      aria-label="Select color theme"
+                    >
+                      <Palette className="size-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="center" className="w-44">
+                    {themePaletteOptions.map((option) => (
+                      <DropdownMenuItem
+                        key={option.value}
+                        onClick={() => handlePaletteChange(option.value)}
+                        className="flex items-center justify-between"
+                      >
+                        <span>{option.label}</span>
+                        {palette === option.value && (
+                          <span className="text-xs text-muted-foreground">Active</span>
+                        )}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
