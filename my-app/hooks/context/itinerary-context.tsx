@@ -38,6 +38,8 @@ type ItineraryContextType = {
   itinerariesError: string | null;
 
   refetchItineraries: () => Promise<void>;
+  isBuildingItinerary: boolean;
+  setIsBuildingItinerary: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const ItineraryContext = createContext<ItineraryContextType | undefined>(
@@ -62,6 +64,7 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
   const [itineraries, setItineraries] = useState<Itinerary[]>([]);
   const [loadingItineraries, setLoadingItineraries] = useState(false);
   const [itinerariesError, setItinerariesError] = useState<string | null>(null);
+  const [isBuildingItinerary, setIsBuildingItinerary] = useState(false);
 
   const [refetchTrigger, setRefetchTrigger] = useState(0);
 
@@ -265,6 +268,8 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
         loadingItineraries,
         itinerariesError,
         refetchItineraries,
+        isBuildingItinerary,
+        setIsBuildingItinerary,
       }}
     >
       {children}

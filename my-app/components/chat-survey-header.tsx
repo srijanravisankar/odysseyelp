@@ -255,7 +255,7 @@ export function ChatSurveyHeader() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { itineraryData, setItineraryData } = useItinerary();
+  const { itineraryData, setItineraryData, setIsBuildingItinerary } = useItinerary();
   const { save: saveItinerary } = useSaveItinerary();
 
   async function handleSend(e: React.FormEvent<HTMLFormElement>) {
@@ -269,6 +269,7 @@ export function ChatSurveyHeader() {
     if (!query.trim()) return;
 
     setIsLoading(true);
+    setIsBuildingItinerary(true);
     setError(null);
 
     // Example:
@@ -555,6 +556,7 @@ export function ChatSurveyHeader() {
       console.error("Network error", err);
     } finally {
       setIsLoading(false);
+      setIsBuildingItinerary(false);
     }
   }
 
