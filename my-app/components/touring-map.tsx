@@ -237,13 +237,13 @@ export function TouringMap({
 
   // 4. Update Center
   useEffect(() => {
-    if (!mapRef.current || !itineraryData?.center) return;
+    if (!mapRef.current || !itineraryData?.stops?.center) return;
 
-    const { lat, lng } = itineraryData.center;
+    const { lat, lng } = itineraryData.stops.center;
     if (typeof lat !== "number" || typeof lng !== "number") return;
 
     mapRef.current.setCenter([lng, lat]);
-  }, [itineraryData?.center?.lat, itineraryData?.center?.lng]);
+  }, [itineraryData?.stops?.center?.lat, itineraryData?.stops?.center?.lng]);
 
   // 5. Update Markers
   useEffect(() => {
@@ -263,7 +263,7 @@ export function TouringMap({
 
     const bounds = new mapboxgl.LngLatBounds();
 
-    itineraryData.stops.forEach((stop: any, index: number) => {
+    itineraryData.stops.stops.forEach((stop: any, index: number) => {
       const stopId = stop.id ?? String(index);
       if (!selectedStopIds.includes(stopId)) return;
 

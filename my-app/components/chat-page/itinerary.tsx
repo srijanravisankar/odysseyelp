@@ -109,7 +109,7 @@ export function Itinerary() {
       }
 
       // 2. Gather Selected Stops Coordinates
-      const stopsToVisit = itineraryData?.stops.filter((stop: any) => {
+      const stopsToVisit = itineraryData?.stops.stops.filter((stop: any) => {
         const stopId = stop.id ?? "unknown";
         return selectedStopIds.includes(stopId);
       });
@@ -201,8 +201,8 @@ export function Itinerary() {
           {/* Main pane: map OR calendar */}
           <div className="relative flex-1 overflow-hidden rounded-lg border bg-muted">
             {viewMode === "map" ? (
-              // <TouringMap />
-              <EmptyItinerariesPage />
+              <TouringMap />
+              // <EmptyItinerariesPage />
             ) : (
               <PlannerCalendar
                 events={calendarEvents}

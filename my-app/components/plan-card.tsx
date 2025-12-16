@@ -74,8 +74,8 @@ export function PlanCard({
         {/* Thumbnail / Map area */}
         <div className="relative aspect-video w-full overflow-hidden">
           {thumbnail ? (
-            // <div className="h-full w-full">{thumbnail}</div>
-            <div className="h-full w-full">Thumbnail</div>
+            <div className="h-full w-full">{thumbnail}</div>
+            // <div className="h-full w-full">Thumbnail</div>
           ) : (
             <div className="h-full w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700" />
           )}

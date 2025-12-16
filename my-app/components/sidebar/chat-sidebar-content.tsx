@@ -252,7 +252,7 @@ export function ChatSidebarContent() {
                 {/* Title + subtitle */}
                 <div className="flex min-w-0 flex-1 flex-col">
                   <span className="text-md leading-tight line-clamp-2 wrap-break-word">
-                    {itineraryData?.stops && itineraryData.stops.length > 0 ? itineraryData.title : item.title}
+                    {itineraryData?.stops?.stops && itineraryData.stops.stops.length > 0 ? itineraryData.title : item.title}
                   </span>
 
                   <span className="flex items-center gap-1 text-[10px] text-muted-foreground">

@@ -69,14 +69,17 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
   const [refetchTrigger, setRefetchTrigger] = useState(0);
 
   const removeStop = (stopId: string) => {
-    if (!itineraryData?.stops) return;
+    if (!itineraryData?.stops?.stops) return;
 
     setItineraryData({
       ...itineraryData,
-      stops: itineraryData.stops.filter((stop: any) => {
-        const id = stop.id ?? String(itineraryData.stops.indexOf(stop));
-        return id !== stopId;
-      }),
+      stops: {
+        ...itineraryData.stops,
+        stops: itineraryData.stops.stops.filter((stop: any) => {
+          const id = stop.id ?? String(itineraryData.stops.stops.indexOf(stop));
+          return id !== stopId;
+        }),
+      },
     });
 
     // Also remove from selected stops if it was selected
