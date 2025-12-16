@@ -378,10 +378,11 @@ export function ChatSidebarContent() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeletingSession}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="cursor-pointer" disabled={isDeletingSession}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteSession}
               disabled={isDeletingSession}
+              className="cursor-pointer"
             >
               {isDeletingSession ? "Deleting..." : "Delete"}
             </AlertDialogAction>
