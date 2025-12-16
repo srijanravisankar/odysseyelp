@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useState, useEffect } from "react"
+import React, { createContext, useContext, useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 
 type SortOption = "newest" | "oldest" | "most-stops"
@@ -26,7 +26,7 @@ type ExploreContextType = {
 
 const ExploreContext = createContext<ExploreContextType | undefined>(undefined)
 
-export function ExploreProvider({ children }: { children: React.ReactNode }) {
+function ExploreProviderContent({ children }: { children: React.ReactNode }) {
     const searchParams = useSearchParams()
 
     const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "")
@@ -72,6 +72,14 @@ export function ExploreProvider({ children }: { children: React.ReactNode }) {
         >
             {children}
         </ExploreContext.Provider>
+    )
+}
+
+export function ExploreProvider({ children }: { children: React.ReactNode }) {
+    return (
+        <Suspense fallback={<div>Loading explore...</div>}>
+            <ExploreProviderContent>{children}</ExploreProviderContent>
+        </Suspense>
     )
 }
 
