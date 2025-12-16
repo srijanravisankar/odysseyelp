@@ -4,37 +4,27 @@ import React, { useState } from "react";
 import type { DateRange } from "react-day-picker";
 
 import {
-  FormInput as Form,
   Send,
   Calendar as CalendarIcon,
-  FormInput,
-  NotebookPen,
   Filter,
   ChevronLeft,
   ChevronRight,
   Check,
   MapPin,
   Users,
-  DollarSign,
   Utensils,
-  Sparkles,
-  ShieldCheck,
-  Ban,
 } from "lucide-react";
 
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -51,12 +41,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
 import { useItinerary } from "@/hooks/context/itinerary-context";
-import { saveItineraryToDatabase } from "@/lib/supabase/itinerary-db";
 import { useSaveItinerary } from "@/hooks/use-save-itinerary";
-
 import { useChat } from "@/hooks/context/session-context";
-import { createChatSession } from "@/lib/supabase/chat-session-db";
-import { useSupabase } from "@/hooks/context/supabase-context";
 
 // ---------------- Date-range picker (uses shadcn Calendar) -------------------
 
@@ -115,48 +101,21 @@ function SurveyDateRangePicker(props: {
 // ---------------- Types for the structured survey object --------------------
 
 type TripType = "solo" | "friends" | "family" | "date" | "work";
-type NoiseLevel = "chill" | "balanced" | "energetic";
-type CrowdLevel = "less_crowded" | "average" | "busy";
-type IndoorOutdoor = "indoor" | "outdoor" | "mix";
-type AlcoholPref = "no_alcohol" | "okay_with_alcohol" | "must_have_alcohol";
 
 export type SurveyContext = {
-  trip: {
-    type: TripType;
-    vibe: string[];
-    occasion: string;
-    people: number;
-  };
   location: {
     area: string;
     dateRange: { start?: string; end?: string };
-    timesOfDay: string[];
+  };
+  trip: {
+    type: TripType;
+    people: number;
   };
   budget: {
     priceLevel: "$" | "$$" | "$$$" | "$$$$";
-    perPersonPerDayRange: string;
-    transport: string;
-    maxTravelMinutes: number;
   };
   food: {
     dietary: string[];
-    cuisines: string[];
-    alcoholPreference: AlcoholPref;
-  };
-  preferences: {
-    noise: NoiseLevel;
-    crowd: CrowdLevel;
-    indoorOutdoor: IndoorOutdoor;
-    kidFriendly: boolean;
-  };
-  qualityFilters: {
-    minRating: number;
-    minReviewCount: number;
-    mustTakeReservations: boolean;
-  };
-  avoid: {
-    tags: string[];
-    notes: string;
   };
 };
 
@@ -177,35 +136,14 @@ function toggleInArray(
 
 // Step definitions for multi-step form
 const SURVEY_STEPS = [
-  { id: 1, title: "Trip Basics", description: "Who's traveling?", icon: Users },
-  { id: 2, title: "Location", description: "Where & when?", icon: MapPin },
-  {
-    id: 3,
-    title: "Budget",
-    description: "Your spending range",
-    icon: DollarSign,
-  },
-  {
-    id: 4,
-    title: "Food & Dietary",
-    description: "Dietary preferences",
-    icon: Utensils,
-  },
-  {
-    id: 5,
-    title: "Vibe",
-    description: "Atmosphere preferences",
-    icon: Sparkles,
-  },
-  { id: 6, title: "Quality", description: "Rating filters", icon: ShieldCheck },
-  { id: 7, title: "Avoid", description: "Things to skip", icon: Ban },
+  { id: 1, title: "Where & When", description: "Location and dates", icon: MapPin },
+  { id: 2, title: "Who & Budget", description: "Trip details", icon: Users },
+  { id: 3, title: "Food", description: "Dietary needs", icon: Utensils },
 ] as const;
 
 const TOTAL_STEPS = SURVEY_STEPS.length;
 
 export function ChatSurveyHeader() {
-  const supabase = useSupabase();
-
   const [dialogOpen, setDialogOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -215,45 +153,19 @@ export function ChatSurveyHeader() {
   // last-saved survey context (so we can pair it with query on send)
   const [savedSurvey, setSavedSurvey] = useState<SurveyContext | null>(null);
 
-  // Trip
-  const [tripType, setTripType] = useState<TripType>("date");
-  const [tripVibe, setTripVibe] = useState<string[]>(["cozy", "food-focused"]);
-  const [tripOccasion, setTripOccasion] = useState("anniversary");
-  const [tripPeople, setTripPeople] = useState(2);
-
   // Location
-  const [area, setArea] = useState("Downtown Toronto");
+  const [area, setArea] = useState("");
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
-  const [timesOfDay, setTimesOfDay] = useState<string[]>(["evening"]);
+
+  // Trip
+  const [tripType, setTripType] = useState<TripType>("solo");
+  const [tripPeople, setTripPeople] = useState(1);
 
   // Budget
-  const [priceLevel, setPriceLevel] = useState<"$" | "$$" | "$$$" | "$$$$">(
-    "$$"
-  );
-  const [perPersonRange, setPerPersonRange] = useState("50-100");
-  const [transport, setTransport] = useState("walking");
-  const [maxMinutes, setMaxMinutes] = useState(15);
+  const [priceLevel, setPriceLevel] = useState<"$" | "$$" | "$$$" | "$$$$">("$$");
 
   // Food
-  const [dietary, setDietary] = useState<string[]>(["halal", "gluten-free"]);
-  const [cuisines, setCuisines] = useState("Middle Eastern, Asian");
-  const [alcoholPreference, setAlcoholPreference] =
-    useState<AlcoholPref>("no_alcohol");
-
-  // Preferences
-  const [noise, setNoise] = useState<NoiseLevel>("chill");
-  const [crowd, setCrowd] = useState<CrowdLevel>("less_crowded");
-  const [indoorOutdoor, setIndoorOutdoor] = useState<IndoorOutdoor>("mix");
-  const [kidFriendly, setKidFriendly] = useState(false);
-
-  // Quality filters
-  const [minRating, setMinRating] = useState(4.0);
-  const [minReviews, setMinReviews] = useState(50);
-  const [mustTakeReservations, setMustTakeReservations] = useState(true);
-
-  // Avoid
-  const [avoidTags, setAvoidTags] = useState("nightclubs, tourist_traps");
-  const [avoidNotes, setAvoidNotes] = useState("no rooftop bars");
+  const [dietary, setDietary] = useState<string[]>([]);
 
   const {active, setActive} = useChat();
 
@@ -264,51 +176,22 @@ export function ChatSurveyHeader() {
       d ? d.toISOString().slice(0, 10) : undefined;
 
     return {
-      trip: {
-        type: tripType,
-        vibe: tripVibe,
-        occasion: tripOccasion,
-        people: tripPeople || 1,
-      },
       location: {
         area,
         dateRange: {
           start: toISODate(dateRange?.from),
           end: toISODate(dateRange?.to),
         },
-        timesOfDay,
+      },
+      trip: {
+        type: tripType,
+        people: tripPeople || 1,
       },
       budget: {
         priceLevel,
-        perPersonPerDayRange: perPersonRange,
-        transport,
-        maxTravelMinutes: maxMinutes || 0,
       },
       food: {
         dietary,
-        cuisines: cuisines
-          .split(",")
-          .map((c) => c.trim())
-          .filter(Boolean),
-        alcoholPreference,
-      },
-      preferences: {
-        noise,
-        crowd,
-        indoorOutdoor,
-        kidFriendly,
-      },
-      qualityFilters: {
-        minRating,
-        minReviewCount: minReviews,
-        mustTakeReservations,
-      },
-      avoid: {
-        tags: avoidTags
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean),
-        notes: avoidNotes,
       },
     };
   };
@@ -677,136 +560,80 @@ export function ChatSurveyHeader() {
 
   const renderStepContent = () => {
     switch (currentStep) {
+      // Step 1: Where & When
       case 1:
         return (
           <div className="space-y-6">
             <div className="space-y-2">
               <Label className="text-sm font-medium">
-                Who&apos;s going on this trip?
-              </Label>
-              <div className="flex flex-wrap gap-2">
-                {["solo", "friends", "family", "date", "work"].map((t) => (
-                  <Button
-                    key={t}
-                    type="button"
-                    size="sm"
-                    variant={tripType === t ? "default" : "outline"}
-                    className="rounded-full capitalize"
-                    onClick={() => setTripType(t as TripType)}
-                  >
-                    {t}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">
-                What vibe are you looking for?
-              </Label>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  "cozy",
-                  "food-focused",
-                  "adventurous",
-                  "romantic",
-                  "chill",
-                  "lively",
-                  "cultural",
-                ].map((v) => (
-                  <Button
-                    key={v}
-                    type="button"
-                    size="sm"
-                    variant={tripVibe.includes(v) ? "default" : "outline"}
-                    className="rounded-full capitalize"
-                    onClick={() => toggleInArray(v, tripVibe, setTripVibe)}
-                  >
-                    {v}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Special occasion?</Label>
-                <Input
-                  value={tripOccasion}
-                  onChange={(e) => setTripOccasion(e.target.value)}
-                  placeholder="anniversary, birthday, first date..."
-                  className="h-10"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Number of people</Label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={tripPeople}
-                  onChange={(e) =>
-                    setTripPeople(
-                      Number.isNaN(parseInt(e.target.value))
-                        ? 1
-                        : parseInt(e.target.value)
-                    )
-                  }
-                  className="h-10"
-                />
-              </div>
-            </div>
-          </div>
-        );
-
-      case 2:
-        return (
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">
-                Where are you exploring?
+                Where are you exploring? <span className="text-red-500">*</span>
               </Label>
               <Input
                 value={area}
                 onChange={(e) => setArea(e.target.value)}
-                placeholder="Downtown Toronto, Central Park, etc."
+                placeholder="e.g. Downtown Toronto, Manhattan, Paris"
                 className="h-10"
               />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium">When?</Label>
+              <Label className="text-sm font-medium">When? (Optional)</Label>
               <SurveyDateRangePicker
                 value={dateRange}
                 onChange={setDateRange}
               />
             </div>
+          </div>
+        );
 
+      // Step 2: Who & Budget
+      case 2:
+        return (
+          <div className="space-y-6">
             <div className="space-y-2">
-              <Label className="text-sm font-medium">What time of day?</Label>
+              <Label className="text-sm font-medium">Who&apos;s traveling?</Label>
               <div className="flex flex-wrap gap-2">
-                {["morning", "afternoon", "evening", "late night"].map((t) => (
+                {[
+                  { value: "solo", label: "✈️ Solo", icon: "✈️" },
+                  { value: "date", label: "💑 Date", icon: "💑" },
+                  { value: "friends", label: "👥 Friends", icon: "👥" },
+                  { value: "family", label: "👨‍👩‍👧 Family", icon: "👨‍👩‍👧" },
+                  { value: "work", label: "💼 Work", icon: "💼" },
+                ].map((opt) => (
                   <Button
-                    key={t}
+                    key={opt.value}
                     type="button"
                     size="sm"
-                    variant={timesOfDay.includes(t) ? "default" : "outline"}
-                    className="rounded-full capitalize"
-                    onClick={() => toggleInArray(t, timesOfDay, setTimesOfDay)}
+                    variant={tripType === opt.value ? "default" : "outline"}
+                    className="rounded-full"
+                    onClick={() => setTripType(opt.value as TripType)}
                   >
-                    {t}
+                    {opt.label}
                   </Button>
                 ))}
               </div>
             </div>
-          </div>
-        );
 
-      case 3:
-        return (
-          <div className="space-y-6">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Number of people</Label>
+              <Input
+                type="number"
+                min={1}
+                value={tripPeople}
+                onChange={(e) =>
+                  setTripPeople(
+                    Number.isNaN(parseInt(e.target.value))
+                      ? 1
+                      : parseInt(e.target.value)
+                  )
+                }
+                className="h-10"
+              />
+            </div>
+
             <div className="space-y-2">
               <Label className="text-sm font-medium">
-                Price range preference
+                Budget per person
               </Label>
               <div className="flex flex-wrap gap-2">
                 {["$", "$$", "$$$", "$$$$"].map((p) => (
@@ -824,68 +651,20 @@ export function ChatSurveyHeader() {
                   </Button>
                 ))}
               </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">
-                  Budget per person per day
-                </Label>
-                <Input
-                  value={perPersonRange}
-                  onChange={(e) => setPerPersonRange(e.target.value)}
-                  placeholder="e.g. 50-100"
-                  className="h-10"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">
-                  Max travel time (minutes)
-                </Label>
-                <Input
-                  type="number"
-                  min={0}
-                  value={maxMinutes}
-                  onChange={(e) =>
-                    setMaxMinutes(
-                      Number.isNaN(parseInt(e.target.value))
-                        ? 0
-                        : parseInt(e.target.value)
-                    )
-                  }
-                  className="h-10"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">
-                How will you get around?
-              </Label>
-              <div className="flex flex-wrap gap-2">
-                {["walking", "public transit", "car", "bike"].map((t) => (
-                  <Button
-                    key={t}
-                    type="button"
-                    size="sm"
-                    variant={transport === t ? "default" : "outline"}
-                    className="rounded-full capitalize"
-                    onClick={() => setTransport(t)}
-                  >
-                    {t}
-                  </Button>
-                ))}
-              </div>
+              <p className="text-xs text-muted-foreground">
+                $ = Budget-friendly, $$ = Moderate, $$$ = Upscale, $$$$ = Luxury
+              </p>
             </div>
           </div>
         );
 
-      case 4:
+      // Step 3: Food
+      case 3:
         return (
           <div className="space-y-6">
             <div className="space-y-2">
               <Label className="text-sm font-medium">
-                Any dietary requirements?
+                Any dietary requirements? (Optional)
               </Label>
               <div className="flex flex-wrap gap-2">
                 {[
@@ -911,229 +690,13 @@ export function ChatSurveyHeader() {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Cuisine preferences</Label>
-              <Input
-                value={cuisines}
-                onChange={(e) => setCuisines(e.target.value)}
-                placeholder="e.g. Middle Eastern, Asian, Italian"
-                className="h-10"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Alcohol preference</Label>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { value: "no_alcohol", label: "No alcohol" },
-                  { value: "okay_with_alcohol", label: "Okay with alcohol" },
-                  { value: "must_have_alcohol", label: "Must have drinks 🍷" },
-                ].map((opt) => (
-                  <Button
-                    key={opt.value}
-                    type="button"
-                    size="sm"
-                    variant={
-                      alcoholPreference === opt.value ? "default" : "outline"
-                    }
-                    className="rounded-full"
-                    onClick={() =>
-                      setAlcoholPreference(opt.value as AlcoholPref)
-                    }
-                  >
-                    {opt.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-
-      case 5:
-        return (
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Noise level</Label>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { value: "chill", label: "🧘 Chill & quiet" },
-                  { value: "balanced", label: "⚖️ Balanced" },
-                  { value: "energetic", label: "🎉 Energetic" },
-                ].map((opt) => (
-                  <Button
-                    key={opt.value}
-                    type="button"
-                    size="sm"
-                    variant={noise === opt.value ? "default" : "outline"}
-                    className="rounded-full"
-                    onClick={() => setNoise(opt.value as NoiseLevel)}
-                  >
-                    {opt.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Crowd preference</Label>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { value: "less_crowded", label: "Less crowded" },
-                  { value: "average", label: "Average" },
-                  { value: "busy", label: "Don't mind busy" },
-                ].map((opt) => (
-                  <Button
-                    key={opt.value}
-                    type="button"
-                    size="sm"
-                    variant={crowd === opt.value ? "default" : "outline"}
-                    className="rounded-full"
-                    onClick={() => setCrowd(opt.value as CrowdLevel)}
-                  >
-                    {opt.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Indoor or outdoor?</Label>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { value: "indoor", label: "🏠 Indoor" },
-                  { value: "outdoor", label: "🌳 Outdoor" },
-                  { value: "mix", label: "🔄 Mix of both" },
-                ].map((opt) => (
-                  <Button
-                    key={opt.value}
-                    type="button"
-                    size="sm"
-                    variant={
-                      indoorOutdoor === opt.value ? "default" : "outline"
-                    }
-                    className="rounded-full"
-                    onClick={() => setIndoorOutdoor(opt.value as IndoorOutdoor)}
-                  >
-                    {opt.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-              <div className="space-y-0.5">
-                <Label className="text-sm font-medium">Kid friendly</Label>
-                <p className="text-xs text-muted-foreground">
-                  Include places suitable for children
-                </p>
-              </div>
-              <Switch checked={kidFriendly} onCheckedChange={setKidFriendly} />
-            </div>
-          </div>
-        );
-
-      case 6:
-        return (
-          <div className="space-y-6">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Minimum rating</Label>
-                <Input
-                  type="number"
-                  min={1}
-                  max={5}
-                  step={0.5}
-                  value={minRating}
-                  onChange={(e) =>
-                    setMinRating(
-                      Number.isNaN(parseFloat(e.target.value))
-                        ? 0
-                        : parseFloat(e.target.value)
-                    )
-                  }
-                  className="h-10"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Only show places rated {minRating}+ stars
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Minimum reviews</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  value={minReviews}
-                  onChange={(e) =>
-                    setMinReviews(
-                      Number.isNaN(parseInt(e.target.value))
-                        ? 0
-                        : parseInt(e.target.value)
-                    )
-                  }
-                  className="h-10"
-                />
-                <p className="text-xs text-muted-foreground">
-                  At least {minReviews} reviews
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-              <div className="space-y-0.5">
-                <Label className="text-sm font-medium">
-                  Reservations required
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  Only show places that take reservations
-                </p>
-              </div>
-              <Switch
-                checked={mustTakeReservations}
-                onCheckedChange={setMustTakeReservations}
-              />
-            </div>
-          </div>
-        );
-
-      case 7:
-        return (
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">
-                Types of places to avoid
-              </Label>
-              <Input
-                value={avoidTags}
-                onChange={(e) => setAvoidTags(e.target.value)}
-                placeholder="e.g. nightclubs, tourist traps, fast food"
-                className="h-10"
-              />
-              <p className="text-xs text-muted-foreground">
-                Separate with commas
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">
-                Anything else to avoid?
-              </Label>
-              <Input
-                value={avoidNotes}
-                onChange={(e) => setAvoidNotes(e.target.value)}
-                placeholder="e.g. no rooftop bars, avoid chain restaurants"
-                className="h-10"
-              />
-            </div>
-
             {/* Summary preview */}
             <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 space-y-2">
               <p className="text-sm font-medium text-primary">
-                Survey Complete! 🎉
+                Almost there! 🎉
               </p>
               <p className="text-xs text-muted-foreground">
-                Your preferences will be used to personalize your itinerary
-                recommendations. You can always come back and update these
-                settings.
+                Your preferences will help us create the perfect itinerary for you.
               </p>
             </div>
           </div>
@@ -1143,6 +706,7 @@ export function ChatSurveyHeader() {
         return null;
     }
   };
+
 
   const currentStepData = SURVEY_STEPS.find((s) => s.id === currentStep)!;
   const StepIcon = currentStepData.icon;

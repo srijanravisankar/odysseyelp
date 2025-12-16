@@ -29,8 +29,6 @@ type ItineraryContextType = {
   setAppTheme: React.Dispatch<
     React.SetStateAction<"light" | "dark" | "system">
   >;
-  routeGeoJSON: any;
-  setRouteGeoJSON: (json: any) => void;
 
   removeStop: (stopId: string) => void;
 
@@ -59,7 +57,6 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
   const [appTheme, setAppTheme] = useState<"light" | "dark" | "system">(
     "system"
   );
-  const [routeGeoJSON, setRouteGeoJSON] = useState<any>(null);
 
   // Itineraries fetched from database
   const [itineraries, setItineraries] = useState<Itinerary[]>([]);
@@ -69,19 +66,28 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
   const [refetchTrigger, setRefetchTrigger] = useState(0);
 
   const removeStop = (stopId: string) => {
-    if (!itineraryData?.stops) return;
+    if (!itineraryData?.stops?.stops) return;
 
     setItineraryData({
       ...itineraryData,
-      stops: itineraryData.stops.filter((stop: any) => {
-        const id = stop.id ?? String(itineraryData.stops.indexOf(stop));
-        return id !== stopId;
-      }),
+      stops: {
+        ...itineraryData.stops,
+        stops: itineraryData.stops.stops.filter((stop: any) => {
+          const id = stop.id ?? String(itineraryData.stops.stops.indexOf(stop));
+          return id !== stopId;
+        }),
+      },
     });
 
     // Also remove from selected stops if it was selected
     setSelectedStopIds((prev) => prev.filter((id) => id !== stopId));
   };
+
+  // Clear selectedStopIds when itineraryData changes (switching between itineraries)
+  useEffect(() => {
+    console.log("Itinerary changed, clearing selectedStopIds");
+    setSelectedStopIds([]);
+  }, [itineraryData?.id]);
 
   // useEffect(() => {
   //   const fetchItineraries = async () => {
@@ -254,8 +260,6 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
         setSelectedStopIds,
         appTheme,
         setAppTheme,
-        routeGeoJSON,
-        setRouteGeoJSON,
         removeStop,
         itineraries,
         loadingItineraries,
