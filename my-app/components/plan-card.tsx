@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { Earth, Heart, Hash } from "lucide-react"
+import { Earth, Heart, Hash, MessageSquareText, ThumbsUp, ThumbsDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import {
@@ -38,6 +38,22 @@ type PlanCardProps = {
   thumbnail?: React.ReactNode
   /** Optional className override */
   className?: string
+  /** Hide action buttons (heart and globe icons) */
+  hideActions?: boolean
+  /** Show social media actions (comments, like, dislike) - for explore page */
+  showSocialActions?: boolean
+  /** Number of likes */
+  likeCount?: number
+  /** Number of dislikes */
+  dislikeCount?: number
+  /** Number of comments */
+  commentCount?: number
+  /** Current user's vote on this itinerary ('like', 'dislike', or undefined) */
+  userVote?: 'like' | 'dislike'
+  /** Called when user clicks like button */
+  onLike?: () => void
+  /** Called when user clicks dislike button */
+  onDislike?: () => void
 }
 
 export function PlanCard({
@@ -51,6 +67,14 @@ export function PlanCard({
   onTogglePublish,
   thumbnail,
   className,
+  hideActions = false,
+  showSocialActions = false,
+  likeCount = 0,
+  dislikeCount = 0,
+  commentCount = 0,
+  userVote,
+  onLike,
+  onDislike,
 }: PlanCardProps) {
   const [publishDialogOpen, setPublishDialogOpen] = useState(false)
   const [tagsDialogOpen, setTagsDialogOpen] = useState(false)
@@ -117,50 +141,118 @@ export function PlanCard({
             </div>
 
             {/* Right side: actions */}
-            <div className="flex items-center gap-1">
-              {/* Like */}
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                className={cn(
-                  "h-7 w-7 p-0 transition",
-                  isLiked
-                    ? "text-red-500 hover:text-red-500 hover:bg-red-500/10"
-                    : "hover:text-red-500"
-                )}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onToggleLike?.()
-                }}
-              >
-                <Heart
+            {!hideActions && (
+              <div className="flex items-center gap-1">
+                {/* Like */}
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
                   className={cn(
-                    "h-4 w-4",
-                    isLiked ? "fill-red-500" : "fill-none"
+                    "h-7 w-7 p-0 transition",
+                    isLiked
+                      ? "text-red-500 hover:text-red-500 hover:bg-red-500/10"
+                      : "hover:text-red-500"
                   )}
-                />
-              </Button>
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onToggleLike?.()
+                  }}
+                >
+                  <Heart
+                    className={cn(
+                      "h-4 w-4",
+                      isLiked ? "fill-red-500" : "fill-none"
+                    )}
+                  />
+                </Button>
 
-              {/* Publish */}
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                className={cn(
-                  "h-7 w-7 p-0 transition",
-                  isPublished
-                    ? "text-emerald-500 hover:text-emerald-500 hover:bg-emerald-500/10"
-                    : "hover:text-emerald-500"
-                )}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setPublishDialogOpen(true)
-                }}
-              >
-                <Earth className="h-4 w-4" />
-              </Button>
-            </div>
+                {/* Publish */}
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  className={cn(
+                    "h-7 w-7 p-0 transition",
+                    isPublished
+                      ? "text-emerald-500 hover:text-emerald-500 hover:bg-emerald-500/10"
+                      : "hover:text-emerald-500"
+                  )}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setPublishDialogOpen(true)
+                  }}
+                >
+                  <Earth className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+
+            {/* Social Media Actions - for explore page */}
+            {showSocialActions && (
+              <div className="flex items-center gap-1">
+                {/* Like */}
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className={cn(
+                    "h-7 px-2 gap-1.5 text-[11px] transition-all",
+                    userVote === 'like'
+                      ? "text-blue-500 hover:text-blue-600 bg-blue-500/10 hover:bg-blue-500/20"
+                      : "hover:text-blue-500 hover:bg-blue-500/10"
+                  )}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onLike?.()
+                  }}
+                >
+                  <ThumbsUp className={cn(
+                    "h-3.5 w-3.5",
+                    userVote === 'like' && "fill-blue-500"
+                  )} />
+                  <span>{likeCount}</span>
+                </Button>
+
+                {/* Dislike */}
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className={cn(
+                    "h-7 px-2 gap-1.5 text-[11px] transition-all",
+                    userVote === 'dislike'
+                      ? "text-orange-500 hover:text-orange-600 bg-orange-500/10 hover:bg-orange-500/20"
+                      : "hover:text-orange-500 hover:bg-orange-500/10"
+                  )}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onDislike?.()
+                  }}
+                >
+                  <ThumbsDown className={cn(
+                    "h-3.5 w-3.5",
+                    userVote === 'dislike' && "fill-orange-500"
+                  )} />
+                  <span>{dislikeCount}</span>
+                </Button>
+
+                {/* Comments */}
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 px-2 gap-1.5 text-[11px] hover:text-primary hover:bg-primary/10 transition-all"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    // Comments are viewed in the dialog, no action needed here
+                  }}
+                >
+                  <MessageSquareText className="h-3.5 w-3.5" />
+                  <span>{commentCount}</span>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
