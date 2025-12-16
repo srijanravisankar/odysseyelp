@@ -83,12 +83,14 @@ export function Itinerary() {
       <CardContent className="flex flex-col flex-1 min-h-0 pr-2 pl-2 pt-2 pb-2 overflow-y-auto w-50">
         {itineraries.length === 0 ? <EmptyItinerariesPage /> : <ItineraryScrollArea />}
 
-        <div className="w-full flex justify-between items-center shrink-0 pt-2 px-1">
+        <div className={cn("w-full flex justify-between items-center shrink-0 pt-2 px-1", itineraries.length === 0 ? "invisible" : "")}>
           <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
              {locationName ? (
                <>
                 <Button className="flex items-center gap-2 rounded-full text-xs h-6 w-auto" variant="outline" size="sm">
                   <span className="relative flex h-2.5 w-2.5 shrink-0">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-200 opacity-25"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-50"></span>
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                   </span>
@@ -97,13 +99,15 @@ export function Itinerary() {
                </>
              ) : (
               <>
-                <div className="flex items-center gap-2">
+                <Button className="flex items-center gap-2 rounded-full text-xs h-6 w-auto" variant="outline" size="sm">
                   <span className="relative flex h-2.5 w-2.5 shrink-0">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gray-200 opacity-25"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gray-300 opacity-50"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gray-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-gray-500"></span>
                   </span>
                   <span>Location not detected</span>
-                </div>
+                </Button>
               </>
              )}
           </div>

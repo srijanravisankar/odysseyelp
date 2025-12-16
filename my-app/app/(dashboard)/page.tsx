@@ -39,7 +39,7 @@ export default function Page() {
         {/* Main Content Area */}
         <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
           <RecentItineraries />
-          <FeaturedDestinations />
+          {/* <FeaturedDestinations /> */}
         </div>
       </div>
     </ScrollArea>

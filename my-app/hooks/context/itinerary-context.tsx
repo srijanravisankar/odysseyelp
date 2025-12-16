@@ -32,7 +32,6 @@ type ItineraryContextType = {
 
   removeStop: (stopId: string) => void;
 
-  // Fetched itineraries from Supabase
   itineraries: Itinerary[];
   loadingItineraries: boolean;
   itinerariesError: string | null;
@@ -51,9 +50,10 @@ const ItineraryContext = createContext<ItineraryContextType | undefined>(
 
 export function ItineraryProvider({ children }: { children: React.ReactNode }) {
   const supabase = useSupabase();
-  const { active } = useChat();
+  // ✅ 1. Get Setters to reset selection on page change
+  const { active, setActive } = useChat(); 
   const { user } = useUser();
-  const { activeGroup } = useGroup();
+  const { activeGroup, setActiveGroup } = useGroup();
 
   const pathname = usePathname();
 
@@ -65,7 +65,6 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
 
   const [routeGeoJSON, setRouteGeoJSON] = useState<any>(null);
 
-  // Itineraries fetched from database
   const [itineraries, setItineraries] = useState<Itinerary[]>([]);
   const [loadingItineraries, setLoadingItineraries] = useState(false);
   const [itinerariesError, setItinerariesError] = useState<string | null>(null);
@@ -87,107 +86,63 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
       },
     });
 
-    // Also remove from selected stops if it was selected
     setSelectedStopIds((prev) => prev.filter((id) => id !== stopId));
   };
 
-  // Clear selectedStopIds when itineraryData changes (switching between itineraries)
   useEffect(() => {
     console.log("Itinerary changed, clearing selectedStopIds");
     setSelectedStopIds([]);
   }, [itineraryData?.id]);
 
-  // useEffect(() => {
-  //   const fetchItineraries = async () => {
-  //     // ✅ Change from user?.email to user?.id for more reliable dependency
-  //     console.log("DEBUG: fetchItineraries effect triggered", {
-  //       active,
-  //       userId: user?.id,
-  //       userEmail: user?.email,
-  //     });
-
-  //     if (!active || !user?.id) {
-  //       console.log("Skipping fetch: missing active or user");
-  //       setItineraries([]);
-  //       setItineraryData(null);
-  //       setLoadingItineraries(false);
-  //       return;
-  //     }
-
-  //     setLoadingItineraries(true);
-  //     setItinerariesError(null);
-
-  //     try {
-  //       const { data: authData } = await supabase.auth.getUser();
-  //       if (!authData.user) {
-  //         setItinerariesError("User not authenticated");
-  //         console.error("No auth user found");
-  //         return;
-  //       }
-
-  //       console.log("Fetching itineraries for:", {
-  //         userId: authData.user.id,
-  //         sessionId: active,
-  //       });
-
-  //       const { data, error: queryError } = await supabase
-  //         .from("itineraries")
-  //         .select("*")
-  //         .eq("user_id", authData.user.id)
-  //         .eq("session_id", active)
-  //         .order("created_at", { ascending: true });
-
-  //       if (queryError) {
-  //         setItinerariesError(queryError.message);
-  //         console.error("Error fetching itineraries:", queryError);
-  //         return;
-  //       }
-
-  //       console.log("Itineraries fetched:", data);
-
-  //       const fetchedItineraries = data || [];
-  //       setItineraries(fetchedItineraries);
-
-  //       if (fetchedItineraries.length > 0) {
-  //         console.log("Setting itineraryData to first itinerary:", fetchedItineraries[0]);
-  //         setItineraryData(fetchedItineraries[0]);
-  //       } else {
-  //         console.log("No itineraries found for this session");
-  //         setItineraryData(null);
-  //       }
-  //     } catch (err: any) {
-  //       setItinerariesError(err.message || "Failed to fetch itineraries");
-  //       console.error("Fetch itineraries error:", err);
-  //     } finally {
-  //       setLoadingItineraries(false);
-  //     }
-  //   };
-
-  //   fetchItineraries();
-  //   // ✅ Changed dependency from user?.email to user?.id
-  // }, [active, user?.id, supabase]);
-
   const refetchItineraries = useCallback(async () => {
     console.log("Manual refetch triggered");
     setRefetchTrigger((prev) => prev + 1);
   }, []);
-  
+
+  // ✅ 2. CLEANUP EFFECT: Runs ONLY when Pathname changes
+  // This enforces the "Clean Slate" rule.
+  useEffect(() => {
+    console.log("🚀 Route changed:", pathname, "-> Wiping Data");
+
+    // 1. Clear Data
+    setItineraryData(null);
+    setItineraries([]);
+    setLoadingItineraries(false);
+    
+    // 2. Clear Selections (Forces manual re-selection)
+    // Using a timeout prevents conflict with the render cycle
+    setTimeout(() => {
+        if (pathname?.startsWith("/groups")) {
+            // Entered groups page -> Deselect any active group
+            setActiveGroup(null);
+        } else if (pathname?.startsWith("/chat")) {
+            // Entered chat page -> Deselect any active session
+            if (setActive) setActive(null as any); 
+        }
+    }, 0);
+
+  }, [pathname, setActiveGroup, setActive]);
+
+
+  // ✅ 3. FETCH EFFECT: Runs ONLY when Selection Changes (active / activeGroup)
+  // Removed 'pathname' from dependency array to prevent auto-fetch on nav
   useEffect(() => {
     const fetchItineraries = async () => {
-      // ✅ Change from user?.email to user?.id for more reliable dependency
-      console.log("DEBUG: fetchItineraries effect triggered", {
-        active,
-        userId: user?.id,
-        userEmail: user?.email,
-      });
+      // Determine context based on the CURRENT pathname ref
+      // (We read pathname, but don't react to it changing)
+      const isGroupPage = window.location.pathname.startsWith("/groups");
+      const isChatPage = window.location.pathname.startsWith("/chat");
 
-      // if ((!active && !activeGroup) || !user?.id) {
-      //   console.log("Skipping fetch: missing active or user");
-      //   setItineraries([]);
-      //   setItineraryData(null);
-      //   setLoadingItineraries(false);
-      //   return;
-      // }
+      // Skip if nothing selected
+      if (isGroupPage && !activeGroup) return;
+      if (isChatPage && !active) return;
+      if (!isGroupPage && !isChatPage) return;
+
+      console.log("DEBUG: Fetching Itineraries for selection", {
+        active,
+        activeGroup: activeGroup?.id,
+        pathname: window.location.pathname
+      });
 
       setLoadingItineraries(true);
       setItinerariesError(null);
@@ -196,33 +151,21 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
         const { data: authData } = await supabase.auth.getUser();
         if (!authData.user) {
           setItinerariesError("User not authenticated");
-          console.error("No auth user found");
           return;
         }
-
-        console.log("Fetching itineraries for:", {
-          userId: authData.user.id,
-          sessionId: active,
-        });
 
         let query = supabase
           .from("itineraries")
           .select("*")
-          .order("created_at", { ascending: true }); // Newest first
-        
-        const isGroupPage = pathname?.startsWith("/groups");
+          .order("created_at", { ascending: true });
 
+        // Logic
         if (isGroupPage && activeGroup) {
-          console.log("Fetching GROUP itineraries:", activeGroup.id);
-          query = query.eq("group_id", activeGroup.id);
-        } else if (active) {
-          // Default to session (chat) itineraries otherwise
-          console.log("Fetching SESSION itineraries:", active);
-          query = query.eq("session_id", active).eq("user_id", user?.id);
+           query = query.eq("group_id", activeGroup.id);
+        } else if (isChatPage && active) {
+           query = query.eq("session_id", active).eq("user_id", authData.user.id);
         } else {
-           // If neither applies (e.g. on /groups but no group selected), clear list
-           setItineraries([]);
-           setItineraryData(null);
+           // Should be caught by guard clause, but safe fallback
            setLoadingItineraries(false);
            return;
         }
@@ -231,33 +174,27 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
 
         if (queryError) {
           setItinerariesError(queryError.message);
-          console.error("Error fetching itineraries:", queryError);
           return;
         }
-
-        console.log("Itineraries fetched:", data);
 
         const fetchedItineraries = data || [];
         setItineraries(fetchedItineraries);
 
         if (fetchedItineraries.length > 0) {
-          console.log("Setting itineraryData to first itinerary:", fetchedItineraries[0]);
           setItineraryData(fetchedItineraries[0]);
         } else {
-          console.log("No itineraries found for this session");
           setItineraryData(null);
         }
       } catch (err: any) {
         setItinerariesError(err.message || "Failed to fetch itineraries");
-        console.error("Fetch itineraries error:", err);
       } finally {
         setLoadingItineraries(false);
       }
     };
 
     fetchItineraries();
-    // ✅ Changed dependency from user?.email to user?.id
-  }, [active, activeGroup, user?.id, supabase, refetchTrigger, pathname]);
+
+  }, [active, activeGroup, user?.id, supabase, refetchTrigger]); // 👈 NO pathname here
 
   return (
     <ItineraryContext.Provider
