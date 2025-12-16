@@ -1,4 +1,5 @@
 "use client"
+// here is the comment
 
 import { useEffect, useState, useMemo } from "react"
 import { PlanCard } from "@/components/plan-card"
@@ -165,7 +166,7 @@ export function ExploreGrid({
         }
 
 
-        // Apply date range filter
+        // Apply date range filter, here is the comment
         if (filters.dateRange) {
             const now = new Date()
             result = result.filter((itinerary) => {
