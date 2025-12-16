@@ -48,6 +48,12 @@ type PlanCardProps = {
   dislikeCount?: number
   /** Number of comments */
   commentCount?: number
+  /** Current user's vote on this itinerary ('like', 'dislike', or undefined) */
+  userVote?: 'like' | 'dislike'
+  /** Called when user clicks like button */
+  onLike?: () => void
+  /** Called when user clicks dislike button */
+  onDislike?: () => void
 }
 
 export function PlanCard({
@@ -66,6 +72,9 @@ export function PlanCard({
   likeCount = 0,
   dislikeCount = 0,
   commentCount = 0,
+  userVote,
+  onLike,
+  onDislike,
 }: PlanCardProps) {
   const [publishDialogOpen, setPublishDialogOpen] = useState(false)
   const [tagsDialogOpen, setTagsDialogOpen] = useState(false)
@@ -187,13 +196,21 @@ export function PlanCard({
                   type="button"
                   size="sm"
                   variant="ghost"
-                  className="h-7 px-2 gap-1.5 text-[11px]"
+                  className={cn(
+                    "h-7 px-2 gap-1.5 text-[11px] transition-all",
+                    userVote === 'like'
+                      ? "text-blue-500 hover:text-blue-600 bg-blue-500/10 hover:bg-blue-500/20"
+                      : "hover:text-blue-500 hover:bg-blue-500/10"
+                  )}
                   onClick={(e) => {
                     e.stopPropagation()
-                    // TODO: Implement like functionality
+                    onLike?.()
                   }}
                 >
-                  <ThumbsUp className="h-3.5 w-3.5" />
+                  <ThumbsUp className={cn(
+                    "h-3.5 w-3.5",
+                    userVote === 'like' && "fill-blue-500"
+                  )} />
                   <span>{likeCount}</span>
                 </Button>
 
@@ -202,13 +219,21 @@ export function PlanCard({
                   type="button"
                   size="sm"
                   variant="ghost"
-                  className="h-7 px-2 gap-1.5 text-[11px]"
+                  className={cn(
+                    "h-7 px-2 gap-1.5 text-[11px] transition-all",
+                    userVote === 'dislike'
+                      ? "text-orange-500 hover:text-orange-600 bg-orange-500/10 hover:bg-orange-500/20"
+                      : "hover:text-orange-500 hover:bg-orange-500/10"
+                  )}
                   onClick={(e) => {
                     e.stopPropagation()
-                    // TODO: Implement dislike functionality
+                    onDislike?.()
                   }}
                 >
-                  <ThumbsDown className="h-3.5 w-3.5" />
+                  <ThumbsDown className={cn(
+                    "h-3.5 w-3.5",
+                    userVote === 'dislike' && "fill-orange-500"
+                  )} />
                   <span>{dislikeCount}</span>
                 </Button>
 
@@ -217,10 +242,10 @@ export function PlanCard({
                   type="button"
                   size="sm"
                   variant="ghost"
-                  className="h-7 px-2 gap-1.5 text-[11px]"
+                  className="h-7 px-2 gap-1.5 text-[11px] hover:text-primary hover:bg-primary/10 transition-all"
                   onClick={(e) => {
                     e.stopPropagation()
-                    // TODO: Implement comments functionality
+                    // Comments are viewed in the dialog, no action needed here
                   }}
                 >
                   <MessageSquareText className="h-3.5 w-3.5" />

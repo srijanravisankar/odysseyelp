@@ -38,6 +38,11 @@ interface PublishedItinerary {
         name: string
         email: string
     }
+    social_stats?: {
+        like_count: number
+        dislike_count: number
+        comment_count: number
+    }
 }
 
 type SortOption = "newest" | "oldest" | "most-stops"
@@ -67,6 +72,44 @@ export function ExploreGrid({
     const [dialogOpen, setDialogOpen] = useState(false)
     const [selectedItinerary, setSelectedItinerary] = useState<PublishedItinerary | null>(null)
     const [activeTab, setActiveTab] = useState<"stops" | "map" | "comments">("stops")
+    const [userVotes, setUserVotes] = useState<Record<number, 'like' | 'dislike'>>({})
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+    const [comments, setComments] = useState<any[]>([])
+    const [commentText, setCommentText] = useState('')
+    const [loadingComments, setLoadingComments] = useState(false)
+    const [submittingComment, setSubmittingComment] = useState(false)
+
+    // Fetch current user
+    useEffect(() => {
+        const fetchUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+                setCurrentUserId(user.id)
+            }
+        }
+        fetchUser()
+    }, [supabase])
+
+    // Fetch user's votes when user is loaded
+    useEffect(() => {
+        if (!currentUserId) return
+
+        const fetchUserVotes = async () => {
+            const { data, error } = await supabase
+                .from('itinerary_votes')
+                .select('itinerary_id, vote_type')
+                .eq('user_id', currentUserId)
+
+            if (!error && data) {
+                const votesMap: Record<number, 'like' | 'dislike'> = {}
+                data.forEach((vote: any) => {
+                    votesMap[vote.itinerary_id] = vote.vote_type
+                })
+                setUserVotes(votesMap)
+            }
+        }
+        fetchUserVotes()
+    }, [currentUserId, supabase])
 
     useEffect(() => {
         const fetchPublishedItineraries = async () => {
@@ -87,6 +130,11 @@ export function ExploreGrid({
                         user:users!itineraries_user_id_fkey (
                             name,
                             email
+                        ),
+                        social_stats:itinerary_social_stats!itinerary_social_stats_itinerary_id_fkey (
+                            like_count,
+                            dislike_count,
+                            comment_count
                         )
                     `)
                     .eq("published", true)
@@ -100,7 +148,10 @@ export function ExploreGrid({
 
                 const transformedData = (data || []).map((item: any) => ({
                     ...item,
-                    user: item.user || { name: "Unknown", email: "" }
+                    user: item.user || { name: "Unknown", email: "" },
+                    social_stats: Array.isArray(item.social_stats) && item.social_stats.length > 0
+                        ? item.social_stats[0]
+                        : item.social_stats || { like_count: 0, dislike_count: 0, comment_count: 0 }
                 }))
 
                 setItineraries(transformedData)
@@ -253,6 +304,202 @@ export function ExploreGrid({
             .slice(0, 2)
     }
 
+    // Fetch comments when dialog opens or activeTab changes to comments
+    useEffect(() => {
+        if (dialogOpen && selectedItinerary && activeTab === 'comments') {
+            fetchComments(selectedItinerary.id)
+        }
+    }, [dialogOpen, selectedItinerary, activeTab])
+
+    const fetchComments = async (itineraryId: number) => {
+        setLoadingComments(true)
+        const { data, error } = await supabase
+            .from('itinerary_comments')
+            .select(`
+                id,
+                comment_text,
+                created_at,
+                updated_at,
+                is_edited,
+                user_id,
+                user:users!itinerary_comments_user_id_fkey (
+                    name,
+                    email
+                )
+            `)
+            .eq('itinerary_id', itineraryId)
+            .order('created_at', { ascending: false })
+
+        if (!error && data) {
+            setComments(data)
+        } else {
+            console.error('Error fetching comments:', error)
+        }
+        setLoadingComments(false)
+    }
+
+    const handleSubmitComment = async () => {
+        if (!currentUserId || !selectedItinerary || !commentText.trim()) {
+            return
+        }
+
+        setSubmittingComment(true)
+        const { error } = await supabase
+            .from('itinerary_comments')
+            .insert({
+                itinerary_id: selectedItinerary.id,
+                user_id: currentUserId,
+                comment_text: commentText.trim()
+            })
+
+        if (!error) {
+            setCommentText('')
+            await fetchComments(selectedItinerary.id)
+
+            // Update comment count in itineraries state
+            const { data: statsData } = await supabase
+                .from('itinerary_social_stats')
+                .select('comment_count')
+                .eq('itinerary_id', selectedItinerary.id)
+                .single()
+
+            if (statsData) {
+                setItineraries(prev => prev.map(it => {
+                    if (it.id === selectedItinerary.id) {
+                        return {
+                            ...it,
+                            social_stats: {
+                                ...it.social_stats!,
+                                comment_count: statsData.comment_count
+                            }
+                        }
+                    }
+                    return it
+                }))
+            }
+        } else {
+            console.error('Error submitting comment:', error)
+        }
+        setSubmittingComment(false)
+    }
+
+    const handleDeleteComment = async (commentId: number) => {
+        if (!currentUserId || !selectedItinerary) return
+
+        const { error } = await supabase
+            .from('itinerary_comments')
+            .delete()
+            .eq('id', commentId)
+            .eq('user_id', currentUserId)
+
+        if (!error) {
+            await fetchComments(selectedItinerary.id)
+
+            // Update comment count
+            const { data: statsData } = await supabase
+                .from('itinerary_social_stats')
+                .select('comment_count')
+                .eq('itinerary_id', selectedItinerary.id)
+                .single()
+
+            if (statsData) {
+                setItineraries(prev => prev.map(it => {
+                    if (it.id === selectedItinerary.id) {
+                        return {
+                            ...it,
+                            social_stats: {
+                                ...it.social_stats!,
+                                comment_count: statsData.comment_count
+                            }
+                        }
+                    }
+                    return it
+                }))
+            }
+        } else {
+            console.error('Error deleting comment:', error)
+        }
+    }
+
+    const handleVote = async (itineraryId: number, voteType: 'like' | 'dislike') => {
+        if (!currentUserId) {
+            console.error('User must be logged in to vote')
+            return
+        }
+
+        const currentVote = userVotes[itineraryId]
+
+        // Optimistic UI update
+        const newVotes = { ...userVotes }
+
+        if (currentVote === voteType) {
+            // User is removing their vote
+            delete newVotes[itineraryId]
+            setUserVotes(newVotes)
+
+            // Remove vote from database
+            const { error } = await supabase
+                .from('itinerary_votes')
+                .delete()
+                .eq('itinerary_id', itineraryId)
+                .eq('user_id', currentUserId)
+
+            if (error) {
+                console.error('Error removing vote:', error)
+                setUserVotes(userVotes) // Revert on error
+            }
+        } else {
+            // User is adding or changing their vote
+            newVotes[itineraryId] = voteType
+            setUserVotes(newVotes)
+
+            // Insert or update vote in database
+            const { error } = await supabase
+                .from('itinerary_votes')
+                .upsert({
+                    itinerary_id: itineraryId,
+                    user_id: currentUserId,
+                    vote_type: voteType,
+                    updated_at: new Date().toISOString()
+                }, {
+                    onConflict: 'itinerary_id,user_id'
+                })
+
+            if (error) {
+                console.error('Error updating vote:', error)
+                setUserVotes(userVotes) // Revert on error
+            }
+        }
+
+        // Refetch itineraries to get updated counts
+        const { data, error: queryError } = await supabase
+            .from("itineraries")
+            .select(`
+                id,
+                social_stats:itinerary_social_stats!itinerary_social_stats_itinerary_id_fkey (
+                    like_count,
+                    dislike_count,
+                    comment_count
+                )
+            `)
+            .eq("id", itineraryId)
+            .single()
+
+        if (!queryError && data) {
+            setItineraries(prev => prev.map(it => {
+                if (it.id === itineraryId) {
+                    const socialStatsArray = data.social_stats as any
+                    const socialStats: { like_count: number; dislike_count: number; comment_count: number } =
+                        Array.isArray(socialStatsArray) && socialStatsArray.length > 0
+                            ? socialStatsArray[0]
+                            : socialStatsArray || { like_count: 0, dislike_count: 0, comment_count: 0 }
+                    return { ...it, social_stats: socialStats }
+                }
+                return it
+            }))
+        }
+    }
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64 w-full">
@@ -302,9 +549,12 @@ export function ExploreGrid({
                             isPublished={true}
                             hideActions={true}
                             showSocialActions={true}
-                            likeCount={0}
-                            dislikeCount={0}
-                            commentCount={0}
+                            likeCount={itinerary.social_stats?.like_count || 0}
+                            dislikeCount={itinerary.social_stats?.dislike_count || 0}
+                            commentCount={itinerary.social_stats?.comment_count || 0}
+                            userVote={userVotes[itinerary.id]}
+                            onLike={() => handleVote(itinerary.id, 'like')}
+                            onDislike={() => handleVote(itinerary.id, 'dislike')}
                             onClick={() => {
                                 setSelectedItinerary(itinerary)
                                 setDialogOpen(true)
@@ -499,23 +749,106 @@ export function ExploreGrid({
                             </div>
                         ) : (
                             <ScrollArea className="h-full">
-                                <div className="p-6">
-                                    <div className="space-y-4">
-                                        <h3 className="text-lg font-semibold">Comments</h3>
-                                        <p className="text-sm text-muted-foreground">
-                                            Comments functionality will be implemented here.
-                                        </p>
-                                        {/* TODO: Implement comments section with:
-                                            - Comment input textarea
-                                            - Submit button
-                                            - List of existing comments
-                                            - User avatars
-                                            - Timestamps
-                                            - Edit/Delete for own comments
-                                        */}
-                                        <div className="text-center py-12 text-muted-foreground">
-                                            No comments yet. Be the first to comment!
+                                <div className="p-6 space-y-6">
+                                    {/* Comment Input */}
+                                    {currentUserId ? (
+                                        <div className="space-y-3">
+                                            <h3 className="text-lg font-semibold">Add a Comment</h3>
+                                            <div className="flex gap-3">
+                                                <Avatar className="h-8 w-8 shrink-0">
+                                                    <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                                                        You
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <div className="flex-1 space-y-2">
+                                                    <textarea
+                                                        value={commentText}
+                                                        onChange={(e) => setCommentText(e.target.value)}
+                                                        placeholder="Share your thoughts..."
+                                                        className="w-full min-h-[80px] px-3 py-2 text-sm rounded-md border border-input bg-background resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+                                                        maxLength={2000}
+                                                    />
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-xs text-muted-foreground">
+                                                            {commentText.length}/2000
+                                                        </span>
+                                                        <button
+                                                            onClick={handleSubmitComment}
+                                                            disabled={!commentText.trim() || submittingComment}
+                                                            className="px-4 py-1.5 text-sm font-medium rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                                        >
+                                                            {submittingComment ? 'Posting...' : 'Post Comment'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
+                                    ) : (
+                                        <div className="text-center py-4 text-muted-foreground">
+                                            Please log in to comment
+                                        </div>
+                                    )}
+
+                                    <Separator />
+
+                                    {/* Comments List */}
+                                    <div className="space-y-4">
+                                        <h3 className="text-lg font-semibold">
+                                            Comments ({comments.length})
+                                        </h3>
+
+                                        {loadingComments ? (
+                                            <div className="flex justify-center py-8">
+                                                <Spinner />
+                                            </div>
+                                        ) : comments.length === 0 ? (
+                                            <div className="text-center py-12 text-muted-foreground">
+                                                No comments yet. Be the first to comment!
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-4">
+                                                {comments.map((comment) => {
+                                                    const isOwnComment = comment.user_id === currentUserId
+                                                    const timeAgo = formatDate(comment.created_at)
+
+                                                    return (
+                                                        <div key={comment.id} className="flex gap-3 group">
+                                                            <Avatar className="h-8 w-8 shrink-0">
+                                                                <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                                                                    {getInitials(comment.user?.name || 'U')}
+                                                                </AvatarFallback>
+                                                            </Avatar>
+                                                            <div className="flex-1 space-y-1">
+                                                                <div className="flex items-baseline gap-2">
+                                                                    <span className="text-sm font-semibold">
+                                                                        {comment.user?.name || 'Unknown User'}
+                                                                    </span>
+                                                                    <span className="text-xs text-muted-foreground">
+                                                                        {timeAgo}
+                                                                    </span>
+                                                                    {comment.is_edited && (
+                                                                        <span className="text-xs text-muted-foreground italic">
+                                                                            (edited)
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <p className="text-sm text-foreground whitespace-pre-wrap break-words">
+                                                                    {comment.comment_text}
+                                                                </p>
+                                                                {isOwnComment && (
+                                                                    <button
+                                                                        onClick={() => handleDeleteComment(comment.id)}
+                                                                        className="text-xs text-red-500 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                    >
+                                                                        Delete
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )
+                                                })}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </ScrollArea>
