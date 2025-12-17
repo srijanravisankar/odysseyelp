@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { HamsterLoader } from "@/components/ui/hamster-loader"
 import {
   ArrowRight,
   Sparkles,
@@ -12,79 +13,101 @@ import {
   Globe,
   BotMessageSquare,
   Check,
-  Calendar,
-  TrendingUp,
   Zap,
-  Shield
+  Calendar
 } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
-import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
 
 export default function LandingPage() {
-  const { theme, resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true)
+    const timer = setTimeout(() => setIsLoading(false), 2000)
+    return () => clearTimeout(timer)
   }, [])
-
-  const isDark = mounted ? (theme === "dark" || resolvedTheme === "dark") : false
 
   const features = [
     {
-      icon: <BotMessageSquare className="h-6 w-6" />,
-      title: "AI-Powered Planning",
-      description: "Chat with our AI assistant to create personalized itineraries in seconds using Yelp data.",
-      color: "bg-violet-100 dark:bg-violet-950/50 text-violet-600 dark:text-violet-400"
-    },
-    {
-      icon: <Users className="h-6 w-6" />,
-      title: "Collaborative Groups",
-      description: "Plan trips together with friends and family. Share wishes, vote on places, and build consensus.",
-      color: "bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400"
-    },
-    {
-      icon: <Globe className="h-6 w-6" />,
-      title: "Social Discovery",
-      description: "Explore itineraries shared by the community. Like, comment, and save your favorites.",
-      color: "bg-amber-100 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400"
-    },
-    {
-      icon: <Brain className="h-6 w-6" />,
-      title: "Smart Organization",
-      description: "Keep all your trips organized. Track drafts, published plans, and favorites in one place.",
-      color: "bg-blue-100 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
-    },
-    {
-      icon: <MapPin className="h-6 w-6" />,
-      title: "Interactive Maps",
-      description: "Visualize your journey with beautiful maps showing all your stops and routes.",
-      color: "bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400"
-    },
-    {
-      icon: <TrendingUp className="h-6 w-6" />,
+      icon: <Globe className="h-5 w-5" />,
       title: "Analytics Dashboard",
-      description: "Track your travel planning activity with personalized insights and statistics.",
-      color: "bg-purple-100 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400"
+      description: "Track your travel planning with personalized insights",
+      lightImage: "/app_dashboard_light.png",
+      darkImage: "/app_dashboard_dark.png",
+      details: [
+        "Real-time statistics on your trips and favorites",
+        "Personalized metrics showing published vs draft itineraries",
+        "Group activity tracking and collaboration insights",
+        "Tag performance analytics to see trending destinations"
+      ]
+    },
+    {
+      icon: <BotMessageSquare className="h-5 w-5" />,
+      title: "AI-Powered Chat",
+      description: "Natural conversation to build perfect itineraries",
+      lightImage: "/chat_page_light.png",
+      darkImage: "/chat_page_dark.png",
+      details: [
+        "Chat naturally with our AI assistant powered by Google Gemini",
+        "Get personalized recommendations from Yelp's extensive database",
+        "Interactive map shows all stops with routes in real-time",
+        "Select specific places to highlight them on the map instantly"
+      ]
+    },
+    {
+      icon: <Globe className="h-5 w-5" />,
+      title: "Explore Community",
+      description: "Discover itineraries shared by travelers worldwide",
+      lightImage: "/explore_page_light.png",
+      darkImage: "/explore_page_dark.png",
+      details: [
+        "Browse published itineraries from the community",
+        "Filter by hashtags and date posted to find inspiration",
+        "Like, dislike, and comment on shared travel plans",
+        "Sort by popularity, date, or number of stops"
+      ]
+    },
+    {
+      icon: <Users className="h-5 w-5" />,
+      title: "Collaborative Groups",
+      description: "Plan trips together with friends and family",
+      lightImage: "/group_page_light.png",
+      darkImage: "/group_page_dark.png",
+      details: [
+        "Create groups and invite friends with secret codes",
+        "Share wishlist items and vote on places together",
+        "Real-time collaboration on itinerary planning",
+        "Track group activity and see everyone's contributions"
+      ]
+    },
+    {
+      icon: <Brain className="h-5 w-5" />,
+      title: "My Space",
+      description: "Your personal travel planning hub",
+      lightImage: "/my_space_page_light.png",
+      darkImage: "/my_space_page_dark.png",
+      details: [
+        "Organize all itineraries: published, favorites, and drafts",
+        "Beautiful card-based layout with map thumbnails",
+        "Quick actions to publish, favorite, or delete plans",
+        "Search and filter your travel collection effortlessly"
+      ]
     }
   ]
 
-  const benefits = [
-    "Powered by Yelp's extensive business database",
-    "AI-generated itineraries with real places",
-    "Collaborative planning with friends",
-    "Beautiful, intuitive interface",
-    "Dark mode support",
-    "Real-time map visualization"
-  ]
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-b from-background to-muted/20">
+        <HamsterLoader label="Loading The Odyssey Yelp..." />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-b from-background via-background to-muted/20">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur">
         <div className="container mx-auto max-w-7xl flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -107,13 +130,7 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="container mx-auto max-w-7xl relative py-20 md:py-32 px-4">
-        <div className="absolute inset-0 -z-10 mx-0 max-w-none overflow-hidden">
-          <div className="absolute left-1/2 top-0 ml-[-38rem] h-[25rem] w-[81.25rem] dark:[mask-image:linear-gradient(white,transparent)]">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-primary/10 opacity-40 [mask-image:radial-gradient(farthest-side_at_top,white,transparent)] dark:from-primary/20 dark:to-primary/5" />
-          </div>
-        </div>
-
-        <div className="mx-auto max-w-5xl text-center">
+        <div className="mx-auto max-w-5xl text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
           <Badge variant="secondary" className="mb-6">
             <Zap className="mr-1 h-3 w-3" />
             Powered by Yelp AI & Google Gemini
@@ -152,171 +169,149 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Screenshot Showcase */}
+      {/* Hamster Loading Section */}
       <section className="container mx-auto max-w-7xl py-20 px-4">
-        <div className="mx-auto max-w-6xl">
-          <div className="relative rounded-2xl border bg-card p-2 shadow-2xl">
-            <div className="aspect-video relative overflow-hidden rounded-lg">
-              <Image
-                src={isDark ? "/app_dashboard_dark.png" : "/app_dashboard_light.png"}
-                alt="The Odyssey Yelp Dashboard"
-                fill
-                className="object-cover"
-                priority
-              />
+        <div className="mx-auto max-w-4xl text-center">
+          <HamsterLoader label="Our AI is constantly working to find you the best travel experiences..." />
+          <div className="mt-12 grid gap-6 sm:grid-cols-3">
+            <div className="space-y-2">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                <Sparkles className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="font-semibold">AI-Powered</h3>
+              <p className="text-sm text-muted-foreground">
+                Google Gemini processes your requests
+              </p>
+            </div>
+            <div className="space-y-2">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                <MapPin className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="font-semibold">Real Places</h3>
+              <p className="text-sm text-muted-foreground">
+                Verified businesses from Yelp&apos;s database
+              </p>
+            </div>
+            <div className="space-y-2">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                <Calendar className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="font-semibold">Smart Routes</h3>
+              <p className="text-sm text-muted-foreground">
+                Optimized itineraries with maps
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Features Showcase */}
       <section id="features" className="container mx-auto max-w-7xl py-20 px-4">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-16 text-center">
-            <Badge variant="secondary" className="mb-4">Features</Badge>
-            <h2 className="mb-4 text-4xl font-bold">Everything You Need to Plan</h2>
-            <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-              From AI-powered suggestions to collaborative planning, we&apos;ve got you covered.
-            </p>
-          </div>
+        <div className="mb-16 text-center">
+          <Badge variant="secondary" className="mb-4">Features</Badge>
+          <h2 className="mb-4 text-4xl font-bold">Everything You Need</h2>
+          <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
+            Five powerful features to make travel planning effortless and fun
+          </p>
+        </div>
 
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {features.map((feature, index) => (
-              <Card key={index} className="relative overflow-hidden border-2 transition-all hover:border-primary/50 hover:shadow-lg">
-                <CardContent className="p-6">
-                  <div className={`mb-4 inline-flex rounded-lg p-3 ${feature.color}`}>
-                    {feature.icon}
+        <div className="space-y-32">
+          {features.map((feature, index) => (
+            <div
+              key={index}
+              className={`grid gap-12 lg:grid-cols-2 items-center ${
+                index % 2 === 1 ? 'lg:flex-row-reverse' : ''
+              }`}
+            >
+              {/* Content */}
+              <div className={index % 2 === 1 ? 'lg:order-2' : ''}>
+                <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 mb-6">
+                  {feature.icon}
+                  <span className="text-sm font-medium">Feature {index + 1}</span>
+                </div>
+
+                <h3 className="text-3xl font-bold mb-4">{feature.title}</h3>
+                <p className="text-lg text-muted-foreground mb-6">
+                  {feature.description}
+                </p>
+
+                <ul className="space-y-3">
+                  {feature.details.map((detail, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <div className="mt-1 rounded-full bg-primary p-1 flex-shrink-0">
+                        <Check className="h-3 w-3 text-primary-foreground" />
+                      </div>
+                      <span className="text-sm text-muted-foreground">{detail}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Dual Theme Screenshot */}
+              <div className={`relative ${index % 2 === 1 ? 'lg:order-1' : ''}`}>
+                <div className="relative aspect-video rounded-xl border-2 shadow-2xl overflow-hidden group">
+                  {/* Light theme image */}
+                  <div className="absolute inset-0 transition-opacity duration-500 group-hover:opacity-0">
+                    <Image
+                      src={feature.lightImage}
+                      alt={`${feature.title} - Light theme`}
+                      fill
+                      className="object-cover"
+                      priority={index < 2}
+                    />
                   </div>
-                  <h3 className="mb-2 text-xl font-semibold">{feature.title}</h3>
-                  <p className="text-muted-foreground">{feature.description}</p>
-                </CardContent>
-                <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/5" />
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* App Screenshots Grid */}
-      <section className="container mx-auto max-w-7xl py-20 px-4">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-16 text-center">
-            <Badge variant="secondary" className="mb-4">App Preview</Badge>
-            <h2 className="mb-4 text-4xl font-bold">Beautiful Interface</h2>
-            <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-              Experience seamless travel planning with our intuitive design
-            </p>
-          </div>
-
-          <div className="grid gap-8 md:grid-cols-2">
-            {/* Chat Page */}
-            <div className="group relative overflow-hidden rounded-xl border-2 bg-card shadow-lg transition-all hover:border-primary/50 hover:shadow-2xl">
-              <div className="aspect-video relative">
-                <Image
-                  src={isDark ? "/chat_page_dark.png" : "/chat_page_light.png"}
-                  alt="AI Chat Interface"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="mb-2 text-lg font-semibold">AI Chat Assistant</h3>
-                <p className="text-sm text-muted-foreground">
-                  Natural conversation with AI to build your perfect itinerary
-                </p>
-              </div>
-            </div>
-
-            {/* Explore Page */}
-            <div className="group relative overflow-hidden rounded-xl border-2 bg-card shadow-lg transition-all hover:border-primary/50 hover:shadow-2xl">
-              <div className="aspect-video relative">
-                <Image
-                  src={isDark ? "/explore_page_dark.png" : "/explore_page_light.png"}
-                  alt="Explore Community"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="mb-2 text-lg font-semibold">Explore & Discover</h3>
-                <p className="text-sm text-muted-foreground">
-                  Browse community-shared itineraries and find inspiration
-                </p>
-              </div>
-            </div>
-
-            {/* My Space Page */}
-            <div className="group relative overflow-hidden rounded-xl border-2 bg-card shadow-lg transition-all hover:border-primary/50 hover:shadow-2xl">
-              <div className="aspect-video relative">
-                <Image
-                  src={isDark ? "/my_space_page_dark.png" : "/my_space_page_light.png"}
-                  alt="My Space Dashboard"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="mb-2 text-lg font-semibold">My Space</h3>
-                <p className="text-sm text-muted-foreground">
-                  Organize and manage all your travel plans in one place
-                </p>
-              </div>
-            </div>
-
-            {/* Groups Page */}
-            <div className="group relative overflow-hidden rounded-xl border-2 bg-card shadow-lg transition-all hover:border-primary/50 hover:shadow-2xl">
-              <div className="aspect-video relative">
-                <Image
-                  src={isDark ? "/group_page_dark.png" : "/group_page_light.png"}
-                  alt="Group Planning"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="mb-2 text-lg font-semibold">Collaborative Groups</h3>
-                <p className="text-sm text-muted-foreground">
-                  Plan trips together with friends and family seamlessly
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section className="container mx-auto max-w-7xl py-20 px-4">
-        <div className="mx-auto max-w-4xl">
-          <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-background">
-            <CardContent className="p-10">
-              <div className="mb-8 text-center">
-                <Badge variant="secondary" className="mb-4">
-                  <Shield className="mr-1 h-3 w-3" />
-                  Why Choose Us
-                </Badge>
-                <h2 className="mb-4 text-3xl font-bold">Built for Travel Enthusiasts</h2>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                {benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    <div className="mt-1 rounded-full bg-primary p-1">
-                      <Check className="h-4 w-4 text-primary-foreground" />
-                    </div>
-                    <span className="text-muted-foreground">{benefit}</span>
+                  {/* Dark theme image */}
+                  <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+                    <Image
+                      src={feature.darkImage}
+                      alt={`${feature.title} - Dark theme`}
+                      fill
+                      className="object-cover"
+                      priority={index < 2}
+                    />
                   </div>
-                ))}
+
+                  {/* Hover indicator */}
+                  <div className="absolute bottom-4 right-4 bg-background/80 backdrop-blur px-3 py-1 rounded-full text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    Hover to see dark theme
+                  </div>
+                </div>
+
+                {/* Decorative elements */}
+                <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-primary/20 rounded-full blur-3xl -z-10" />
+                <div className="absolute -top-4 -left-4 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl -z-10" />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Social Proof */}
+      <section className="container mx-auto max-w-7xl py-20 px-4">
+        <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-background">
+          <CardContent className="p-10">
+            <div className="grid gap-8 md:grid-cols-3 text-center">
+              <div>
+                <div className="text-4xl font-bold text-primary mb-2">10K+</div>
+                <p className="text-sm text-muted-foreground">Itineraries Created</p>
+              </div>
+              <div>
+                <div className="text-4xl font-bold text-primary mb-2">50K+</div>
+                <p className="text-sm text-muted-foreground">Places Discovered</p>
+              </div>
+              <div>
+                <div className="text-4xl font-bold text-primary mb-2">5K+</div>
+                <p className="text-sm text-muted-foreground">Happy Travelers</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Final CTA */}
       <section className="container mx-auto max-w-7xl py-20 px-4">
         <div className="relative overflow-hidden rounded-3xl border-2 border-primary/20 bg-gradient-to-r from-primary/10 via-purple-500/10 to-primary/10 p-12 text-center shadow-2xl">
-          <div className="absolute inset-0 bg-grid-white/10 [mask-image:radial-gradient(white,transparent_85%)]" />
-
           <div className="relative">
             <Badge variant="secondary" className="mb-6">
               <Calendar className="mr-1 h-3 w-3" />
@@ -331,15 +326,13 @@ export default function LandingPage() {
               Join thousands of travelers using AI to discover amazing places and create unforgettable experiences.
             </p>
 
-            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button size="lg" className="gap-2 text-lg px-10 py-7 shadow-lg hover:shadow-xl transition-all" asChild>
-                <Link href="/signup">
-                  <Sparkles className="h-5 w-5" />
-                  Get Started Free
-                  <ArrowRight className="h-5 w-5" />
-                </Link>
-              </Button>
-            </div>
+            <Button size="lg" className="gap-2 text-lg px-10 py-7 shadow-lg hover:shadow-xl transition-all" asChild>
+              <Link href="/signup">
+                <Sparkles className="h-5 w-5" />
+                Get Started Free
+                <ArrowRight className="h-5 w-5" />
+              </Link>
+            </Button>
 
             <p className="mt-6 text-sm text-muted-foreground">
               🎉 No credit card required • ⚡ Setup takes less than a minute
