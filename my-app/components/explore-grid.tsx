@@ -555,8 +555,14 @@ export function ExploreGrid({
                             userVote={userVotes[itinerary.id]}
                             onLike={() => handleVote(itinerary.id, 'like')}
                             onDislike={() => handleVote(itinerary.id, 'dislike')}
+                            onComment={() => {
+                                setSelectedItinerary(itinerary)
+                                setActiveTab("comments")
+                                setDialogOpen(true)
+                            }}
                             onClick={() => {
                                 setSelectedItinerary(itinerary)
+                                setActiveTab("stops")
                                 setDialogOpen(true)
                             }}
                             thumbnail={
