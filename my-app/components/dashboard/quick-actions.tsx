@@ -10,7 +10,6 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   BotMessageSquare,
-  Compass,
   Sparkles,
   Route,
   UsersRound,
@@ -35,14 +34,6 @@ const quickActions: QuickAction[] = [
     href: "/chat",
     color: "text-violet-600 dark:text-violet-400",
     bgColor: "bg-violet-100 dark:bg-violet-950/50",
-  },
-  {
-    title: "Explore Map",
-    description: "Discover nearby places",
-    icon: <Compass className="h-5 w-5" />,
-    href: "/touring",
-    color: "text-emerald-600 dark:text-emerald-400",
-    bgColor: "bg-emerald-100 dark:bg-emerald-950/50",
   },
   {
     title: "My Trips",
@@ -78,7 +69,7 @@ export function QuickActions() {
         <CardDescription>Jump right into what you need</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {quickActions.map((action) => (
             <Link key={action.title} href={action.href}>
               <Button
