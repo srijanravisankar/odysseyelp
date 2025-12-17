@@ -5,3 +5,8 @@ export { RecentItineraries } from "./recent-itineraries";
 export { FeaturedDestinations } from "./featured-destinations";
 export { QuickStartTips } from "./quick-start-tips";
 export { AIPromptCard } from "./ai-prompt-card";
+export { AnalyticsHero } from "./analytics-hero";
+export { MetricsGrid } from "./metrics-grid";
+export { CommunityPulse } from "./community-pulse";
+export { TagPerformance } from "./tag-performance";
+export { GroupInsights } from "./group-insights";

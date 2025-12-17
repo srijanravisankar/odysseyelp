@@ -255,8 +255,8 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
         </SidebarFooter>
       </Sidebar>
 
-      {/* Right sidebar – your "inside navbar" area (hidden on home page) */}
-      {pathname !== "/" && (
+      {/* Right sidebar – your "inside navbar" area (hidden on home page and explore page) */}
+      {pathname !== "/" && !pathname.startsWith("/explore") && (
         <Sidebar collapsible="none" className="hidden flex-1 md:flex">
           <SidebarHeader className="gap-3 border-b p-3">
             {activeItem?.title}
