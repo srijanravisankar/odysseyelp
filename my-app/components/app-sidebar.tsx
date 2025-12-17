@@ -133,27 +133,42 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   };
 
   return (
+    // <Sidebar
+    //   collapsible="icon"
+    //   className="h-[calc(100svh-(--spacing(6)))] overflow-hidden *:data-[sidebar=sidebar]:flex-row rounded-xl border border-border bg-card/50 mt-3 mb-3 ml-2"
+    //   {...props}
+    // >
     <Sidebar
       collapsible="icon"
-      className="h-[calc(100svh-(--spacing(6)))] overflow-hidden *:data-[sidebar=sidebar]:flex-row rounded-xl border border-border bg-card/50 mt-3 mb-3 ml-2"
+      className={`h-[calc(100svh-(--spacing(6)))] overflow-hidden *:data-[sidebar=sidebar]:flex-row rounded-xl border border-border bg-card/50 mt-3 mb-3 ml-2 ${
+        pathname === "/" || pathname.startsWith("/explore") 
+          ? "w-[calc(var(--sidebar-width-icon))]!" 
+          : ""
+      }`}
       {...props}
     >
       {/* Left mini sidebar (icons only) */}
-      <Sidebar
+      {/* <Sidebar
         collapsible="none"
         className="w-[calc(var(--sidebar-width-icon))]! border-r"
+      > */}
+      <Sidebar
+        collapsible="none"
+        className={`w-[calc(var(--sidebar-width-icon))]! ${
+          pathname !== "/" && !pathname.startsWith("/explore") ? "border-r" : ""
+        }`}
       >
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton size="lg" asChild className="md:h-8 md:p-0">
                 <Link href="/">
-                  <div title="The Odyssey Yelp" className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                  <div title="Odysseyelp" className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                     <Compass className="size-5" />
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">The Odyssey Yelp</span>
-                    <span className="truncate text-xs">Your Travel Companion</span>
+                    <span className="truncate font-medium">Odysseyelp</span>
+                    <span className="truncate text-xs">Your Travel Planner</span>
                   </div>
                 </Link>
               </SidebarMenuButton>
@@ -251,7 +266,21 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
         </SidebarContent>
 
         <SidebarFooter>
-          <NavUser />
+          <div className="flex flex-col items-center justify-center gap-2">
+            {/* Minimalistic vertical rotated logo */}
+            <a href="/" onClick={() => setOpen(false)}>
+              <div className="flex items-center justify-center h-12 mb-7 cursor-pointer">
+                <span 
+                  className="text-xs font-extrabold tracking-widest origin-center"
+                  style={{ transform: 'rotate(-90deg)', whiteSpace: 'nowrap' }}
+                >
+                  ODYSSEYELP
+                </span>
+              </div>
+            </a>
+
+            <NavUser />
+          </div>
         </SidebarFooter>
       </Sidebar>
 
