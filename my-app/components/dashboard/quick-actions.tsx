@@ -10,11 +10,10 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   BotMessageSquare,
-  MapPin,
   Compass,
-  Calendar,
   Sparkles,
   Route,
+  UsersRound,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -54,6 +53,14 @@ const quickActions: QuickAction[] = [
     bgColor: "bg-blue-100 dark:bg-blue-950/50",
   },
   {
+    title: "Groups",
+    description: "Collaborate with friends",
+    icon: <UsersRound className="h-5 w-5" />,
+    href: "/groups",
+    color: "text-rose-600 dark:text-rose-400",
+    bgColor: "bg-rose-100 dark:bg-rose-950/50",
+  },
+  {
     title: "Discover",
     description: "Browse trending spots",
     icon: <Sparkles className="h-5 w-5" />,
@@ -71,7 +78,7 @@ export function QuickActions() {
         <CardDescription>Jump right into what you need</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {quickActions.map((action) => (
             <Link key={action.title} href={action.href}>
               <Button
