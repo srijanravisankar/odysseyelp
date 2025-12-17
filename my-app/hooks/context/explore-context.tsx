@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 
-type SortOption = "newest" | "oldest" | "most-stops" | "fewest-stops"
+export type SortOption = "newest" | "oldest" | "most-stops" | "fewest-stops"
 
 export type FilterOptions = {
     tags: string[]
