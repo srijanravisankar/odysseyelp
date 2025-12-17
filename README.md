@@ -373,7 +373,7 @@ For issues, feature requests, or feedback, please contact the development team o
 <img width="1190" height="748" alt="image" src="https://github.com/user-attachments/assets/4c7b11fb-b00d-4ec3-9253-bd8283ded600" />
 
 ### Database Design:
-<img width="1462" height="796" alt="supabase-schema-odysseyelp" src="https://github.com/user-attachments/assets/4acd9d01-711e-4537-a9a7-a80fd5568685" />
+![database-design](supabase-schema-balfwiiexlaforvdmjch.png)
 
 ### Database Schema:
 ```SQL
