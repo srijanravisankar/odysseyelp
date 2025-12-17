@@ -41,13 +41,17 @@ export function useHomeAnalytics() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        if (!user?.id) return
+
         const sinceDate = new Date()
         sinceDate.setDate(sinceDate.getDate() - 7)
 
-        const [itinerariesRes, statsRes, commentsRes, votesRes, groupsRes, wishesRes] = await Promise.all([
+        const [itinerariesRes, statsRes, commentsRes, votesRes, groupsRes, wishesRes, groupMembersRes] = await Promise.all([
+          // Fetch only logged-in user's itineraries
           supabase
             .from("itineraries")
-            .select("id, title, created_at, published, favorites, tags, stops, group_id")
+            .select("id, title, created_at, published, favorites, tags, stops, group_id, user_id")
+            .eq("user_id", user.id)
             .order("created_at", { ascending: false }),
           supabase
             .from("itinerary_social_stats")
@@ -62,14 +66,20 @@ export function useHomeAnalytics() {
             .select("id, itinerary_id, vote_type, created_at, user_id")
             .order("created_at", { ascending: false })
             .limit(10),
+          // Fetch all groups (we'll filter user's groups after fetching group_members)
           supabase
             .from("groups")
-            .select("id, name, created_at")
+            .select("id, name, created_at, created_by")
             .order("created_at", { ascending: false }),
           supabase
             .from("group_wishes")
             .select("id, group_id, created_at")
             .order("created_at", { ascending: false }),
+          // Fetch group memberships for the user
+          supabase
+            .from("group_members")
+            .select("group_id")
+            .eq("user_id", user.id),
         ])
 
         if (itinerariesRes.error) throw itinerariesRes.error
@@ -78,13 +88,25 @@ export function useHomeAnalytics() {
         if (votesRes.error) throw votesRes.error
         if (groupsRes.error) throw groupsRes.error
         if (wishesRes.error) throw wishesRes.error
+        if (groupMembersRes.error) throw groupMembersRes.error
 
         const itineraries = itinerariesRes.data || []
         const stats = statsRes.data || []
         const comments = commentsRes.data || []
         const votes = votesRes.data || []
-        const groups = groupsRes.data || []
+        const allGroups = groupsRes.data || []
         const wishes = wishesRes.data || []
+        const groupMemberships = groupMembersRes.data || []
+
+        // Filter groups to only those user created or is a member of
+        const userGroupIds = new Set([
+          ...groupMemberships.map(m => m.group_id),
+          ...allGroups.filter(g => g.created_by === user.id).map(g => g.id)
+        ])
+        const groups = allGroups.filter(g => userGroupIds.has(g.id))
+
+        // Filter wishes to only those from user's groups
+        const userWishes = wishes.filter(w => userGroupIds.has(w.group_id))
 
         const hero: HeroStats = {
           totalItineraries: itineraries.length,
@@ -128,7 +150,7 @@ export function useHomeAnalytics() {
             description: "Active planning circles",
             icon: <Users className="h-4 w-4" />,
             accent: "bg-purple-100 text-purple-600 dark:bg-purple-950/50 dark:text-purple-300",
-            chip: `${wishes.length} wishes shared`,
+            chip: `${userWishes.length} wishes shared`,
           },
           {
             title: "Unique cities",
@@ -194,12 +216,15 @@ export function useHomeAnalytics() {
           .slice(0, 6)
 
         const groupsInsights: GroupInsight[] = groups.map((group) => {
+          // Count only user's itineraries in this group
           const groupItineraries = itineraries.filter((i) => i.group_id === group.id)
-          const groupWishes = wishes.filter((w) => w.group_id === group.id)
+          const groupWishes = userWishes.filter((w) => w.group_id === group.id)
+          // Count members in this group
+          const memberCount = groupMemberships.filter(m => m.group_id === group.id).length + (group.created_by === user.id ? 1 : 0)
           return {
             id: group.id,
             name: group.name,
-            memberCount: 1,
+            memberCount: memberCount,
             wishCount: groupWishes.length,
             itineraryCount: groupItineraries.length,
             lastActivity: groupItineraries[0]?.created_at
@@ -223,7 +248,7 @@ export function useHomeAnalytics() {
     }
 
     fetchData()
-  }, [supabase])
+  }, [supabase, user?.id])
 
   return { ...data, user }
 }
