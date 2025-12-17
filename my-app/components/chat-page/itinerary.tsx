@@ -112,8 +112,7 @@ export function Itinerary() {
              )}
           </div>
 
-          <div className={cn("flex items-center gap-1", itineraries.length === 0 ? "invisible" : "")}>
-            {/* Like */}
+          {/* <div className={cn("flex items-center gap-1", itineraries.length === 0 ? "invisible" : "")}>
             <Button
               type="button"
               size="icon"
@@ -137,7 +136,6 @@ export function Itinerary() {
               />
             </Button>
 
-            {/* Publish */}
             <Button
               type="button"
               size="icon"
@@ -155,7 +153,7 @@ export function Itinerary() {
             >
               <Earth className="h-4 w-4" />
             </Button>
-          </div>
+          </div> */}
         </div>
       </CardContent>
 

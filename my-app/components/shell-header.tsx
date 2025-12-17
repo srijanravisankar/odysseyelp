@@ -171,11 +171,11 @@ export function ShellHeader() {
           <div className="flex w-full justify-end text-lg font-medium">
              {/* ✅ 4. Updated Button with Handler and Loading State */}
             <Button
-              size="sm"
-              variant="outline"
+              size="lg"
+              variant="default"
               disabled={!activeGroup || isPlanning}
               onClick={handlePlanFromGroup}
-              className="h-7 gap-2 text-xs cursor-pointer"
+              className="h-8 gap-2 text-sm cursor-pointer"
             >
               {isPlanning ? (
                 <Loader className="h-3.5 w-3.5 animate-spin" />
@@ -184,8 +184,9 @@ export function ShellHeader() {
               )}
               
               {activeGroup ? <>
-                <span className="-mr-1">{isPlanning ? "Planning..." : "Plan from"}</span>
-                <span className="font-bold">{activeGroup.name}</span>
+                <span className="-mr-1">{isPlanning ? "Planning..." : "Generate Plan from"}</span>
+                <span className="font-bold -mr-1">{activeGroup.name}</span>
+                <span>chat</span>
               </> : "No Group Selected"}
             </Button>
           </div>
