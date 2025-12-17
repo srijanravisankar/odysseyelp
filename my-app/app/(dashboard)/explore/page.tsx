@@ -15,10 +15,6 @@ function ExploreContent() {
         const params = new URLSearchParams()
         if (sortBy !== "newest") params.set("sort", sortBy)
         if (filters.tags.length > 0) params.set("tags", filters.tags.join(","))
-        if (filters.cities.length > 0) params.set("cities", filters.cities.join(","))
-        if (filters.priceRanges.length > 0) params.set("prices", filters.priceRanges.join(","))
-        if (filters.categories.length > 0) params.set("categories", filters.categories.join(","))
-        if (filters.stopCounts.length > 0) params.set("stops", filters.stopCounts.join(","))
         if (filters.dateRange) params.set("date", filters.dateRange)
 
         const newUrl = params.toString() ? `/explore?${params.toString()}` : "/explore"
