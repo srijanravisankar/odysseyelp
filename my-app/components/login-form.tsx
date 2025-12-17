@@ -105,7 +105,7 @@ export function LoginForm({
                   Login to your <b>The Odyssey Yelp</b> account
                 </p> */}
                 <p className="text-balance text-sm text-muted-foreground">
-                  Enter your details below to login your <b>Odyssey Yelp</b> account
+                  Enter your details below to login your <b>Odysseyelp</b> account
                 </p>
               </div>
 

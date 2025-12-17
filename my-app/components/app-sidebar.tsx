@@ -252,10 +252,10 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                       setTheme(newTheme);
                       setAppTheme(newTheme);
                     }}
-                    className="px-2.5 md:px-2"
+                    className="px-2.5 md:px-2 cursor-pointer"
                   >
-                    <Sun className="hidden dark:block cursor-pointer" />
-                    <Moon className="dark:hidden cursor-pointer" />
+                    <Sun className="hidden dark:block" />
+                    <Moon className="dark:hidden" />
                     <span>Toggle Theme</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

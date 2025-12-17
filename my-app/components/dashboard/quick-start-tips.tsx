@@ -72,7 +72,7 @@ export function QuickStartTips() {
           </span>
         </div>
         <CardDescription>
-          Quick tips to help you get the most out of the Odyssey Yelp!
+          Quick tips to help you get the most out of Odysseyelp!
         </CardDescription>
 
         {/* Progress bar */}
