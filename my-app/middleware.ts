@@ -45,12 +45,13 @@ export async function middleware(request: NextRequest) {
   const isPublicRoute =
     pathname.startsWith("/login") ||
     pathname.startsWith("/signup") ||
+    pathname.startsWith("/landing") ||
     pathname.startsWith("/supabase"); // your test page, optional
 
-  // 1) Not logged in & trying to access a protected route → send to /login
+  // 1) Not logged in & trying to access a protected route → send to /landing
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone();
-    url.pathname = "/login";
+    url.pathname = "/landing";
 
     // Optional: remember where they were trying to go
     url.searchParams.set("redirectTo", pathname + request.nextUrl.search);
