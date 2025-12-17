@@ -40,7 +40,7 @@ function ExploreContent() {
 
             {/* Itineraries Grid */}
             <ExploreGrid
-                sortBy={sortBy}
+                sortBy={sortBy as any}
                 filters={filters}
             />
         </div>

@@ -24,7 +24,7 @@ import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { FilterOptions } from "@/hooks/context/explore-context"
+import { FilterOptions, SortOption } from "@/hooks/context/explore-context"
 
 interface PublishedItinerary {
     id: number
@@ -45,19 +45,15 @@ interface PublishedItinerary {
     }
 }
 
-type SortOption = "newest" | "oldest" | "most-stops"
 
 type ExploreGridProps = {
-    sortBy?: SortOption
-    filters?: FilterOptions
+    sortBy: SortOption
+    filters: FilterOptions
 }
 
 export function ExploreGrid({
-    sortBy = "newest",
-    filters = {
-        tags: [],
-        dateRange: null,
-    }
+    sortBy,
+    filters,
 }: ExploreGridProps) {
     const supabase = useSupabase()
     const [itineraries, setItineraries] = useState<PublishedItinerary[]>([])

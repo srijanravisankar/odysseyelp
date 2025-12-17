@@ -105,7 +105,7 @@ export function ExploreFilterBarEnhanced({ filters, onFiltersChange }: ExploreFi
         <div className="flex items-start gap-2 flex-wrap">
             <Popover>
                 <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-2 h-8">
+                    <Button variant="outline" size="lg" className="gap-2 h-9">
                         <Filter className="h-3.5 w-3.5" />
                         Filters
                         {activeFiltersCount > 0 && (
@@ -214,7 +214,7 @@ export function ExploreFilterBarEnhanced({ filters, onFiltersChange }: ExploreFi
 
             {/* Sort Dropdown */}
             <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-40 h-8">
+                <SelectTrigger className="w-45 h-8">
                     <ArrowUpDown className="h-3.5 w-3.5 mr-2" />
                     <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
