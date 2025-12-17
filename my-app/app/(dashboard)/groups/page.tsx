@@ -8,10 +8,10 @@ import { HamsterLoader } from "@/components/ui/hamster-loader";
 
 // pr check
 export default function Page() {
-  const { loadingItineraries } = useItinerary();
+  const { loadingItineraries, isBuildingItinerary } = useItinerary();
   return (
     <div className="grid h-full w-full gap-4 md:grid-rows-1">
-      {loadingItineraries ?
+      {loadingItineraries || isBuildingItinerary ?
         <div className="flex items-center justify-center h-full w-full">
           <HamsterLoader />
         </div>

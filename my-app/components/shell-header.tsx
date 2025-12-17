@@ -34,7 +34,7 @@ export function ShellHeader() {
   const { wishes } = useGroupWishes(activeGroup?.id ?? 0);
   const [isPlanning, setIsPlanning] = useState(false);
   const { user } = useUser();
-  const { itineraryData, setItineraryData, refetchItineraries } = useItinerary();
+  const { itineraryData, setItineraryData, refetchItineraries, setIsBuildingItinerary } = useItinerary();
   const { save: saveItinerary } = useSaveItinerary();
 
   const supabase = createClient();
@@ -64,6 +64,7 @@ export function ShellHeader() {
       if (!activeGroup) return;
 
       setIsPlanning(true);
+      setIsBuildingItinerary(true);
   
       try {
         const userLocation = await getUserLocation();
@@ -135,6 +136,7 @@ export function ShellHeader() {
         toast.error("Network error. Please try again.");
       } finally {
         setIsPlanning(false);
+        setIsBuildingItinerary(false);
       }
     }
 
