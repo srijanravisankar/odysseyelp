@@ -424,6 +424,7 @@ export function GroupsSidebarContent() {
   const [isJoining, setIsJoining] = useState(false); // ✅ Added Loading State
   const [groupToDelete, setGroupToDelete] = useState<Group | null>(null);
   const [isDeletingGroup, setIsDeletingGroup] = useState(false);
+  const [hoveredGroupId, setHoveredGroupId] = useState<number | null>(null);
 
   // 1. Fetch "My Groups"
   const fetchGroups = useCallback(async () => {
@@ -799,6 +800,8 @@ export function GroupsSidebarContent() {
                       ? "bg-primary/10 text-primary"
                       : "hover:bg-muted/70"
                   )}
+                  onMouseEnter={() => setHoveredGroupId(group.id)}
+                  onMouseLeave={() => setHoveredGroupId(null)}
                 >
                   <div className="flex items-center justify-center pt-1">
                     <Boxes className="h-3.5 w-3.5 opacity-80" />
@@ -813,7 +816,10 @@ export function GroupsSidebarContent() {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="ml-auto h-6 w-6 cursor-pointer p-0 opacity-70 hover:opacity-100"
+                    className={cn(
+                      "ml-auto h-6 w-6 p-0 cursor-pointer transition-opacity",
+                      hoveredGroupId === group.id ? "opacity-100" : "opacity-0"
+                    )}
                     onClick={(e) => {
                       e.stopPropagation();
                       setGroupToDelete(group);

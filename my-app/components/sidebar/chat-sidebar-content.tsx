@@ -47,6 +47,7 @@ export function ChatSidebarContent() {
   const { itineraryData } = useItinerary();
   const [sessionToDelete, setSessionToDelete] = useState<Session | null>(null);
   const [isDeletingSession, setIsDeletingSession] = useState(false);
+  const [hoveredSessionId, setHoveredSessionId] = useState<number | null>(null);
 
   // Fetch sessions on mount
   // useEffect(() => {
@@ -329,6 +330,8 @@ export function ChatSidebarContent() {
                     isActive ? "bg-primary/10 text-primary" : "hover:bg-muted/70"
                   )}
                   onClick={() => handleGetChat(item.id)}
+                  onMouseEnter={() => setHoveredSessionId(item.id)}
+                  onMouseLeave={() => setHoveredSessionId(null)}
                 >
                   {/* Left icon */}
                   <div className="flex items-center justify-center pt-1">
@@ -351,7 +354,10 @@ export function ChatSidebarContent() {
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="ml-auto h-6 w-6 p-0 opacity-70 hover:opacity-100"
+                    className={cn(
+                      "ml-auto h-6 w-6 p-0 transition-opacity cursor-pointer",
+                      hoveredSessionId === item.id ? "opacity-100" : "opacity-0"
+                    )}
                     onClick={(e) => {
                       e.stopPropagation();
                       setSessionToDelete(item);

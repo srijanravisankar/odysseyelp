@@ -192,6 +192,38 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                   );
                 })}
 
+                {/* Palette picker button */}
+                <SidebarMenuItem>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <SidebarMenuButton
+                        tooltip={{
+                          children: "Theme Palette",
+                          hidden: false,
+                        }}
+                        className="px-2.5 md:px-2 cursor-pointer"
+                      >
+                        <Palette />
+                        <span>Theme Palette</span>
+                      </SidebarMenuButton>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="center" className="w-44">
+                      {themePaletteOptions.map((option) => (
+                        <DropdownMenuItem
+                          key={option.value}
+                          onClick={() => handlePaletteChange(option.value)}
+                          className="flex items-center justify-between cursor-pointer"
+                        >
+                          <span>{option.label}</span>
+                          {palette === option.value && (
+                            <span className="text-xs text-muted-foreground">Active</span>
+                          )}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </SidebarMenuItem>
+
                 {/* Theme toggle button */}
                 <SidebarMenuItem>
                   <SidebarMenuButton
@@ -207,43 +239,12 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                     }}
                     className="px-2.5 md:px-2"
                   >
-                    <Sun className="hidden dark:block" />
-                    <Moon className="dark:hidden" />
+                    <Sun className="hidden dark:block cursor-pointer" />
+                    <Moon className="dark:hidden cursor-pointer" />
                     <span>Toggle Theme</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-
-                {/* Palette picker button */}
-                <SidebarMenuItem>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <SidebarMenuButton
-                        tooltip={{
-                          children: "Theme Palette",
-                          hidden: false,
-                        }}
-                        className="px-2.5 md:px-2"
-                      >
-                        <Palette />
-                        <span>Theme Palette</span>
-                      </SidebarMenuButton>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="center" className="w-44">
-                      {themePaletteOptions.map((option) => (
-                        <DropdownMenuItem
-                          key={option.value}
-                          onClick={() => handlePaletteChange(option.value)}
-                          className="flex items-center justify-between"
-                        >
-                          <span>{option.label}</span>
-                          {palette === option.value && (
-                            <span className="text-xs text-muted-foreground">Active</span>
-                          )}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </SidebarMenuItem>
+                
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
