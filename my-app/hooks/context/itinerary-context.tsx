@@ -161,7 +161,7 @@ export function ItineraryProvider({ children }: { children: React.ReactNode }) {
 
         // Logic
         if (isGroupPage && activeGroup) {
-           query = query.eq("group_id", activeGroup.id);
+           query = query.eq("group_id", activeGroup.id).eq("user_id", authData.user.id);
         } else if (isChatPage && active) {
            query = query.eq("session_id", active).eq("user_id", authData.user.id);
         } else {
