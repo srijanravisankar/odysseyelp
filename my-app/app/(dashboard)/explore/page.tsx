@@ -8,23 +8,18 @@ import { ExploreFilterBarEnhanced } from "@/components/explore-filter-bar-enhanc
 
 function ExploreContent() {
     const router = useRouter()
-    const { searchQuery, sortBy, filters, setFilters, debouncedSearch } = useExplore()
+    const { sortBy, filters, setFilters } = useExplore()
 
     // Update URL params when state changes
     useEffect(() => {
         const params = new URLSearchParams()
-        if (searchQuery) params.set("search", searchQuery)
         if (sortBy !== "newest") params.set("sort", sortBy)
         if (filters.tags.length > 0) params.set("tags", filters.tags.join(","))
-        if (filters.cities.length > 0) params.set("cities", filters.cities.join(","))
-        if (filters.priceRanges.length > 0) params.set("prices", filters.priceRanges.join(","))
-        if (filters.categories.length > 0) params.set("categories", filters.categories.join(","))
-        if (filters.stopCounts.length > 0) params.set("stops", filters.stopCounts.join(","))
         if (filters.dateRange) params.set("date", filters.dateRange)
 
         const newUrl = params.toString() ? `/explore?${params.toString()}` : "/explore"
         router.replace(newUrl, { scroll: false })
-    }, [searchQuery, sortBy, filters, router])
+    }, [sortBy, filters, router])
 
     return (
         <div className="flex flex-1 flex-col gap-4">
@@ -45,7 +40,6 @@ function ExploreContent() {
 
             {/* Itineraries Grid */}
             <ExploreGrid
-                searchQuery={debouncedSearch}
                 sortBy={sortBy}
                 filters={filters}
             />

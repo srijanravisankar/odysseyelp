@@ -54,6 +54,8 @@ type PlanCardProps = {
   onLike?: () => void
   /** Called when user clicks dislike button */
   onDislike?: () => void
+  /** Called when user clicks comment button */
+  onComment?: () => void
 }
 
 export function PlanCard({
@@ -75,6 +77,7 @@ export function PlanCard({
   userVote,
   onLike,
   onDislike,
+  onComment,
 }: PlanCardProps) {
   const [publishDialogOpen, setPublishDialogOpen] = useState(false)
   const [tagsDialogOpen, setTagsDialogOpen] = useState(false)
@@ -245,7 +248,7 @@ export function PlanCard({
                   className="h-7 px-2 gap-1.5 text-[11px] hover:text-primary hover:bg-primary/10 transition-all"
                   onClick={(e) => {
                     e.stopPropagation()
-                    // Comments are viewed in the dialog, no action needed here
+                    onComment?.()
                   }}
                 >
                   <MessageSquareText className="h-3.5 w-3.5" />

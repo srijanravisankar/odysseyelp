@@ -7,8 +7,6 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { InputWithButton } from "@/components/input-with-button";
 import { ChatSurveyHeader } from "@/components/chat-survey-header";
-import { ExploreHeaderActions } from "@/components/explore-header-actions";
-import { ExploreProvider } from "@/hooks/context/explore-context";
 import { Button } from "./ui/button";
 import { Loader, Map } from "lucide-react";
 
@@ -25,6 +23,7 @@ export function ShellHeader() {
   const isChat = pathname.startsWith("/chat");
   const isGroup = pathname.startsWith("/groups");
   const isExplore = pathname.startsWith("/explore");
+  const isMySpace = pathname.startsWith("/my-space");
 
   const { 
       activeGroup, 
@@ -152,9 +151,8 @@ export function ShellHeader() {
         {isChat ? (
           <ChatSurveyHeader />
         ) : isExplore ? (
-          <ExploreProvider>
-            <ExploreHeaderActions />
-          </ExploreProvider>
+          // No header actions for explore page - filters and sort are in the page
+          <div />
         ) : isGroup ? (
           // <div className="flex text-lg font-medium">
           //   <Button
@@ -191,6 +189,9 @@ export function ShellHeader() {
               </> : "No Group Selected"}
             </Button>
           </div>
+        ) : isMySpace ? (
+          // No search bar for my-space pages
+          <div />
         ) : (
           <InputWithButton />
         )}
