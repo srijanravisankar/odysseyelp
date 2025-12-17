@@ -25,6 +25,7 @@ export function ShellHeader() {
   const isChat = pathname.startsWith("/chat");
   const isGroup = pathname.startsWith("/groups");
   const isExplore = pathname.startsWith("/explore");
+  const isMySpace = pathname.startsWith("/my-space");
 
   const { 
       activeGroup, 
@@ -191,6 +192,9 @@ export function ShellHeader() {
               </> : "No Group Selected"}
             </Button>
           </div>
+        ) : isMySpace ? (
+          // No search bar for my-space pages
+          <div />
         ) : (
           <InputWithButton />
         )}

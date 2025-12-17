@@ -48,13 +48,11 @@ interface PublishedItinerary {
 type SortOption = "newest" | "oldest" | "most-stops"
 
 type ExploreGridProps = {
-    searchQuery?: string
     sortBy?: SortOption
     filters?: FilterOptions
 }
 
 export function ExploreGrid({
-    searchQuery = "",
     sortBy = "newest",
     filters = {
         tags: [],
@@ -170,18 +168,6 @@ export function ExploreGrid({
     const filteredAndSortedItineraries = useMemo(() => {
         let result = [...itineraries]
 
-        // Apply search filter
-        if (searchQuery.trim()) {
-            const query = searchQuery.toLowerCase().trim()
-            result = result.filter((itinerary) => {
-                const titleMatch = itinerary.title.toLowerCase().includes(query)
-                const userNameMatch = itinerary.user?.name?.toLowerCase().includes(query)
-                const tagsMatch = itinerary.tags?.some(tag =>
-                    tag.toLowerCase().includes(query)
-                )
-                return titleMatch || userNameMatch || tagsMatch
-            })
-        }
 
         // Apply tag filter
         if (filters.tags.length > 0) {
@@ -254,7 +240,7 @@ export function ExploreGrid({
         }
 
         return result
-    }, [itineraries, searchQuery, sortBy, filters])
+    }, [itineraries, sortBy, filters])
 
     const formatDate = (dateString: string): string => {
         const date = new Date(dateString)
@@ -517,11 +503,11 @@ export function ExploreGrid({
     }
 
     if (filteredAndSortedItineraries.length === 0) {
-        const message = searchQuery || filters.tags.length > 0 || filters.priceRanges.length > 0 || filters.categories.length > 0 || filters.dateRange
-            ? "No itineraries match your search"
+        const message = filters.tags.length > 0 || filters.priceRanges.length > 0 || filters.categories.length > 0 || filters.dateRange
+            ? "No itineraries match your filters"
             : "No published itineraries yet"
-        const description = searchQuery || filters.tags.length > 0 || filters.priceRanges.length > 0 || filters.categories.length > 0 || filters.dateRange
-            ? "Try adjusting your search or filters"
+        const description = filters.tags.length > 0 || filters.priceRanges.length > 0 || filters.categories.length > 0 || filters.dateRange
+            ? "Try adjusting your filters"
             : "Be the first to share your itinerary with the community!"
 
         return (
