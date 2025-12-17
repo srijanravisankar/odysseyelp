@@ -22,21 +22,22 @@ function ExploreContent() {
     }, [sortBy, filters, router])
 
     return (
-        <div className="flex flex-1 flex-col gap-4">
-            <div className="flex items-center justify-between">
+        <div className="flex flex-1 flex-col gap-6 mt-[30px]">
+            {/* Header row with title on left and filters/sorting on right */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                     <h1 className="text-xl font-semibold tracking-tight">Explore</h1>
                     <p className="text-sm text-muted-foreground">
                         Discover itineraries shared by the community
                     </p>
                 </div>
-            </div>
 
-            {/* Enhanced Filter Bar */}
-            <ExploreFilterBarEnhanced
-                filters={filters}
-                onFiltersChange={setFilters}
-            />
+                {/* Enhanced Filter Bar */}
+                <ExploreFilterBarEnhanced
+                    filters={filters}
+                    onFiltersChange={setFilters}
+                />
+            </div>
 
             {/* Itineraries Grid */}
             <ExploreGrid
