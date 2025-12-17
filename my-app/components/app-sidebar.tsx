@@ -269,9 +269,9 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
           <div className="flex flex-col items-center justify-center gap-2">
             {/* Minimalistic vertical rotated logo */}
             <a href="/" onClick={() => setOpen(false)}>
-              <div className="flex items-center justify-center h-12 mb-7 cursor-pointer">
+              <div className="flex items-center justify-center h-12 mb-6 cursor-pointer">
                 <span 
-                  className="text-xs font-extrabold tracking-widest origin-center"
+                  className="text-xs font-bold tracking-widest origin-center"
                   style={{ transform: 'rotate(-90deg)', whiteSpace: 'nowrap' }}
                 >
                   ODYSSEYELP

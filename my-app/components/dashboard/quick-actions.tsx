@@ -13,6 +13,8 @@ import {
   Sparkles,
   Route,
   UsersRound,
+  Brain,
+  Globe,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -36,9 +38,9 @@ const quickActions: QuickAction[] = [
     bgColor: "bg-violet-100 dark:bg-violet-950/50",
   },
   {
-    title: "My Trips",
+    title: "My Space",
     description: "View saved itineraries",
-    icon: <Route className="h-5 w-5" />,
+    icon: <Brain className="h-5 w-5" />,
     href: "/my-space",
     color: "text-blue-600 dark:text-blue-400",
     bgColor: "bg-blue-100 dark:bg-blue-950/50",
@@ -54,7 +56,7 @@ const quickActions: QuickAction[] = [
   {
     title: "Discover",
     description: "Browse trending spots",
-    icon: <Sparkles className="h-5 w-5" />,
+    icon: <Globe className="h-5 w-5" />,
     href: "/explore",
     color: "text-amber-600 dark:text-amber-400",
     bgColor: "bg-amber-100 dark:bg-amber-950/50",
@@ -75,7 +77,7 @@ export function QuickActions() {
               <Button
                 variant="outline"
                 className={cn(
-                  "flex flex-col items-center justify-center gap-2 h-auto py-4 w-full",
+                  "flex flex-col items-center justify-center gap-2 h-auto py-4 w-full cursor-pointer",
                   "hover:border-primary/50 transition-all duration-200",
                   "group"
                 )}
