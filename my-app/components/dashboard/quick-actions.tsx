@@ -10,11 +10,9 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   BotMessageSquare,
-  MapPin,
-  Compass,
-  Calendar,
   Sparkles,
   Route,
+  UsersRound,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -38,20 +36,20 @@ const quickActions: QuickAction[] = [
     bgColor: "bg-violet-100 dark:bg-violet-950/50",
   },
   {
-    title: "Explore Map",
-    description: "Discover nearby places",
-    icon: <Compass className="h-5 w-5" />,
-    href: "/touring",
-    color: "text-emerald-600 dark:text-emerald-400",
-    bgColor: "bg-emerald-100 dark:bg-emerald-950/50",
-  },
-  {
     title: "My Trips",
     description: "View saved itineraries",
     icon: <Route className="h-5 w-5" />,
     href: "/my-space",
     color: "text-blue-600 dark:text-blue-400",
     bgColor: "bg-blue-100 dark:bg-blue-950/50",
+  },
+  {
+    title: "Groups",
+    description: "Collaborate with friends",
+    icon: <UsersRound className="h-5 w-5" />,
+    href: "/groups",
+    color: "text-rose-600 dark:text-rose-400",
+    bgColor: "bg-rose-100 dark:bg-rose-950/50",
   },
   {
     title: "Discover",

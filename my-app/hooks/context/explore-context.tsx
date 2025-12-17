@@ -3,14 +3,10 @@
 import React, { createContext, useContext, useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 
-type SortOption = "newest" | "oldest" | "most-stops"
+export type SortOption = "newest" | "oldest" | "most-stops" | "fewest-stops"
 
 export type FilterOptions = {
     tags: string[]
-    cities: string[]
-    priceRanges: string[]
-    categories: string[]
-    stopCounts: string[]
     dateRange: string | null
 }
 
@@ -33,18 +29,10 @@ function ExploreProviderContent({ children }: { children: React.ReactNode }) {
     const [sortBy, setSortBy] = useState<SortOption>((searchParams.get("sort") as SortOption) || "newest")
     const [filters, setFilters] = useState<FilterOptions>(() => {
         const tagsParam = searchParams.get("tags")
-        const citiesParam = searchParams.get("cities")
-        const pricesParam = searchParams.get("prices")
-        const categoriesParam = searchParams.get("categories")
-        const stopsParam = searchParams.get("stops")
         const dateParam = searchParams.get("date")
 
         return {
             tags: tagsParam ? tagsParam.split(",") : [],
-            cities: citiesParam ? citiesParam.split(",") : [],
-            priceRanges: pricesParam ? pricesParam.split(",") : [],
-            categories: categoriesParam ? categoriesParam.split(",") : [],
-            stopCounts: stopsParam ? stopsParam.split(",") : [],
             dateRange: dateParam || null,
         }
     })

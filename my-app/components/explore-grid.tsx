@@ -24,7 +24,7 @@ import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { FilterOptions } from "@/hooks/context/explore-context"
+import { FilterOptions, SortOption } from "@/hooks/context/explore-context"
 
 interface PublishedItinerary {
     id: number
@@ -45,25 +45,15 @@ interface PublishedItinerary {
     }
 }
 
-type SortOption = "newest" | "oldest" | "most-stops"
 
 type ExploreGridProps = {
-    searchQuery?: string
-    sortBy?: SortOption
-    filters?: FilterOptions
+    sortBy: SortOption
+    filters: FilterOptions
 }
 
 export function ExploreGrid({
-    searchQuery = "",
-    sortBy = "newest",
-    filters = {
-        tags: [],
-        cities: [],
-        priceRanges: [],
-        categories: [],
-        stopCounts: [],
-        dateRange: null,
-    }
+    sortBy,
+    filters,
 }: ExploreGridProps) {
     const supabase = useSupabase()
     const [itineraries, setItineraries] = useState<PublishedItinerary[]>([])
@@ -166,58 +156,45 @@ export function ExploreGrid({
         fetchPublishedItineraries()
     }, [supabase])
 
+    // Helper function to get stops count
+    const getStopsCount = (stops: any): number => {
+        if (!stops) return 0
+        if (Array.isArray(stops)) return stops.length
+        if (stops.stops && Array.isArray(stops.stops)) return stops.stops.length
+        return 0
+    }
+
     // Enhanced filtering logic with all filter types
     const filteredAndSortedItineraries = useMemo(() => {
         let result = [...itineraries]
 
-        // Apply search filter
-        if (searchQuery.trim()) {
-            const query = searchQuery.toLowerCase().trim()
-            result = result.filter((itinerary) => {
-                const titleMatch = itinerary.title.toLowerCase().includes(query)
-                const userNameMatch = itinerary.user?.name?.toLowerCase().includes(query)
-                const tagsMatch = itinerary.tags?.some(tag =>
-                    tag.toLowerCase().includes(query)
-                )
-                return titleMatch || userNameMatch || tagsMatch
-            })
-        }
-
         // Apply tag filter
         if (filters.tags.length > 0) {
             result = result.filter((itinerary) => {
-                return filters.tags.every(filterTag =>
-                    itinerary.tags?.some(tag =>
-                        tag.toLowerCase() === filterTag.toLowerCase()
+                // Check if filtering for "none" (no tags)
+                if (filters.tags.includes('none')) {
+                    // If "none" is selected and this itinerary has no tags, include it
+                    if (!itinerary.tags || itinerary.tags.length === 0) {
+                        return true
+                    }
+                }
+
+                // For other tag filters
+                const otherTags = filters.tags.filter(t => t !== 'none')
+                if (otherTags.length > 0) {
+                    return otherTags.some(filterTag =>
+                        itinerary.tags?.some(tag =>
+                            tag.toLowerCase() === filterTag.toLowerCase()
+                        )
                     )
-                )
-            })
-        }
+                }
 
-        // Apply category filter
-        if (filters.categories.length > 0) {
-            result = result.filter((itinerary) => {
-                const stops = itinerary.stops?.stops || []
-                return stops.some((stop: any) =>
-                    filters.categories.some(filterCat =>
-                        stop.category?.toLowerCase().includes(filterCat.toLowerCase())
-                    )
-                )
-            })
-        }
-
-        // Apply price range filter
-        if (filters.priceRanges.length > 0) {
-            result = result.filter((itinerary) => {
-                const stops = itinerary.stops?.stops || []
-                return stops.some((stop: any) =>
-                    stop.price && filters.priceRanges.includes(stop.price)
-                )
+                return filters.tags.includes('none') && (!itinerary.tags || itinerary.tags.length === 0)
             })
         }
 
 
-        // Apply date range filter, here is the comment
+        // Apply date range filter
         if (filters.dateRange) {
             const now = new Date()
             result = result.filter((itinerary) => {
@@ -251,10 +228,17 @@ export function ExploreGrid({
                     return stopsB - stopsA
                 })
                 break
+            case "fewest-stops":
+                result.sort((a, b) => {
+                    const stopsA = getStopsCount(a.stops)
+                    const stopsB = getStopsCount(b.stops)
+                    return stopsA - stopsB
+                })
+                break
         }
 
         return result
-    }, [itineraries, searchQuery, sortBy, filters])
+    }, [itineraries, sortBy, filters])
 
     const formatDate = (dateString: string): string => {
         const date = new Date(dateString)
@@ -270,13 +254,6 @@ export function ExploreGrid({
         if (diffDays < 7) return `${diffDays}d ago`
 
         return date.toLocaleDateString()
-    }
-
-    const getStopsCount = (stops: any): number => {
-        if (!stops) return 0
-        if (Array.isArray(stops)) return stops.length
-        if (stops.stops && Array.isArray(stops.stops)) return stops.stops.length
-        return 0
     }
 
     const getMapCenter = (stops: any): { lat: number; lng: number } => {
@@ -517,11 +494,11 @@ export function ExploreGrid({
     }
 
     if (filteredAndSortedItineraries.length === 0) {
-        const message = searchQuery || filters.tags.length > 0 || filters.priceRanges.length > 0 || filters.categories.length > 0 || filters.dateRange
-            ? "No itineraries match your search"
+        const message = filters.tags.length > 0 || filters.dateRange
+            ? "No itineraries match your filters"
             : "No published itineraries yet"
-        const description = searchQuery || filters.tags.length > 0 || filters.priceRanges.length > 0 || filters.categories.length > 0 || filters.dateRange
-            ? "Try adjusting your search or filters"
+        const description = filters.tags.length > 0 || filters.dateRange
+            ? "Try adjusting your filters"
             : "Be the first to share your itinerary with the community!"
 
         return (
@@ -555,8 +532,14 @@ export function ExploreGrid({
                             userVote={userVotes[itinerary.id]}
                             onLike={() => handleVote(itinerary.id, 'like')}
                             onDislike={() => handleVote(itinerary.id, 'dislike')}
+                            onComment={() => {
+                                setSelectedItinerary(itinerary)
+                                setActiveTab("comments")
+                                setDialogOpen(true)
+                            }}
                             onClick={() => {
                                 setSelectedItinerary(itinerary)
+                                setActiveTab("stops")
                                 setDialogOpen(true)
                             }}
                             thumbnail={
