@@ -321,6 +321,7 @@ export function ChatSurveyHeader() {
 
       if (!res.ok) {
         console.error("Error from API:", data);
+        toast.error("Failed to plan trip. Please try again.");
         // later: show toast
         return;
       }

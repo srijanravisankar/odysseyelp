@@ -35,6 +35,7 @@ interface Group {
   name: string;
   createdAt: string;
   secretCode: string;
+  createdBy: string;
 }
 
 interface GroupChatSheetProps {

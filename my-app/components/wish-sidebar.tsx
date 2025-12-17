@@ -23,6 +23,7 @@ interface Group {
   name: string;
   createdAt: string;
   secretCode: string;
+  createdBy: string;
 }
 
 export function WishSidebar({ group }: { group: Group }) {

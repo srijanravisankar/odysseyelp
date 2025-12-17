@@ -386,6 +386,7 @@ interface Group {
   name: string;
   createdAt: string;
   secretCode: string;
+  createdBy: string;
 }
 
 export function GroupsSidebarContent() {
@@ -478,6 +479,7 @@ export function GroupsSidebarContent() {
         name: g.name,
         createdAt: g.created_at,
         secretCode: g.secret_code,
+        createdBy: g.created_by,
       }));
       setAllGroups(transformed);
     } catch (error) {
@@ -605,7 +607,18 @@ export function GroupsSidebarContent() {
       
       // 3. Update UI on Success
       if (data) {
-        const newGroup = { id: data.id, name: data.name, createdAt: data.created_at, secretCode: data.secret_code };
+        const { error: memberError } = await supabase
+            .from("group_members")
+            .insert({
+                group_id: data.id,
+                user_id: authData.user.id
+            });
+
+        if (memberError) {
+            console.error("Failed to add creator to members group:", memberError);
+        }
+
+        const newGroup = { id: data.id, name: data.name, createdAt: data.created_at, secretCode: data.secret_code, createdBy: data.created_by };
         setGroups((prev) => [newGroup, ...prev]);
         setSelectedGroup(newGroup);
         setActiveGroup(newGroup);

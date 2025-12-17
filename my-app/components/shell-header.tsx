@@ -36,6 +36,7 @@ export function ShellHeader() {
   const { user } = useUser();
   const { itineraryData, setItineraryData, refetchItineraries, setIsBuildingItinerary } = useItinerary();
   const { save: saveItinerary } = useSaveItinerary();
+  const isOwner = activeGroup?.createdBy === user?.id;
 
   const supabase = createClient();
 
@@ -175,11 +176,11 @@ export function ShellHeader() {
             <Button
               size="lg"
               variant="default"
-              disabled={!activeGroup || isPlanning}
+              disabled={!activeGroup || isPlanning || !isOwner}
               onClick={handlePlanFromGroup}
               className="h-8 gap-2 text-sm cursor-pointer"
             >
-              {isPlanning ? (
+              {/* {isPlanning ? (
                 <Loader className="h-3.5 w-3.5 animate-spin" />
               ) : (
                 <Map className="h-3.5 w-3.5" />
@@ -189,7 +190,25 @@ export function ShellHeader() {
                 <span className="-mr-1">{isPlanning ? "Planning..." : "Generate Plan from"}</span>
                 <span className="font-bold -mr-1">{activeGroup.name}</span>
                 <span>chat</span>
-              </> : "No Group Selected"}
+              </> : "No Group Selected"} */}
+              {activeGroup ? (
+    <>
+      {/* ✅ FIX: Show specific text if user is not the owner */}
+      {!isOwner ? (
+        <span>Only Owner Can Plan</span>
+      ) : (
+        <>
+          <span className="-mr-1">
+            {isPlanning ? "Planning..." : "Generate Plan from"}
+          </span>
+          <span className="font-bold -mr-1">{activeGroup.name}</span>
+          <span>chat</span>
+        </>
+      )}
+    </>
+  ) : (
+    "No Group Selected"
+  )}
             </Button>
           </div>
         ) : isMySpace ? (
