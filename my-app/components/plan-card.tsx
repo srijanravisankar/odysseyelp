@@ -197,7 +197,7 @@ export function PlanCard({
                   size="sm"
                   variant="ghost"
                   className={cn(
-                    "h-7 px-2 gap-1.5 text-[11px] transition-all",
+                    "h-7 px-2 gap-1.5 text-[11px] transition-all cursor-pointer",
                     userVote === 'like'
                       ? "text-blue-500 hover:text-blue-600 bg-blue-500/10 hover:bg-blue-500/20"
                       : "hover:text-blue-500 hover:bg-blue-500/10"
@@ -220,7 +220,7 @@ export function PlanCard({
                   size="sm"
                   variant="ghost"
                   className={cn(
-                    "h-7 px-2 gap-1.5 text-[11px] transition-all",
+                    "h-7 px-2 gap-1.5 text-[11px] transition-all cursor-pointer",
                     userVote === 'dislike'
                       ? "text-orange-500 hover:text-orange-600 bg-orange-500/10 hover:bg-orange-500/20"
                       : "hover:text-orange-500 hover:bg-orange-500/10"
@@ -242,7 +242,7 @@ export function PlanCard({
                   type="button"
                   size="sm"
                   variant="ghost"
-                  className="h-7 px-2 gap-1.5 text-[11px] hover:text-primary hover:bg-primary/10 transition-all"
+                  className="cursor-pointer h-7 px-2 gap-1.5 text-[11px] hover:text-primary hover:bg-primary/10 transition-all"
                   onClick={(e) => {
                     e.stopPropagation()
                     // Comments are viewed in the dialog, no action needed here
