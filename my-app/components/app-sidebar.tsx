@@ -60,11 +60,6 @@ const data = {
       icon: Home,
     },
     {
-      title: "My Space",
-      url: "/my-space",
-      icon: Brain,
-    },
-    {
       title: "Chat",
       url: "/chat",
       icon: BotMessageSquare,
@@ -73,6 +68,11 @@ const data = {
       title: "Groups",
       url: "/groups",
       icon: UsersRound,
+    },
+    {
+      title: "My Space",
+      url: "/my-space",
+      icon: Brain,
     },
     {
       title: "Explore",
