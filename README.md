@@ -4,6 +4,33 @@
 
 ---
 
+## Getting Started
+
+### Prerequisites
+- Node.js and pnpm
+- Supabase account and project
+- Mapbox API key
+- Google Gemini API key
+- Yelp AI API key
+
+### Installation
+```bash
+cd my-app
+pnpm install
+pnpm dev
+```
+
+### Configuration
+Set up environment variables for:
+- Supabase URL (NEXT_PUBLIC_SUPABASE_URL)
+- Supabase key (NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY)
+- Mapbox token (NEXT_PUBLIC_MAPBOX_TOKEN)
+- Google Generative AI API key (GEMINI_API_KEY)
+- Yelp AI API key (YELP_API_KEY)
+
+- Fill these variables in `env.local.example` inside my-app. Then, change the file name to `env.local`.
+---
+
 ## Core Features
 
 ### 1. **AI-Powered Itinerary Planning**
@@ -315,29 +342,6 @@
 - **Personalization**: Recommendations based on user preferences
 - **Integration**: Connect with booking platforms for flights/hotels
 - **Export**: Download itineraries in various formats (PDF, iCal, etc.)
-
----
-
-## Getting Started
-
-### Prerequisites
-- Node.js and pnpm
-- Supabase account and project
-- Mapbox API key
-- Google Gemini API key
-
-### Installation
-```bash
-cd my-app
-pnpm install
-pnpm dev
-```
-
-### Configuration
-Set up environment variables for:
-- Supabase URL and key
-- Mapbox token
-- Google Generative AI API key
 
 ---
 
